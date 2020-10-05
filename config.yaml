@@ -1,0 +1,7 @@
+baseURL: "http://example.org/"
+languageCode: "en-us"
+title: "Openshift CI docs"
+theme: "docsy"
+sectionPagesMenu: "main"
+params:
+  offlineSearch: true
