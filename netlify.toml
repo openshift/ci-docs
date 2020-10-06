@@ -1,6 +1,6 @@
 [build]
 publish = "public"
-command = "npm install -D --save postcss postcss-cli autoprefixer && cd themes/docsy && git submodule update -f --init && cd ../.. && hugo --gc --minify"
+command = "make generate"
 
 [context.production.environment]
 HUGO_VERSION = "0.75.1"
@@ -8,14 +8,14 @@ HUGO_ENV = "production"
 HUGO_ENABLEGITINFO = "true"
 
 [context.split1]
-command = "cd themes/docsy && git submodule update -f --init && cd ../.. && hugo --gc --minify --enableGitInfo"
+command = "make generate"
 
 [context.split1.environment]
 HUGO_VERSION = "0.75.1"
 HUGO_ENV = "production"
 
 [context.deploy-preview]
-command = "cd themes/docsy && git submodule update -f --init && cd ../.. && hugo --gc --minify --buildFuture -b $DEPLOY_PRIME_URL"
+command = "make generate"
 
 [context.deploy-preview.environment]
 HUGO_VERSION = "0.75.1"
