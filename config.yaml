@@ -5,3 +5,6 @@ theme: "docsy"
 sectionPagesMenu: "main"
 params:
   offlineSearch: true
+pygmentsCodefences: true
+pygmentsCodefencesGuessSyntax: true
+pygmentsStyle: "dracula"
