@@ -8,3 +8,7 @@ params:
 pygmentsCodefences: true
 pygmentsCodefencesGuessSyntax: true
 pygmentsStyle: "dracula"
+menu:
+  main:
+  - name: Step Registry
+    url: https://steps.ci.openshift.org/
