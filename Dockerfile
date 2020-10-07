@@ -1,6 +1,6 @@
 FROM klakegg/hugo:0.75.1-ext-ubuntu as builder
 
-COPY ./ /src/
+COPY . /src/
 
 RUN set -x && ln -s /bin/bash /usr/bin/bash && make generate
 
