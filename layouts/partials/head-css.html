@@ -1,0 +1,31 @@
+
+{{ $scssMain := "scss/main.scss"}}
+{{ if .Site.IsServer }}
+{{/* Note the missing postCSS. This makes it snappier to develop in Chrome, but makes it look sub-optimal in other browsers. */}}
+{{ $css := resources.Get $scssMain | toCSS (dict "enableSourceMap" true) }}
+<link href="{{ $css.RelPermalink }}" rel="stylesheet">
+{{ else }}
+{{ $css := resources.Get $scssMain | toCSS (dict "enableSourceMap" false) | postCSS | minify | fingerprint }}
+<link rel="preload" href="{{ $css.RelPermalink }}" as="style">
+<link href="{{ $css.RelPermalink }}" rel="stylesheet" integrity="{{ $css.Data.integrity }}">
+{{ end }}
+
+{{/* Everything above here is copied from themes/docsy/layouts/partials/head-css.html to add the below section */}}
+<style>
+@media(min-width:992px) {
+ .td-max-width-on-larger-screens,
+ .td-content>pre,
+ .td-content>.highlight,
+ .td-content>.lead,
+ .td-content>h1,
+ .td-content>h2,
+ .td-content>ul,
+ .td-content>ol,
+ .td-content>p,
+ .td-content>blockquote,
+ .td-content>dl dd,
+ .td-content .footnotes,
+ .td-content>.alert {
+  max-width:100%;
+ }
+</style>
