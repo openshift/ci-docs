@@ -5,10 +5,23 @@ theme: "docsy"
 sectionPagesMenu: "main"
 params:
   offlineSearch: true
-pygmentsCodefences: true
-pygmentsCodefencesGuessSyntax: true
-pygmentsStyle: "dracula"
+    #pygmentsCodefences: true
+    #pygmentsCodefencesGuessSyntax: true
+    #pygmentsStyle: "dracula"
 menu:
   main:
   - name: Step Registry
     url: https://steps.ci.openshift.org/
+markup:
+  highlight:
+    anchorLineNos: true
+    codeFences: true
+    guessSyntax: false
+    hl_Lines: ""
+    lineAnchors: ""
+    lineNoStart: 1
+    lineNos: true
+    lineNumbersInTable: true
+    noClasses: true
+    style: "dracula"
+    tabWidth: 4

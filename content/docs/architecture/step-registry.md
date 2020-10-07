@@ -21,7 +21,7 @@ components to create a test:
 A step is the lowest level component in the test registry. A step defines a base container image, the filename of the shell script to run inside the
 container, the resource requests and limits for the container, and documentation for the step. Example of a step:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 ref:
   as: ipi-conf                   # name of the step
   from: base                     # image to run the commands in
@@ -64,7 +64,7 @@ code under test or the version of OpenShift being tested. Using the `from_image`
 referencing the tag with the `from` field, but allows the step definition to be entirely self-contained. The following example of a step configuration
 uses this option:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 ref:
   as: ipi-conf
   from_image: # literal image tag to run the commands in
@@ -146,7 +146,7 @@ in the step. For instance, to mount the my-data secret into the step's filesyste
 
 Registry step configuration:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 ref:
   as: step
   from: base
@@ -171,7 +171,7 @@ By default, only secrets in the `test-credentials` namespace will be available f
 A chain is a registry component that specifies multiple registry components to be run. Components are run in the order that they are written.
 Components specified by a chain can be either steps and other chains. Example of a chain:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 chain:
   as: ipi-deprovision                # name of this chain
   steps:
@@ -190,7 +190,7 @@ multistage tests and defines an entire test from start to finish. It has four ba
 to be used to clean up any resources created/used by the test. If a step in `pre` or `test` fails, all pending `pre` and `test` steps are skipped
 and all `post` steps are run to ensure that resources are properly cleaned up. This is an example of a workflow configuration
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml  >}}
 workflow:
   as: origin-e2e             # name of workflow
   steps:
@@ -212,7 +212,7 @@ the `ci-operator` configuration does not have a documentation field, and the ci-
 the `cluster_profile`, `pre`, `test`, and `post` fields are under a steps field instead of workflow. Here is an example of the `tests`
 section of a `ci-operator` configuration using the multistage test design:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 tests:
 - as: e2e-steps # test name
   steps:
@@ -229,7 +229,7 @@ priority (i.e. the value from the `ci-operator` configuration is used).
 
 Example of a `ci-operator` configuration that overrides a workflow field:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 tests:
 - as: e2e-steps # test name
   steps:
@@ -241,7 +241,7 @@ tests:
 
 The configuration can also override a workflow field with a [full literal step](#step) (not only a reference to a shared step):
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 tests:
 - as: e2e-steps # test name
   steps:
@@ -264,7 +264,7 @@ passed may be useful to skip gathering artifacts and save some time at the end o
 skipped in a test, the `allow_skip_on_success` field must be set in the `steps` configuration. Individual `post` steps opt into being
 skipped by setting the `optional_on_success` field. This is an example:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 tests:
 - as: e2e-steps # test name
   steps:
@@ -315,7 +315,7 @@ Other files that are allowed in the step registry but are not used for testing a
 Steps, chains, and workflows can declare parameters in their `env` section. These can then be set to different values to generate tests
 that have small variations between them. For example:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 ref:
   as: openshift-e2e-test
   from: tests
@@ -346,7 +346,7 @@ Environment variables can be added to chains and workflows in the registry. Thes
 That is: a variable in the env section of a chain will propagate to all of its sub-chains and sub-steps, a variable in the env
 section of a workflow will propagate to all of its stages.
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 chain:
   as: some-chain
   steps:
@@ -364,7 +364,7 @@ the configuration is resolved, tests that do not satisfy this requirement will g
 
 Step definition:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 ref:
   as: some-ref
   # …
@@ -374,7 +374,7 @@ ref:
 
 `ci-operator` configuration:
 
-{{< highlight yaml "linenos=table,anchorlinenos=true,lineanchors=prefix" >}}
+{{< highlight yaml >}}
 tests:
 - as: valid
   steps:
