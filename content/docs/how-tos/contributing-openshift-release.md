@@ -130,11 +130,11 @@ config_updater:
   # …
   maps:
     # …
-    `ci-operator`/config/path/to/files-*-branch-name*.yaml:
+    ci-operator/config/path/to/files-*-branch-name*.yaml:
       clusters:
         app.ci:
         - ci
-      name: `ci-operator`-misc-configs
+      name: ci-operator-misc-configs
 {{< / highlight >}}
 
 The surrounding entries that add files to `ci-operator-misc-configs` can be used as reference. When adding a new glob,
