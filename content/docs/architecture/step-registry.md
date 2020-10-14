@@ -166,6 +166,40 @@ ref:
 Note that access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
 By default, only secrets in the `test-credentials` namespace will be available for mounting into test steps.
 
+#### Injecting the `oc` CLI
+
+Steps can make the `oc` CLI available to their commands by adding the `cli` configuration item to the test step, specifying which OpenShift
+release the CLI should be sourced from. For example, the following configuration pulls in a CentOS image, a custom OCP release and runs a test
+where the release's CLI is injected to the test step.
+
+{{< highlight yaml >}}
+base_images:
+  os: # import an image and call it "os"
+    name: centos
+    namespace: openshift
+    tag: '7'
+releases:
+  custom: # import a release and call it "custom"
+    candidate:
+      product: okd
+      version: "4.3"
+tests:
+  - as: with-cli
+    steps:
+      test:
+        - as: use-cli
+          commands: oc adm policy add-role-to-user --help
+          from: os    # use the "os" image for running the test
+          cli: custom # allow the CLI from the "custom" release to be available
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+{{< /highlight >}}
+
+If a test configuration uses `tag_specification` to import an OCP release, the `"initial"` and `"latest"` releases will be available for
+sourcing the CLI.
+
 ## Chain
 
 A chain is a registry component that specifies multiple registry components to be run. Components are run in the order that they are written.
