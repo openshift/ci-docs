@@ -8,6 +8,7 @@ params:
     #pygmentsCodefences: true
     #pygmentsCodefencesGuessSyntax: true
     #pygmentsStyle: "dracula"
+  github_repo: "https://github.com/openshift/ci-docs"
 menu:
   main:
   - name: Step Registry
