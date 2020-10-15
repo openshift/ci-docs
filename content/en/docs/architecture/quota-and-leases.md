@@ -113,3 +113,6 @@ executed. `ci-operator` will acquire the lease, present the name of the leased r
 `${LEASED_RESOURCE}` environment variable, send heartbeats as necessary and relinquish the lease when it is no longer
 needed. In order for a `cluster_profile` to be supported, the cloud administrator will need to have set up the quota slice
 resources, so by the time a job author uses a `cluster_profile`, all the infrastructure should be in place.
+
+For more complex lease configuration, see the multi-stage test
+[section](./step-registry/#leases).
