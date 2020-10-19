@@ -48,22 +48,29 @@ in order to ensure that jobs are well-behaved against the cloud provider APIs.
 ## Adding a New Type Of Resource
 
 In order to add a new type of cloud quota to the system, changes to the `boskos` leasing server configuration are
-required. The configuration is checked into source control
-[here](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml).
-When adding a new type of quota, a new entry to the `resources` list is required, for example:
+required. The configuration is checked into source control:
 
-`boskos` configuration:
+* [generator](https://github.com/openshift/release/blob/master/core-services/prow/02_config/generate-boskos.py)
+* [generated configuration](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)
 
-{{< highlight yaml >}}
-resources:
-- type: "my-new-quota-slice"
-  state: "free"
-  min-count: 10 # how many concurrent jobs can run against the cloud
-  max-count: 10 # set equal to `min-count`
+After altering the generator, run `make boskos-config` to regenerate the configuration.
+
+When adding a new type of quota, a new entry to the `CONFIG` dict is required, for example:
+
+{{< highlight python >}}
+CONFIG = {
+    'my-new-quota-slice': {
+        'default': 10, # how many concurrent jobs can run against the cloud
+    },
+    # other entries
+}
 {{< / highlight >}}
 
+The `default` key is a special identifier for declaring dynamic resources; use different identifiers to declare
+[static resources](#configuration-for-heterogeneous-resources).
+
 If it is not clear exactly how many concurrent jobs can share the cloud provider at once, the convention is to set the
-`min-count` and `max-count` to `1000`, to effectively leave jobs unlimited and allow for investigation.
+`default` count to `1000`, to effectively leave jobs unlimited and allow for investigation.
 
 In addition to registering the volume of concurrent jobs that are allowed against a new cloud platform, it is required
 that the leasing server is configured to reap leases which have not seen a recent heartbeat. This is done by adding the
@@ -77,16 +84,15 @@ APIs where clients act identically regardless of which slice of the quota they h
 is being configured has a static pool of resources and jobs are expected to act differently based on the specific lease
 that they acquire, it is necessary to create a static list of resources for `boskos`:
 
-`boskos` configuration:
-
-{{< highlight yaml >}}
-resources:
-- type: "some-static-quota-slice"
-  state: "free"
-  names:
-  - "server01.prod.service.com" # these names should be semantically meaningful to a client
-  - "server02.prod.service.com"
-  - "server03.prod.service.com"
+{{< highlight python >}}
+CONFIG = {
+    'some-static-quota-slice': {
+        'server01.prod.service.com': 1, # these names should be semantically meaningful to a client
+        'server02.prod.service.com': 1, # set the count larger than one if multiple jobs can share this resource
+        'server03.prod.service.com': 1,
+    },
+    # other entries
+}
 {{< / highlight >}}
 
 A test may access the name of the resource that was acquired using the `${LEASED_RESOURCE}` environment variable.
@@ -95,7 +101,7 @@ A test may access the name of the resource that was acquired using the `${LEASED
 
 In order to view the number of concurrent jobs executing against any specific cloud, or to view the states of resources
 in the lease system, a
-[dashboard](https://grafana-prow-monitoring.apps.ci.l2s4.p1.openshiftapps.com/d/628a36ebd9ef30d67e28576a5d5201fd/`boskos`-dashboard?orgId=1)
+[dashboard](https://grafana-prow-monitoring.apps.ci.l2s4.p1.openshiftapps.com/d/628a36ebd9ef30d67e28576a5d5201fd/boskos-dashboard?orgId=1)
 exists.
 
 # Directions for Job Authors
