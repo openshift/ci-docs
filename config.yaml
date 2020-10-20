@@ -3,6 +3,7 @@ languageCode: "en-us"
 title: "Openshift CI docs"
 theme: "docsy"
 sectionPagesMenu: "main"
+contentDir: "content/en"
 params:
   offlineSearch: true
     #pygmentsCodefences: true
@@ -13,6 +14,8 @@ menu:
   main:
   - name: Step Registry
     url: https://steps.ci.openshift.org/
+  - name: GitHub
+    url: https://github.com/openshift/ci-tools
 markup:
   highlight:
     anchorLineNos: true
