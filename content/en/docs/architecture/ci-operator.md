@@ -75,7 +75,7 @@ If an image that is required for building is not yet present on the cluster, eit
 
 The build root image must contain all dependencies for building executables and non-image artifacts. Additionally,
 `ci-operator` requires this image to include a `git` executable in $PATH. Most repositories will want to use an image
-already present in the cluster, using the `image_stream_tag` stanza like described in [Configuring Inputs](#Configuring Inputs).
+already present in the cluster, using the `image_stream_tag` stanza like described in [Configuring Inputs](#configuring-inputs).
 
 Alternatively, a project can be configured to build a build root image using a `Dockerfile` in the repository:
 

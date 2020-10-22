@@ -161,7 +161,7 @@ The Test Platform team created a [tool](https://github.com/openshift/ci-tools/bl
 job configuration files out of ci-operator configuration files. The generator has knowledge of the naming and directory structure conventions in
 [`openshift/release`](https://github.com/openshift/release) repository. Provided you have put the `ci-operator`
 configuration file to `ci-operator/config/$org/$repo` directory in it (as described by [Containerized Tests
-section](#Containerized)), you can generate the needed Prow files by running this command from the root of the
+section](#containerized-tests)), you can generate the needed Prow files by running this command from the root of the
 [`openshift/release`](https://github.com/openshift/release) repository:
 
 {{< highlight bash >}}

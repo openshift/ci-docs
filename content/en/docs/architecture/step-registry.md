@@ -12,9 +12,9 @@ chances of a mistake when copying a feature from one test workflow to another.
 To understand how the multistage tests and registry work, we must first talk about the three components of the test registry and how to use those
 components to create a test:
 
-* [Step](#Step): A step is the lowest level component in the test step registry. It describes an individual test step.
-* [Chain](#Chain): A chain is a registry component that specifies multiple steps to be run. Any item of the chain can be either a step or another chain.
-* [Workflow](#Workflow): A workflow is the highest level component of the step registry. It contains three chains: pre, test, post.
+* [Step](#step): A step is the lowest level component in the test step registry. It describes an individual test step.
+* [Chain](#chain): A chain is a registry component that specifies multiple steps to be run. Any item of the chain can be either a step or another chain.
+* [Workflow](#workflow): A workflow is the highest level component of the step registry. It contains three chains: pre, test, post.
 
 ## Step
 
@@ -85,7 +85,7 @@ ref:
 The commands file must contain shell script in a shell language supported by the `shellcheck` program used to validate the commands. However,
 regardless of the shell language used for the commands, the web UI will syntax highlight all commands as bash.
 
-Note: the shell script file must follow the [naming convention](#Registry Layout and Naming Convention) described later in this help page.
+Note: the shell script file must follow the [naming convention](#registry-layout-and-naming-convention) described later in this help page.
 
 ### Step Execution Environment
 
@@ -115,7 +115,7 @@ In addition to these variables, commands will also have a number of other enviro
 If a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
 straightforward approach exists to achieve the same outcome.
 
-[Parameters](#Parameters) declared by steps and set by tests will also be available as environment variables.
+[Parameters](#parameters) declared by steps and set by tests will also be available as environment variables.
 
 #### Sharing Data Between Steps
 
@@ -255,7 +255,7 @@ tests:
 {{< / highlight >}}
 
 In this example, the `ci-operator` configuration simply specifies the desired cluster profile and the `origin-e2e` workflow shown in the
-example for the [`Workflow`](#Workflow) section above.
+example for the [`Workflow`](#workflow) section above.
 
 Since the `ci-operator` configuration and workflows share the same fields, it is possible to override fields specified in a workflow.
 In cases where both the workflow and a `ci-operator` configuration specify the same field, the `ci-operator` configuration’s field has
