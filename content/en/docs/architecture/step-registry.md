@@ -105,6 +105,7 @@ The following environment variables will be available to commands in a step:
 |`${ARTIFACT_DIR}`|`Directory on the step's filesystem where files should be placed to persist them in the job's artifacts.`|Always.|
 |`${CLUSTER_PROFILE_DIR}`|Directory on the step's filesystem where credentials and configuration from the cluster profile are stored.|When the test as defined in a `ci-operator` configuration file sets a `cluster_profile.`|
 |`${KUBECONFIG}`| Path to `system:admin` credentials for the ephemeral OpenShift cluster under test.|After an ephemeral cluster has been installed.|
+|`${KUBEADMIN_PASSWORD_FILE}`| Path to the kubeadmin password file.|After an ephemeral cluster has been installed.|
 |`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|Always.|
 |`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|Always.|
 |`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See the [documentation.](/architecture/leases)|When the test requires a lease.|
