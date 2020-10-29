@@ -97,7 +97,7 @@ build_root:
   from_repository: true
 {{< / highlight >}}
 
-Afterwards, create a file named .`ci-operator`.yaml in your repository that contains the imagestream you want to use for
+Afterwards, create a file named `.ci-operator.yaml` in your repository that contains the imagestream you want to use for
 your `build_root`:
 
 {{< highlight yaml >}}
