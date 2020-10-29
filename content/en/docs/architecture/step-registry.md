@@ -128,6 +128,13 @@ Steps are more commonly expected to communicate between each other by using stat
 installs some components or changes configuration, a later step could check for that as a pre-condition by using `oc` or the API to view the
 cluster's configuration.
 
+The mechanism that makes this data sharing possible incurs a non-trivial
+overhead, directly reflected in the execution time of the test.  Simple steps
+that only require a read-only, private view of the shared directory that is not
+modified can be configured with the `readonly_shared_dir` field set to `true`.
+Doing so will likely result in tests with a significantly shorter and more
+consistent execution time.
+
 #### A Note on `$KUBECONFIG`
 
 In the default execution environment, commands run in steps will be given the `$KUBECONFIG` environment variable to allow them to interact with
