@@ -66,7 +66,6 @@ number of `images`:
 {{< highlight yaml >}}
 base_images:
   custom-scripts:
-    cluster: myregistry.com
     namespace: project
     name: custom-scripts
     tag: latest

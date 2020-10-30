@@ -235,7 +235,6 @@ same integration `ImageStream` is specified for `tag_specification` as is for `p
 
 {{< highlight yaml >}}
 tag_specification:
-  cluster: "https://api.ci.openshift.org"
   namespace: "ocp"
   name: "4.5"
 {{< / highlight >}}
