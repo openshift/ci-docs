@@ -64,9 +64,10 @@ If your component repository is **not** in this organization:
 
 1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as collaborators for the repository.
 1. Contact a CI administrator to accept the invitation
-1. By default, we enable [branch-protection](TODO: Add link once https://github.com/openshift/ci-docs/pull/7 merges) for
+1. By default, we enable [branch-protection](/docs/architecture/branch-protection) for
 	 all prow-controlled repos. This requires `openshift-merge-robot` to be an admin of the repo. We can disable it in
    prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
+1. If a repository is [enrolled in centralized branch management](https://docs.google.com/document/d/1USkRjWPVxsRZNLG5BRJnm5Q1LSk-NtBgrxl2spFRRU8/edit#heading=h.ur4381uqbo8z) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
 
 
 ## Prow Configuration
