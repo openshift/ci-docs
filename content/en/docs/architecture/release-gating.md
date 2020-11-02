@@ -4,8 +4,6 @@ date: 2020-10-28T11:14:39-04:00
 draft: false
 ---
 
-# Extending OpenShift Release Gates
-
 ### Overview
 Layered products that extend the control plane of the cluster must be able to tie into OpenShift's CI and gate releases. For example, OCS is a part of the OpenShift platform, and if an upgrade breaks OCS, we have broken part of our platform. Extending our testing to these components is a requirement to perform regression and early verification.
 
