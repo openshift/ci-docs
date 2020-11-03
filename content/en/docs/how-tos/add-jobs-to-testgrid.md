@@ -25,12 +25,12 @@ Since release informing jobs get run every time we build a new payload for that 
 #### Adding a release gating job to TestGrid
 Release gating jobs are picked up automatically to be added to TestGrid. If the job has already been configured in the release controller nothing further needs to be done. For information on how to configure a job to be release gating refer to [How do I set a job to be release-gating?](#how-do-i-set-a-job-to-be-release-gating)
 
-**Note:** If a job in the release definition is an upgrade job it goes into the overall informing dashboard (because upgrades cross dashboards).
+**Note 1:** If a job in the release definition is an upgrade job it goes into the overall informing dashboard (because upgrades cross dashboards).
+
+**Note 2:** If the release gating job has an entry in the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) the new entry would override the default on the job. But the override would be invalid if the release gating job is blocking and the annotation is informing.
 
 #### Adding a non-release gating job to TestGrid
-Adding an entry for the job in [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) would add the job to TestGrid in the specified dashboard.
-
-**Note:** If the new entry in the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) is a release gating job the new entry would override the default on the job (unless the job is blocking on the release controller and the annotation is informing).
+If a non-release gating job is added to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) it would simply add the job to TestGrid in the specified dashboard.
 
 
 Refer to the README for the [TestGrid config generator tool](https://github.com/openshift/ci-tools/tree/master/cmd/testgrid-config-generator) for more details regarding how the testgrid-config-generator works.
