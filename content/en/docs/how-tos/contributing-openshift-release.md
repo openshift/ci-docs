@@ -161,8 +161,8 @@ When adding CI configuration for new repositories, instead of manually modifying
 above or copy-pasting existing configuration for other repos, you should use the `make new-repo` target. It walks you
 through the necessary steps and generates the configuration for you:
 
-{{< highlight `make` >}}
-`make` new-repo
+{{< highlight make >}}
+make new-repo
 docker pull registry.svc.ci.openshift.org/ci/repo-init:latest
 <...>
 docker run --rm -it <...> registry.svc.ci.openshift.org/ci/repo-init:latest --release-repo <...>
