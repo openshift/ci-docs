@@ -8,7 +8,7 @@ draft: false
 Operator SDK or not. This document outlines how to configure `ci-operator` to build bundle and index `images` and use those
 in end-to-end tests.
 
-Consult the `ci-operator` [overview](/docs/architecture/`ci-operator`/) and the step environment
+Consult the `ci-operator` [overview](/docs/architecture/ci-operator/) and the step environment
 [reference](/docs/architecture/step-registry/) for detailed descriptions of the broader test infrastructure that an
 operator test is defined in.
 
@@ -16,7 +16,7 @@ operator test is defined in.
 
 Multiple different `images` are involved in installing and testing candidate versions of OLM-delivered operators: operand,
 operator, bundle, and index `images`. Operand and operator `images` are built normally using the `images` stanza in
-[`ci-operator` configuration](/docs/architecture/`ci-operator`/#building-container-`images`). OLM uses bundle and index `images`
+[`ci-operator` configuration](/docs/architecture/ci-operator/#building-container-images). OLM uses bundle and index `images`
 to install the desired version of an operator. `ci-operator` can build ephemeral versions of these `images` suitable for
 installation and testing, but not for production.
 
@@ -69,7 +69,7 @@ The `operator.bundles` stanza is a list, so it is possible to build multiple bun
 When `ci-operator` builds at least one operator bundle from a repository, it will also automatically build an ephemeral
 index image to package those bundles. Test workloads should consume the bundles via this index image. The index image is
 named ci-index and can be exposed to test steps via the
-[dependencies](http://localhost:1313/docs/architecture/`ci-operator`/#referring-to-`images`-in-tests) feature.
+[dependencies](http://localhost:1313/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
 
 The ephemeral index is built from scratch and only the bundles built in the current `ci-operator` run will be added to it,
 nothing else. The bundles are added to the index using the `semver` mode, which means that the `spec.version` stanza in the
@@ -78,7 +78,7 @@ not contain a bundle with the replaced version.
 
 ## Validating Bundle and Index `Builds`
 
-Similarly to how the job generator automatically creates a `pull-ci-$ORG-$REPO-$BRANCH-`images`` job to test image builds
+Similarly to how the job generator automatically creates a `pull-ci-$ORG-$REPO-$BRANCH-images` job to test image builds
 when `ci-operator` configuration has an `images` stanza, it will also `make` a separate job that builds the configured bundle
 and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index`, is created only when an `operator` stanza is
 present.
@@ -87,7 +87,7 @@ present.
 
 Once `ci-operator` builds the operator bundle and index, they are available to be used as a `CatalogSource` by OLM for
 deploying and testing the operator. The index image is called ci-index and can be exposed to multi-stage test workloads
-via the [dependencies feature](/docs/architecture/`ci-operator`/#referring-to-`images`-in-tests):
+via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
 
 Step configuration example:
 {{< highlight yaml >}}
