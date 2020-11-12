@@ -190,7 +190,7 @@ What version of Go does the repository build with? [default: 1.13] 1.15
 ## `ci-operator` Configuration
 
 The `ci-operator` configuration files for a repository live in `ci-operator/config/$org/$repo` directories. For details
-about the configuration itself, see this [document](https://steps.ci.openshift.org/help/`ci-operator`). There is a
+about the configuration itself, see this [document](https://steps.ci.openshift.org/help/ci-operator). There is a
 separate configuration file per branch, and the configuration files follow the `$org-$repo-$branch.yaml` pattern:
 
 {{< highlight make >}}

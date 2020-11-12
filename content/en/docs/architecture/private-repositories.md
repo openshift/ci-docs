@@ -57,7 +57,7 @@ content, and all necessary CI configuration of the fork in `openshift-priv`:
    job runs the [private-org-sync](https://github.com/openshift/ci-tools/tree/master/cmd/private-org-sync) tool to
    synchronize the `git` content of the fork with the source repository.
 1. The [periodic-prow-auto-config-brancher](https://prow.ci.openshift.org/?job=periodic-prow-auto-config-brancher) runs
-   the [`ci-operator`-config-mirror](https://github.com/openshift/ci-tools/tree/master/cmd/`ci-operator`-config-mirror) tool
+   the [`ci-operator-config-mirror`](https://github.com/openshift/ci-tools/tree/master/cmd/ci-operator-config-mirror) tool
    to create and maintain the CI configuration for the fork (`ci-operator` configuration files). The same job then generates
    the CI jobs from the `ci-operator` files. This has a caveat of not carrying over handcrafted (non-generated) jobs and also
    manual changes to the generated jobs.
