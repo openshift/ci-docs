@@ -149,7 +149,7 @@ tests:
 - as: "operator-e2e"
   steps:
     workflow: "optional-operators-ci-aws"
-    `cluster_profile`: "aws"
+    cluster_profile: "aws"
     env:
       OO_CHANNEL: "1.2.0"
       OO_INSTALL_NAMESPACE: "kubevirt-hyperconverged"
@@ -157,8 +157,8 @@ tests:
       OO_TARGET_NAMESPACES: '!install'
     test:
     - as: "e2e"
-      from: "`src`"               # the end-to-end tests run in the source repository
-      commands: "`make` test-e2e" # the commands to run end-to-end tests
+      from: "src"               # the end-to-end tests run in the source repository
+      commands: "make test-e2e" # the commands to run end-to-end tests
       resources:
         requests:
           cpu: 100m
