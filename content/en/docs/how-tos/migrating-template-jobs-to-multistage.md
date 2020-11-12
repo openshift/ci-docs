@@ -4,7 +4,7 @@ date: 2020-10-30T21:49:06+02:00
 draft: false
 ---
 
-OpenShift CI offers two mechanisms for setting up end-to-end tests: older 
+OpenShift CI offers two mechanisms for setting up end-to-end tests: older
 template-based tests and newer [multi-stage test workflows](/docs/architecture/step-registry/).
 Template-based tests cause problems for both DPTP and OpenShift CI users:
  - they need intensive support
@@ -15,6 +15,62 @@ These concerns were addressed in designing the multi-stage workflows, which
 supersede template-based tests. DPTP wants to migrate all existing template-based
 jobs to multi-stage workflows in the medium term. We expect this to cause no
 service disruption.
+
+## User-facing Differences Between Template and Multi-Stage Tests
+
+Template-based tests used mostly hardcoded sequences of containers (usually
+called `setup`, `test` and `teardown`). Multi-stage tests usually consist of a
+higher number (usually, around ten) of `Pods` that each execute a separated
+test step, so the output change accordingly. The higher number of executed
+`Pods` may also slightly increase total job runtime; executing each Pod has an
+overhead which accumulates over the whole workflow.
+
+You can examine what exact steps an individual job will resolve to
+on the [Job Search](https://steps.ci.openshift.org/search) page.
+
+### Collected Artifacts
+
+Template-based tests put all artifacts into a single directory together, no
+matter if the artifacts came from setup, test or teardown phase. Multi-stage
+workflows' artifacts are separated in a separate directory for each step
+executed. Most of the artifacts captured from the cluster after tests were
+executed are collected by the `gather-must-gather` step (surprisingly, runs
+`must-gather`) and `gather-extra` (gathers even more artifacts that
+`must-gather` does not) steps.
+
+#### Content of `artifacts/$TEST-NAME/` (template-based)
+
+All captured artifacts are together:
+
+```
+container-logs/
+installer/
+junit/
+metrics/
+network/
+nodes/
+pods/
+apiservices.json
+audit-logs.tar
+...
+<more JSON dumps>
+```
+
+#### Content of `artifacts/$TEST-NAME/` (multi-stage)
+
+Separate directories per step:
+
+```
+gather-audit-logs/
+gather-extra/
+gather-must-gather/
+ipi-conf-gcp/
+ipi-conf/
+ipi-deprovision-deprovision/
+ipi-install-install/
+ipi-install-rbac/
+test/
+```
 
 ## Migrating Jobs Generated from `ci-operator` Configurations
 
@@ -34,7 +90,7 @@ the `oc` binary from the `cli` image.
 These jobs can be migrated to multi-stage using an `ipi-$PLATFORM` workflow
 (like [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws)) and replacing
 its `test` stage with matching inline steps. The resulting configuration is
-more verbose. This is a consequence of multi-stage tests being more flexible, 
+more verbose. This is a consequence of multi-stage tests being more flexible,
 allowing configuration of the elements that in templates were hardcoded.
 
 #### Before (template-based)
@@ -55,7 +111,7 @@ tests:
     cluster_profile: aws     # needs to match the workflow
     test:                    # override the `test` section of the workflow
     - as: test               # name of the step
-      cli: latest            # inject the `oc` binary from specified release into image used by the step 
+      cli: latest            # inject the `oc` binary from specified release into image used by the step
       commands: make test    # execute `make test`...
       from: src              # ...inside the src image
       resources:             # explicitly specify resources for the step
@@ -108,10 +164,10 @@ tests:
     cluster_profile: aws                             # needs to match the workflow
     test:                                            # override the `test` section
     - as: test                                       # name of the step
-      cli: latest                                    # inject the `oc` binary 
+      cli: latest                                    # inject the `oc` binary
       commands: make test                            # execute `make test`...
       from: stable:aws-ebs-csi-driver-operator-test  # ...inside the specified image
-      resources:             
+      resources:
         requests:
           cpu: 100m
     workflow: ipi-aws        # `ipi-$PLATFORM` workflows implement the "usual" OpenShift installation
@@ -126,7 +182,7 @@ These are the possible problems you may encounter when porting an
 
 The `openshift_installer_custom_test_image` template silently injected
 `openshift-tests` binary to the specified image. This was a hack and will not
-be implicitly supported in multi-stage workflows. 
+be implicitly supported in multi-stage workflows.
 
 **Resolution:** Jobs that want to execute common OpenShift tests as well as
 some custom ones can do so in two separate steps. The first step would use the
