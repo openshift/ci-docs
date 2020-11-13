@@ -67,4 +67,21 @@ branch-protection:
 An overview of all available settings and a more detailled explanation can be found in the
 [upstream documentation.](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/branchprotector/README.md)
 
+### Notes on `protect: false`
 
+Unfortunately, setting up `protect: false` may have unexpected effects because of how it interacts
+with Prow jobs required for merges. OpenShift CI is by default configured to enforce branch protection
+for all branches that have at least one required Prow job. If `protect: false` is
+configured for such a branch, `branchprotector` will not manage its branch protection settings.
+However, if there **is not** a required Prow job on a branch, `protect: false` causes `branchprotector`
+to ensure the branch protection is disabled on the branch (and therefore, the `openshift-merge-robot`
+account needs the admin permissions that are necessary for this operation).
+
+| Required jobs | `protect:` stanza  | What `branchprotector` does  | Requires admin |
+|---|---|---|---|
+| yes | absent | Enforces BP for required jobs | yes |
+| yes | `true` | Enforces BP for required jobs | yes |
+| yes | `false` | Does not touch BP settings | no |
+| no | absent | Does not touch BP settings | no |
+| no | `true` | Enforces BP defined by the configuration | yes |
+| no | `false` | Enforces BP is disabled | yes |
