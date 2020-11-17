@@ -31,8 +31,8 @@ defines the integration `ImageStream` where they will be available. By default, 
 `ImageStream`. Promotion can be furthermore configured to include other `images`, as well. In the following `ci-operator`
 configuration, the following `images` are promoted for reuse by other repositories to the `ocp/4.4` integration `ImageStream`:
 
-* the `pipeline:`src`` tag, published as `ocp/4.4:repo-scripts` containing the latest version of the repository to allow for executing helper scripts
-* the `pipeline:test-`bin`` tag, published as `ocp/4.4:repo-tests` containing built test binaries to allow for running the repository's tests
+* the `pipeline:src` tag, published as `ocp/4.4:repo-scripts` containing the latest version of the repository to allow for executing helper scripts
+* the `pipeline:test-bin` tag, published as `ocp/4.4:repo-tests` containing built test binaries to allow for running the repository's tests
 * the `stable:component` tag, published as `ocp/4.4:component` containing the component itself to allow for deployments and installations in end-to-end scenarios
 
 `ci-operator` configuration:

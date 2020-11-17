@@ -116,9 +116,9 @@ separate set of commands, `test_binary_build_commands`, can be configured for bu
 execution. The following `ImageStreamTags` are created in the test's `Namespace`
 
 * `pipeline:root`: imports or builds the `build_root` image
-* `pipeline:src`: clones the code under test `FROM` `pipeline:root`
-* `pipeline:bin`: runs commands in the cloned repository to build artifacts `FROM` pipeline:`src`
-* `pipeline:test-bin`: runs a separate set of commands in the cloned repository to build test artifacts `FROM` `pipeline:src`
+* `pipeline:src`: clones the code under test `FROM pipeline:root`
+* `pipeline:bin`: runs commands in the cloned repository to build artifacts `FROM pipeline:src`
+* `pipeline:test-bin`: runs a separate set of commands in the cloned repository to build test artifacts `FROM pipeline:src`
 
 `ci-operator` configuration:
 
@@ -128,7 +128,7 @@ test_binary_build_commands: "go test -c -o mytests" # these commands are run to 
 {{< / highlight >}}
 
 The content created with these OpenShift `Builds` is addressable in the `ci-operator` configuration simply with the tag. For
-instance, the pipeline:`bin` image can be referenced as `bin` when the content in that image is needed in derivative `Builds`.
+instance, the `pipeline:bin` image can be referenced as `bin` when the content in that image is needed in derivative `Builds`.
 
 ## Building Container Images
 
@@ -157,7 +157,7 @@ RUN go build ./cmd/...
 # this is the production output image base and matches the "base" build_root
 FROM registry.svc.ci.openshift.org/openshift/origin-v4.5:base
 # inject the built artifact into the output
-COPY --from=builder /go/`src`/github.com/myorg/myrepo/mybinary /usr/bin/
+COPY --from=builder /go/src/github.com/myorg/myrepo/mybinary /usr/bin/
 {{< / highlight >}}
 
 While such a `Dockerfile` could simply be built by `ci-operator`, a number of optimizations can be configured to speed up
@@ -175,7 +175,7 @@ images:
 - dockerfile_path: "Dockerfile" # this is a relative path from the root of the repository to the multi-stage Dockerfile
   from: "base" # a reference to the named base_image, used to replace the output FROM in the Dockerfile
   inputs:
-    `bin`: # declares that the "`bin`" tag is used as the builder image when overwriting that `FROM` instruction
+    bin: # declares that the "bin" tag is used as the builder image when overwriting that FROM instruction
       as:
       - "registry.svc.ci.openshift.org/ocp/builder:golang-1.13"
   to: "mycomponent" # names the output container image "mycomponent"
@@ -185,7 +185,7 @@ images:
     cli:
       paths:
       - destination_dir: "."
-        source_path: "/go/`bin`/oc" # inject the OpenShift clients into the build context directory
+        source_path: "/go/bin/oc" # inject the OpenShift clients into the build context directory
   to: "mytests" # names the output container image "mytests"
 {{< / highlight >}}
 
@@ -209,7 +209,7 @@ tested version of every component. In order to publish `images` to an integratio
 {{< highlight yaml >}}
 promotion:
   additional_images:
-    repo-scripts: "`src`"    # promotes "src" as "repo-scripts"
+    repo-scripts: "src"    # promotes "src" as "repo-scripts"
   excluded_images:
   - "mytests" # does not promote the test image
   namespace: "ocp"
@@ -304,7 +304,7 @@ tests:
 - as: "vet"                 # names this test "vet"
   commands: "go vet ./..."  # declares which commands to run
   container:
-    from: "`src`"             # runs the commands in "pipeline:src"
+    from: "src"             # runs the commands in "pipeline:src"
 {{< / highlight >}}
 
 The second approach to describing tests allows for multiple containers to be chained together and describes a more
@@ -339,7 +339,7 @@ tests:
 - as: "upload-results"               # names this test "upload-results"
   commands: "make upload-results"    # declares which commands to run
   container:
-    from: "`bin`"                      # runs the commands in "pipeline:bin"
+    from: "bin"                      # runs the commands in "pipeline:bin"
   postsubmit: true
 {{< / highlight >}}
 
@@ -410,7 +410,7 @@ present by declaring `dependencies` in the `ci-operator` configuration for the t
 will be able to access the following environment variables:
 
 * `${MACHINE_CONFIG_OPERATOR}`: exposing the pull specification of the stable:machine-config-operator `ImageStreamTag`
-* `${BINARIES}`: exposing the pull specification of the pipeline:`bin` `ImageStreamTag`
+* `${BINARIES}`: exposing the pull specification of the `pipeline:bin` `ImageStreamTag`
 * `${LATEST_RELEASE}`: exposing the pull specification of the release:latest payload `ImageStreamTag`
 
 `ci-operator` configuration:
@@ -430,7 +430,7 @@ tests:
       dependencies:
       - name: "machine-config-operator"
         env: "MACHINE_CONFIG_OPERATOR"
-      - name: "`bin`"
+      - name: "bin"
         env: "BINARIES"
       - name: "release:latest"
         env: "LATEST_RELEASE"
@@ -441,7 +441,7 @@ tests:
 Dependencies can be defined at the workflows and test level in the registry, overwriting the source for the pull
 specification that will populate an environment variable in a step. These definitions will be propagated from the
 top-level definition to individual steps. The following example overrides the content of the `${DEP}` environment variable
-in the test step to point to the pull specification of pipeline:`src` instead of the original pipeline:`bin`.
+in the test step to point to the pull specification of `pipeline:src` instead of the original `pipeline:bin`.
 
 {{< highlight yaml >}}
 tests:
@@ -452,7 +452,7 @@ tests:
     test:
     - as: "test"
       commands: "make test"
-      from: "`src`"
+      from: "src"
       resources:
         requests:
           cpu: 100m
