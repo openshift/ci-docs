@@ -6,16 +6,18 @@ sectionPagesMenu: "main"
 contentDir: "content/en"
 params:
   offlineSearch: true
-    #pygmentsCodefences: true
-    #pygmentsCodefencesGuessSyntax: true
-    #pygmentsStyle: "dracula"
   github_repo: "https://github.com/openshift/ci-docs"
 menu:
   main:
+  - name: CI Operator Reference
+    url: https://steps.ci.openshift.org/ci-operator-reference
+    weight: 40
   - name: Step Registry
     url: https://steps.ci.openshift.org/
+    weight: 50
   - name: GitHub
     url: https://github.com/openshift/ci-tools
+    weight: 60
 markup:
   highlight:
     anchorLineNos: true
