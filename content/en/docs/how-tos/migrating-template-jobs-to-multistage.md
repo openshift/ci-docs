@@ -72,6 +72,18 @@ ipi-install-rbac/
 test/
 ```
 
+### Notable Cluster Differences
+
+Certain cluster properties may be different between testing clusters installed by
+template-based jobs and the ones provisioned by multi-stage workflows.
+
+- AWS clusters have default-sized workers (`m4.large`) in clusters installed by
+  multi-stage workflows. Templates previously hardcoded a worker size `m4.xlarge`
+  override, so AWS clusters in multi-stage jobs are less powerful and may be
+  insufficient for some test workloads. The issue is tracked in
+  [DPTP-1740](https://issues.redhat.com/browse/DPTP-1740). Jobs that need more
+  powerful clusters may use templates instead of multi-stage workflows for now.
+
 ## Migrating Jobs Generated from `ci-operator` Configurations
 
 Most template-based jobs are generated from `ci-operator` configuration stanzas.
