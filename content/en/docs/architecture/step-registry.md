@@ -383,7 +383,7 @@ Each item in the `env` section consists of the following fields:
 * `default` (optional): the value assigned if no other node in the hierarchy provides one (described below)
 * `documentation` (optional): a textual description of the parameter
 
-## Hierarchical Propagation
+### Hierarchical Propagation
 
 Environment variables can be added to chains and workflows in the registry. These variables will be propagated down the hierarchy.
 That is: a variable in the env section of a chain will propagate to all of its sub-chains and sub-steps, a variable in the env
@@ -400,7 +400,7 @@ chain:
     default: test value
 {{< / highlight >}}
 
-## Required Parameters
+### Required Parameters
 
 Any variable that is not assigned a default value is considered required and must be set at a higher level of the hierarchy. When
 the configuration is resolved, tests that do not satisfy this requirement will generate a validation failure.
@@ -429,4 +429,76 @@ tests:
   steps:
     test:
     - some-ref
+{{< / highlight >}}
+
+## Leases
+
+Tests can acquire leases for cloud quota (described in
+[this page](./quota-and-leases)) in two different ways:
+
+### Implicit Lease Configuration with `cluster_profile`
+
+A test that declares a `cluster_profile` implicitly adds a requirement for a
+lease.  The type of lease is pre-configured and determined automatically based
+on the cluster profile.
+
+{{< highlight yaml >}}
+tests:
+- as: implicit-lease
+  steps:
+    cluster_profile: aws
+    test:
+    - # …
+{{< / highlight >}}
+
+### Explicit Lease Configuration
+
+Tests that have more complex requirements can configure lease acquisition
+explicitly with a `leases` section.  Each entry should have the following
+fields:
+
+- `resource_type`: one of the resource types declared in the `boskos`
+  configuration.
+- `env` name of the environment variable through which the name of the leased
+  resource will be exposed to the test.
+
+{{< highlight yaml >}}
+tests:
+- as: explicit-leases
+  steps:
+    leases:
+    - resource_type: aws-quota-slice
+      env: AWS_LEASED_RESOURCE
+    - resource_type: gcp-quota-slice
+      env: GCP_LEASED_RESOURCE
+    # …
+{{< / highlight >}}
+
+Every step in the test will have access to the `AWS_LEASED_RESOURCE` and
+`GCP_LEASED_RESOURCES` environment variables, which will contain the name of the
+resource acquired.
+
+Leases can be configured in references and chains.  Contrary to parameters,
+lease configuration applies to the test as a whole: all declared leases will be
+acquired before the execution of the steps, and are held throughout its
+entirety.  The environment variable name in each lease configuration entry must
+be unique for the entire test.
+
+{{< highlight yaml >}}
+tests:
+- as: lease-hierarchy
+  steps:
+    leases:
+    - resource_type: aws-quota-slice
+      env: AWS_LEASED_RESOURCE
+    test:
+    - as: test
+      leases:
+      # overriden by the parent section
+      - resource_type: aws-quota-slice
+        env: AWS_LEASED_RESOURCE
+      # added to the parent section
+      - resource_type: gcp-quota-slice
+        env: GCP_LEASED_RESOURCE
+      # …
 {{< / highlight >}}
