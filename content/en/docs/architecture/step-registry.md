@@ -31,7 +31,7 @@ ref:
       cpu: 1000m
       memory: 100Mi
   documentation: |-
-  The IPI configure step generates the install-config.yaml file based on the cluster profile and optional input files.
+    The IPI configure step generates the install-config.yaml file based on the cluster profile and optional input files.
 {{< / highlight >}}
 
 A step may be referred to in chains, workflows, and `ci-operator` configs.
@@ -77,7 +77,7 @@ ref:
       cpu: 1000m
       memory: 100Mi
   documentation: |-
-  The IPI configure step generates the install-config.yaml file based on the cluster profile and optional input files.
+    The IPI configure step generates the install-config.yaml file based on the cluster profile and optional input files.
 {{< / highlight >}}
 
 ##### Commands
@@ -168,7 +168,7 @@ ref:
     name: my-data
     mount_path: /var/run/my-data
   documentation: |-
-  The step runs with custom credentials injected.
+    The step runs with custom credentials injected.
 {{< / highlight >}}
 
 **Note that access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
@@ -245,7 +245,7 @@ workflow:
     post:                    # "post" chain containing cleanup steps
     - chain: ipi-deprovision
   documentation: |-
-  The Origin E2E workflow executes the common end-to-end test suite.
+    The Origin E2E workflow executes the common end-to-end test suite.
 {{< / highlight >}}
 
 ## `ci-operator` Test Configuration
