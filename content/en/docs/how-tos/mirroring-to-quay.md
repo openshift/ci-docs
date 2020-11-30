@@ -51,6 +51,10 @@ image tag to the `quay.io/openshift:4.6` image would require a new entry in the
 [`core-services/image-mirroring/openshift/mapping_origin_4_6`](https://github.com/openshift/release/tree/master/core-services/image-mirroring/openshift/mapping_origin_4_6)
 file. Adding a new image entirely would require a new `mapping_origin_*` file.
 
+{{< alert title="Warning" color="warning" >}}
+Images that are mirrored to Quay for the first time are **private** by default and need to be made public by an administrator of the Quay organization. For `openshift` organization, contact Clayton Coleman about making images public.
+{{< /alert >}}
+
 ## Configuring Mirroring for New Repository
 
 Submit a PR adding a new subdirectory
