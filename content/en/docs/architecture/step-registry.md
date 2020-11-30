@@ -460,7 +460,10 @@ fields:
 - `resource_type`: one of the resource types declared in the `boskos`
   configuration.
 - `env` name of the environment variable through which the name of the leased
-  resource will be exposed to the test.
+  resource will be exposed to the test.  If a `count` is specified, the
+  variable will contain multiple names separated by spaces.
+- `count`: an optional number of resources of the specified type to lease.
+  Defaults to `1`.
 
 {{< highlight yaml >}}
 tests:
@@ -470,13 +473,16 @@ tests:
     - resource_type: aws-quota-slice
       env: AWS_LEASED_RESOURCE
     - resource_type: gcp-quota-slice
-      env: GCP_LEASED_RESOURCE
+      env: GCP_LEASED_RESOURCES
+      count: 3
     # …
 {{< / highlight >}}
 
 Every step in the test will have access to the `AWS_LEASED_RESOURCE` and
 `GCP_LEASED_RESOURCES` environment variables, which will contain the name of the
-resource acquired.
+resource(s) acquired.  `AWS_LEASED_RESOURCE` will contain a single resource
+name, while `GCP_LEASED_RESOURCES` will contain the name of the three resources
+separated by space, as described above.
 
 Leases can be configured in references and chains.  Contrary to parameters,
 lease configuration applies to the test as a whole: all declared leases will be
