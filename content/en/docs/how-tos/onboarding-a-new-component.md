@@ -219,15 +219,14 @@ with test artifacts and a `Pod` to run the integration test using that container
 
 While the Prow configuration describes *when* to run a test, the CI Operator configuration describes the test’s content.
 
-Consult the [`ci-operator` configuration reference
-document](https://github.com/openshift/ci-tools/blob/master/CONFIGURATION.md) for information on specific fields.
+Consult the [`ci-operator` configuration reference document](https://steps.ci.openshift.org/ci-operator-reference) for
+information on specific fields.
 
 ### Containerized Tests
 
 Adding a containerized test is as simple as adding an entry to the `tests` array in the CI Operator configuration file
-and a Prow job configuration that runs the test with `--target=$target`. Consult the [CI Operator
-README](https://github.com/openshift/ci-tools/blob/master/ONBOARD.md#prepare-configuration-for-component-repo) for more
-details on how to configure containerized tests and test them locally.
+and a Prow job configuration that runs the test with `--target=$target`. Consult the [documentation](/docs/architecture/ci-operator/#declaring-tests)
+for more details on how to configure containerized tests and test them locally.
 
 We recommend breaking up your tests into logical sections when adding tests here. More granular test reporting will
 allow for higher parallelism during test execution and more efficient re-testing if one suite fails.
@@ -250,8 +249,7 @@ When container images are declared as release artifacts for a repository in the 
 a synthetic `[images]` target is available for CI Operator execution that will simply build all
 release images. In order for the container images built from your repository to be published, the
 Prow job generator will configure a Prow postsubmit job that uses the CI Operator `--target=[images]` and `--promote` flags.
-Information on how to publish images to an external registry can be found in a [separate document.](TODO alvaroaleman: Link to
-https://github.com/openshift/ci-docs/pull/9 once merged).
+Information on how to publish images to an external registry can be found in a [separate document.](/docs/how-tos/mirroring-to-quay/).
 
 ### Product builds and becoming part of an OpenShift release image
 
