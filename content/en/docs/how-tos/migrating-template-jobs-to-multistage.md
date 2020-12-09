@@ -91,6 +91,59 @@ Migrating these jobs is easier and can be done almost mechanically. Soon, DPTP
 will migrate all existing `ci-operator` configurations to multi-stage workflows
 automatically.
 
+### `openshift_installer`
+
+The tests using the `openshift_installer` stanza install OpenShift using a
+generic IPI installation workflow and then execute the shared OpenShift E2E tests
+provided by the `openshift-tests` binary in `tests` image.
+
+#### Before (template-based)
+```yaml
+tests:
+- as: e2e-test
+  openshift_installer:
+    cluster_profile: aws
+```
+
+#### After (multi-stage)
+```yaml
+tests:
+- as: e2e-test
+  steps:
+    cluster_profile: aws     # needs to match the workflow
+    workflow: openshift-e2e-aws # workflow implements the "usual" e2e test workflow
+```
+
+### `openshift_installer`: upgrades
+
+The `openshift_installer` stanzas had a special `upgrade: true` member, which,
+when set, made the CI job install a baseline version of OpenShift and then
+triggered an observed upgrade to the candidate version (the meaning of "baseline"
+and "candidate" can differ depending on context, but on PR jobs "baseline" usually
+means "HEADs of branches" and "candidate" means "baseline+component candidate").
+
+```yaml
+tests:
+- as: e2e-test
+  openshift_installer:
+    cluster_profile: aws
+    upgrade: true
+```
+
+#### After (multi-stage)
+```yaml
+tests:
+- as: e2e-test
+  steps:
+    cluster_profile: aws     # needs to match the workflow
+    workflow: openshift-upgrade-aws-loki # workflow implements the "usual" upgrade workflow
+```
+
+There are multiple different workflows that implement the upgrade test:
+- [`openshift-upgrade-$PLATFORM`](https://steps.ci.openshift.org/workflow/openshift-upgrade-aws): basic upgrade test workflow
+- [`openshift-upgrade-$PLATFORM-loki`](https://steps.ci.openshift.org/workflow/openshift-upgrade-aws-loki): upgrade test workflow with logs collected via Loki (**recommended**)
+- [`openshift-upgrade-$PLATFORM-hosted-loki`](https://steps.ci.openshift.org/workflow/openshift-upgrade-aws-hosted-loki): upgrade test workflow with logs collected via Loki hosted on Observatorium.
+
 ### `openshift_installer_src`
 
 The tests using the `openshift_installer_src` stanza install OpenShift using a
