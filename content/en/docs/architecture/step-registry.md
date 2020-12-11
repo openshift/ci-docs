@@ -302,6 +302,8 @@ tests:
 
 ## Options to Change Control Flow
 
+### Skipping `post` Steps On Success
+
 `ci-operator` can be configured to skip some or all `post` steps when all `test` steps pass. Skipping a `post` step when all tests have
 passed may be useful to skip gathering artifacts and save some time at the end of the multistage test. In order to allow steps to be
 skipped in a test, the `allow_skip_on_success` field must be set in the `steps` configuration. Individual `post` steps opt into being
@@ -323,6 +325,38 @@ tests:
     post:
     - as: gather-must-gather         # this step will be skipped as the successful-test-step passes
       optional_on_success: true
+      from: cli
+      commands: gather-must-gather-commands.sh
+      resources:
+        requests:
+          cpu: 300m
+          memory: 300Mi
+{{< / highlight >}}
+
+### Marking `post` Steps Best-Effort
+
+`ci-operator` can be configured to run `post` steps in best-effort mode, meaning that failures in these steps will not cause the overall
+test to fail. Running a `post`-step in best-effort mode may be useful when the step is used to gather debugging information or otherwise
+is useful but should not cause the job to fail if it does not complete correctly. In order to run `post` steps in best-effort mode, the
+`best_effort` field must be set to `true` in the configuration for an individual step and the `allow_best_effort_post_steps` setting must
+be set at the workflow or job level. For example:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-steps # test name
+  steps:
+  allow_best_effort_post_steps: true      # allows steps to be run best-effort in this test
+    test:
+    - as: successful-test-step
+      commands: echo Success
+      from: os
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+    post:
+    - as: gather-must-gather         # this step will be ignored if it fails
+      best_effort: true
       from: cli
       commands: gather-must-gather-commands.sh
       resources:
