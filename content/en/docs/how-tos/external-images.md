@@ -6,7 +6,7 @@ draft: false
 
 The `ci-operator` config only allows to reference `ImageStreamTags`, it does not allow to specify arbitrary Docker pull specs. In order
 to use external images, they need to be imported. For this, create a file in the
-[`openshift/release` repository in the `core-services/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/core-services/supplemental-ci-images)
+[`openshift/release` repository in the `clusters/app.ci/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/clusters/app.ci/supplemental-ci-images)
 that looks like the following:
 
 
