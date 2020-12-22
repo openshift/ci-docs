@@ -12,8 +12,7 @@ In order to mirror an image built by CI to Quay, that image must be [promoted.](
 If the image is promoted into a namespace for which no other image mirroring is set up yet, some RBAC needs to
 be configured:
 
-* In [roles.yaml](https://github.com/openshift/release/blob/master/core-services/various_rbac/admin_ci-operator_roles.yaml),
-  add role `image-tagger` and rolebinding `image-tagger-ci-operator` for your namespace.
+* Create a folder in [app.ci](https://github.com/openshift/release/tree/master/clusters/app.ci) with the name of the namespace, containing the manifests of the namespace and the RBAC regarding to that namespace.
 * The admin of the namespace should allow the SA in the mirroring job defined below to access the images with `oc image mirror`,
 	like this, which makes the images open to the public:
 
