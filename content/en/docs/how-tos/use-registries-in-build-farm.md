@@ -29,9 +29,9 @@ when an image changes on the authoritative registry, that change is propagated t
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
 **Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative 
-registry is registry.ci.openshift.org. The previous authoritative registry, registry.svc.ci.openshift.org, contains an
-up-to-date version of all images as well, and will continue to do so for the time being while users migrate to using
-the new registry.
+registry is [registry.svc.ci.openshift.org](registry.svc.ci.openshift.org). The previous authoritative registry,
+[registry.svc.ci.openshift.org](registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
+and will continue to do so for the time being while users migrate to using the new registry.
 
 # Common Questions
 
