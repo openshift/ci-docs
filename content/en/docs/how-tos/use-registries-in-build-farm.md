@@ -112,7 +112,6 @@ users:
   - tracy
   - jim
   - emily
-  - petr-muller
 ---
 # this grants the right to read the ServiceAccount's credentials
 kind: Role
