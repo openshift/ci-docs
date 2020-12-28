@@ -1,112 +1,258 @@
 ---
-title: "Use Registries in Build Farm"
+title: "Interacting With CI Image Registries"
 date: 2020-12-15T16:08:01-04:00
 draft: false
 ---
 
-The follow table shows the public DNS of each registry in build farm:
+# Summary of Available Registries
 
-| cluster | registry                                             | note                        |
-|---------|------------------------------------------------------|-----------------------------|
-| api.ci  | registry.svc.ci.openshift.org                        |                             |
-| app.ci  | registry.ci.openshift.org                            | the central CI registry     |
-| build01 | registry.build01.ci.openshift.org                    |                             |
-| build02 | registry.build02.ci.openshift.org                    |                             |
-| vsphere | registry.apps.build01-us-west-2.vmc.ci.openshift.org | only open to vsphere admins |
+The OpenShift CI system runs on OpenShift clusters; each cluster hosts its own image registry. Therefore, a number of
+image registries exist in the OpenShift CI ecosystem. The following table shows the public DNS of each registry and has
+some comments on their purpose:
 
-# Login as a github user:
+|  Cluster  | Registry URL                                                                                                 | Note                                                                                                                                    |
+|-----------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `app.ci`  | [registry.ci.openshift.org](registry.ci.openshift.org)                                                       | the authoritative, central CI registry                                                                                                  |
+| `api.ci`  | [registry.svc.ci.openshift.org](registry.svc.ci.openshift.org)                                               | the previous central registry; contains identical images to the authoritative registry                                                  |
+| `build01` | [registry.build01.ci.openshift.org](registry.build01.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
+| `build02` | [registry.build02.ci.openshift.org](registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
+| `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
 
-* Ensure oc-cli has logged into the cluster: Copy the login command from [the console](/docs/getting-started/useful-links/#clusters).
-* Use oc token to log into the registry, e.g.,  `registry.ci.openshift.org`:
+# Container Image Data Flows
+
+Today, three major data flows exist for container images in the OpenShift CI ecosystem. First, when a job executes on
+one of the build farm clusters, container images that need to be [built](/docs/architecture/ci-operator/#building-container-images)
+for the execution will exist only on that cluster. Second, when changes are merged to repositories under test, updated
+images are built on a build farm and [promoted](/docs/architecture/ci-operator/#publishing-container-images) to the
+central, authoritative registry. Users should always pull from this registry for any images they interact with. Third,
+when an image changes on the authoritative registry, that change is propagated to all build farm clusters so that the
+copies they hold are up-to-date and jobs that run there run with the correct container image versions.
+
+**Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative 
+registry is registry.ci.openshift.org. The previous authoritative registry, registry.svc.ci.openshift.org, contains an
+up-to-date version of all images as well, and will continue to do so for the time being while users migrate to using
+the new registry.
+
+# Common Questions
+
+## How do I log in to pull images that require authentication?
+
+All registries are the internal OpenShift image registry for the cluster they reside on, so authenticating to the registry
+requires authentication to the cluster that hosts it. Once logged in to the OpenShift cluster, the `oc` CLI can be used to
+authenticate to the registry in question. For example, for the [registry.build01.ci.openshift.org](registry.build01.ci.openshift.org)
+registry, the cluster is `build01`. Using the [the list of clusters](/docs/getting-started/useful-links/#clusters),
+the console URL for this cluster is found to be [console.build01.ci.openshift.org](console.build01.ci.openshift.org).
+After logging in to this cluster using the console and copying the log-in command to authenticate your local `oc` CLI,
+you can run `oc registry login` to authenticate to the registry.
 
 ```bash
-$ docker login -u $(oc whoami) -p $(oc whoami -t) registry.ci.openshift.org
-Login Succeeded!
+$ oc registry login
+info: Using registry public hostname registry.build01.ci.openshift.org
+Saved credentials for registry.build01.ci.openshift.org
 
-$ cat ${HOME}/.docker/config.json
+$ cat ~/.docker/config.json | jq '.auths["registry.build01.ci.openshift.org"]'
 {
-	"auths": {
-		"registry.ci.openshift.org": {
-			"auth": "token"
-		}
-	}
+  "auth": "token"
 }
+
 ```
 
-# Get token for a service account
+**Note:** Today, authentication to the OpenShift cluster is delegated to GitHub and requires that you are a member of the
+`OpenShift` organization.
 
-If some robot is required to log into the central CI registry, we need to use a service account: Choose a new namespace, and create a pull request to add a folder with the same name in [release/clusters/app.ci](https://github.com/openshift/release/tree/master/clusters/app.ci). The folder should contain the namespace manifest.
+## How do I get a token for programmatic access to the central CI registry?
 
-After the pull request is merged, the manifests in the folder will be applied automatically to `app.ci`. We can use `sa/builder` which [Openshift creates by default for any namespace and is allowed to pull images from any imagestream in the namespace](https://docs.openshift.com/container-platform/4.6/authentication/using-service-accounts-in-applications.html#default-service-accounts-and-roles_using-service-accounts). [Openshift also creates secrets for each service account for the OpenShift Container Registry](https://docs.openshift.com/container-platform/4.6/authentication/using-service-accounts-in-applications.html#service-accounts-overview_using-service-accounts). The secret name could be found at `sa.imagePullSecrets`.
+If you're developing an integration with the central CI registry, an OpenShift `ServiceAccount` should be used. Write a
+pull request to the [`openshift/release`](https://github.com/openshift/release) repository that adds a new directory under
+the `release/clusters/app.ci/registry-access` directory. In this directory, provide an `OWNERS` file to allow your team
+to make changes to your manifests and an `admin_manifest.yaml` file that creates your `ServiceAccount` and associated
+RBAC:
 
-We can then get the token of, e.g., `SA/builder` in `namespace/ci`:
+```yaml
+# this is the Namespace in which your ServiceAccount will live
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Automation ServiceAccounts for MyProject
+    openshift.io/display-name: MyProject CI
+  name: my-project
+---
+# this is the ServiceAccount whose credentials you will use
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: image-puller
+  namespace: my-project
+---
+# this grants your ServiceAccount rights to pull images
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-image-puller-binding
+  # the namespace from which you will pull images
+  namespace: ocp
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:image-puller
+subjects:
+  - kind: ServiceAccount
+    namespace: my-project
+    name: image-puller
+---
+# the Group of people who should be able to manage this ServiceAccount
+kind: Group
+apiVersion: v1
+metadata:
+  name: my-project-admins
+users:
+  # these names are GitHub usernames
+  - bob
+  - tracy
+  - jim
+  - emily
+  - petr-muller
+---
+# this grants the right to read the ServiceAccount's credentials
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secret-reader
+  namespace: my-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+      - secrets
+    verbs:
+      - get
+      - list
+---
+# this allows the group of people admin access to the Namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-admins-binding
+  namespace: my-project
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: secret-reader
+  namespace: my-project
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: my-project-admins
+    namespace: my-project
+```
+
+After the pull request is merged, you will be able to extract the pull token for your `ServiceAccount` using the `oc` CLI:
 
 ```bash
-$ namespace=ci
-$ sa=builder
-$ secret=$(oc get sa -n $namespace $sa -o json | jq -r '.imagePullSecrets[0].name')
-$ hostname=image-registry.openshift-image-registry.svc:5000
-$ oc get secret --namespace $namespace $secret -o json | jq '.data[".dockercfg"]' --raw-output | base64 --decode | jq --arg h $hostname 'with_entries(select(.key==$h))'
+$ token="$( oc --namespace my-project serviceaccounts get-token image-puller )"
+$ auth="$( base64 --wrap=0 <<<"serviceaccount:${token}" )"
+$ cat<<EOF
 {
-  "image-registry.openshift-image-registry.svc:5000": {
-    "auth": "token"
+  "registry.ci.openshift.org": {
+    "username": "serviceaccount",
+    "password": "${token}",
+    "email": "serviceaccount@example.org",
+    "auth": "${auth}"
   }
 }
+EOF
 ```
 
-The token can be used to modify the `${HOME}/.docker/config.json` file above.
+This data can be added to a `.docker/config` authentication file to provide programmatic access with the `ServiceAccount`
+credentials.
 
-# Access Images built during a testrun
+## How can I access images that were built during a specific job execution?
 
-The URL of an image is `<registry_dns>/<namespace>/<imagestream>:<tag>`.
+Namespaces in which jobs execute on build farms are ephemeral and will be garbage-collected an hour after a job finishes
+executing, so access to images used in a specific job execution will only be possible shortly after the job executed.
 
-Determine which cluster the job is running on, e.g. the follow line in the job log says that the job runs on `build02` and that `ci-op-2c2tvgti` is the temporary namespace for the test:
+In order to access these images, first determine the build farm on which the job executed by looking for a log line in
+the test output like:
 
 ```
 2020/11/20 14:12:28 Using namespace https://console.build02.ci.openshift.org/k8s/cluster/projects/ci-op-2c2tvgti
 ```
 
-E.g., the image `pipeline:odh-manifests-tests` in `ci-op-2c2tvgti` can be pulled by
+This line determines the build farm that executed the tests and the namespace on that cluster in which the execution
+occurred. In this example, the job executed on the `build02` farm and used the `ci-op-2c2tvgti` namespace. All registry
+pullspecs are in the form `<registry>/<namespace>/<imagestream>:<tag>`, so if we needed to access the source image for
+this execution, the pullspec would be `registry.build02.ci.openshift.org/ci-op-2c2tvgti/pipeline:src`. In order to pull
+an image from a test namespace, you must be logged in to the registry and be the author of the pull request. Pull the
+image with any normal container engine:
 
 ```bash
-$ docker pull registry.build02.ci.openshift.org/ci-op-2c2tvgti/pipeline:odh-manifests-tests
+$ podman pull registry.build02.ci.openshift.org/ci-op-2c2tvgti/pipeline:src
 ```
 
-Note that the only github user that has access to the image is the author of the underlying pull request which triggers the testrun.
+**Warning:** Only `vSphere` system administrators can access the images on [registry.apps.build01-us-west-2.vmc.ci.openshift.org](registry.apps.build01-us-west-2.vmc.ci.openshift.org).
 
-# Access the promoted images
+## How do I access the latest published images for my component?
 
-If `ci-operator`'s config has [`promotion` stanza](/docs/architecture/ci-operator/#publishing-container-images), the images are published to the central CI registry at `app.ci`.
+If the `ci-operator` configuration for your component configures image [`promotion`](/docs/architecture/ci-operator/#publishing-container-images),
+output container images will be published to the central CI registry when changes are merged to your repository. Two main
+configurations are possible for promotion: configuring an `ImageStream` name and namespace or a namespace and a target tag.
+
+### Publication of New Tags
+
+A configuration that specifies the `ImageStream` name looks like the following and results in new tags on that stream
+for each image that is promoted:
 
 ```yaml
 images:
-- dockerfile_path: images/hello-openshift/Dockerfile.rhel
+- dockerfile_path: images/my-component
   from: base
-  inputs:
-    ocp_builder_rhel-8-golang-1.15-openshift-4.7:
-      as:
-      - registry.svc.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.7
-  to: hello-openshift
+  to: my-component
 promotion:
   name: "4.7"
   namespace: ocp
 ```
 
-We can pull the image defined by above `promotion` stanza by:
+The `my-component` image can be pulled from the authoritative registry with:
 
 ```bash
-$ docker pull registry.ci.openshift.org/ocp/4.7:hello-openshift
+$ podman pull registry.ci.openshift.org/ocp/4.7:my-component
 ```
 
-# Troubleshooting
+### Publication of New Streams
 
-## I am getting an "authentication required" error, why?
+A configuration that specifies the `ImageStream` tag looks like the following and results in new streams in the namespace
+for each image that is promoted, with the named tag in each stream:
+
+```yaml
+images:
+- dockerfile_path: images/my-component
+  from: base
+  to: my-component
+promotion:
+  namespace: my-organization
+  tag: latest
+```
+
+The `my-component` image can be pulled from the authoritative registry with:
 
 ```bash
-$ docker pull registry.svc.ci.openshift.org/ci/applyconfig:latest
-Trying to pull registry.svc.ci.openshift.org/ci/applyconfig:latest...
-  unable to retrieve auth token: invalid username/password: unauthorized: authentication required
-Error: unable to pull registry.svc.ci.openshift.org/ci/applyconfig:latest: Error initializing source docker://registry.svc.ci.openshift.org/ci/applyconfig:latest: unable to retrieve auth token: invalid username/password: unauthorized: authentication required
+$ podman pull registry.ci.openshift.org/my-organization/my-component:latest
 ```
 
-You most likely logged in at some point and your token expired, this now prevents all pulls from that registry, even for public images.
+## Why I am getting an authentication error?
+
+An authentication error may occur both in the case where you have not yet logged in to a registry and in the case where
+you logged in to the registry in the past.
+
+### I have not yet logged in to the registry.
+
+Please follow [the directions](#how-do-i-log-in-to-pull-images-that-require-authentication) to log in to the registry.
+
+### I have logged in to the registry in the past.
+
+An unfortunate side-effect of the architecture for container image registry authentication results in authentication
+errors when your authentication token expired, even if the image you are attempting to pull requires no authentication.
+Authentication tokens expire once a month. All you'll need to do is follow [the directions](#how-do-i-log-in-to-pull-images-that-require-authentication)
+to log in to the registry again.
