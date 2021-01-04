@@ -28,7 +28,7 @@ central, authoritative registry. Users should always pull from this registry for
 when an image changes on the authoritative registry, that change is propagated to all build farm clusters so that the
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
-**Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative 
+**Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative
 registry is [registry.svc.ci.openshift.org](registry.svc.ci.openshift.org). The previous authoritative registry,
 [registry.svc.ci.openshift.org](registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
 and will continue to do so for the time being while users migrate to using the new registry.
@@ -113,33 +113,17 @@ users:
   - jim
   - emily
 ---
-# this grants the right to read the ServiceAccount's credentials
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: secret-reader
-  namespace: my-project
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts
-      - secrets
-    verbs:
-      - get
-      - list
----
-# this allows the group of people admin access to the Namespace
+# this grants the right to read the ServiceAccount's credentials and pull
+# images to the admins.
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: my-project-admins-binding
   namespace: my-project
 roleRef:
-  kind: Role
+  kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
-  name: secret-reader
-  namespace: my-project
+  name: pull-secret-namespace-manager
 subjects:
   - kind: Group
     apiGroup: rbac.authorization.k8s.io
