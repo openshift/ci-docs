@@ -131,25 +131,13 @@ subjects:
     namespace: my-project
 ```
 
-After the pull request is merged, you will be able to extract the pull token for your `ServiceAccount` using the `oc` CLI:
+After the pull request is merged, you will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:
 
 ```bash
-$ token="$( oc --namespace my-project serviceaccounts get-token image-puller )"
-$ auth="$( base64 --wrap=0 <<<"serviceaccount:${token}" )"
-$ cat<<EOF
-{
-  "registry.ci.openshift.org": {
-    "username": "serviceaccount",
-    "password": "${token}",
-    "email": "serviceaccount@example.org",
-    "auth": "${auth}"
-  }
-}
-EOF
+$ oc --namespace my-project registry login --service-account image-puller --registry-config=/tmp/config.json"
 ```
 
-This data can be added to a `.docker/config` authentication file to provide programmatic access with the `ServiceAccount`
-credentials.
+The created `/tmp/config.json` file can be then used as a standard `.docker/config.json` authentication file.
 
 ## How can I access images that were built during a specific job execution?
 
