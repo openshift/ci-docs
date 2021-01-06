@@ -21,9 +21,8 @@ orgs:
 * openshift-s2i
 * operator-framework
 
-
 If you are onboarding a new component in one of these orgs, you do not need to configure webhooks individually for your
-repository, please continue on to the next section.
+repository, please continue on to the [Prow Configuration](#prow-configuration) section.
 
 #### Token Retrieval
 
