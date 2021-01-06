@@ -134,7 +134,7 @@ subjects:
 After the pull request is merged, you will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:
 
 ```bash
-$ oc --namespace my-project registry login --service-account image-puller --registry-config=/tmp/config.json"
+$ oc --namespace my-project registry login --service-account image-puller --registry-config=/tmp/config.json
 ```
 
 The created `/tmp/config.json` file can be then used as a standard `.docker/config.json` authentication file.
