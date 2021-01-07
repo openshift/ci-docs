@@ -50,7 +50,7 @@ on the left. Your webhook should be set up with the following parameters:
 
 *Note:*  Don’t add `/` at the end of the payload url.
 
-### Granting Robots Privileges
+### Granting Robots Privileges and Installing the GitHub App
 
 In order to add labels, move PRs and issues into milestones, merge PRs, etc, the robots will need write access to your repository.
 
@@ -67,6 +67,9 @@ If your component repository is **not** in this organization:
 	 all prow-controlled repos. This requires `openshift-merge-robot` to be an admin of the repo. We can disable it in
    prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
 1. If a repository is [enrolled in centralized branch management](https://docs.google.com/document/d/1USkRjWPVxsRZNLG5BRJnm5Q1LSk-NtBgrxl2spFRRU8/edit#heading=h.ur4381uqbo8z) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
+
+Additionally, all repositories need the [Openshift CI](https://github.com/apps/openshift-ci) GitHub App installed. We plan to eventually replace the bot accounts entirely
+with that app, but that work is not yet done.
 
 
 ## Prow Configuration
