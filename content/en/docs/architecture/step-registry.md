@@ -345,7 +345,7 @@ be set at the workflow or job level. For example:
 tests:
 - as: e2e-steps # test name
   steps:
-  allow_best_effort_post_steps: true      # allows steps to be run best-effort in this test
+    allow_best_effort_post_steps: true      # allows steps to be run best-effort in this test
     test:
     - as: successful-test-step
       commands: echo Success
