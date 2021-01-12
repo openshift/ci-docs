@@ -131,7 +131,10 @@ subjects:
     namespace: my-project
 ```
 
-After the pull request is merged, you will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:
+After the pull request is merged, your manifests will be automatically applied to the cluster hosting the central CI 
+registry. Make sure your `oc` CLI is [logged in](#how-do-i-log-in-to-pull-images-that-require-authentication) to the
+`app.ci` cluster via the [console](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/), then you
+will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:
 
 ```bash
 $ oc --namespace my-project registry login --service-account image-puller --registry-config=/tmp/config.json
