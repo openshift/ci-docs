@@ -4,41 +4,129 @@ date: 2020-12-21T10:08:01-04:00
 draft: false
 ---
 
-If a job needs to access sensitive information, we can seal it into a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) and mount it to the pod which runs the job. There are several OpenShift [clusters in CI build farm](/docs/getting-started/useful-links/#clusters). A user can maintain the secrets in a namespace that the user has access to on `api.ci`. The CI `secret-mirroring` tool can be used to mirror the secrets to other namespaces on all clusters in the build farm. 
+Jobs execute as `Pod`s; those that need access to sensitive information will have access to it through mounted Kubernetes
+[`Secrets`](https://kubernetes.io/docs/concepts/configuration/secret/). Secret data is managed self-service by the owners
+of the data. While there are many OpenShift clusters in the [CI build farm](/docs/getting-started/useful-links/#clusters),
+owners of secret data simply need to add their `Secret` to the `api.ci` cluster and automation will sync the data out to
+all environments where jobs execute. 
 
 ## Add A New Secret
 
-Choose a new namespace, and create a pull request to add a folder with the same name in [release/core-services](https://github.com/openshift/release/tree/master/core-services). The folder should contain the manifests for the namespace and the RBACs regarding to the namespace. If the desired namespace exists already, ask the owners of the namespace if it can be shared. After the pull request is merged, the manifests in the folder will be applied automatically to `api.ci`.
+In order to commit secret data to our system, the data will need to be added to the `api.ci` cluster. Management of the
+secret data can either be done manually by one user or in a semi-automated fashion with a group of managing users.
 
-Log into `api.ci` and create the secret in the namespace chosen above.
+In both cases, all users who wish to interact with the system must [log in](/docs/how-tos/use-registries-in-build-farm/#how-do-i-log-in-to-pull-images-that-require-authentication)
+to the `api.ci` cluster.
 
-Use the secret as the source in [the mapping file](https://github.com/openshift/release/tree/master/core-services/secret-mirroring).
-The secret and any modification on it afterwards will be populated to the targeting namespace on [all clusters](/docs/getting-started/useful-links/#clusters) in the build farm.
+### Management By A Single User
+
+When managing secret content in a fully manual manner with only one user involved, the `oc` CLI can simply be used to
+create an owning namespace and populate the secret data. The following example creates the `my-secret` secret in the
+`my-project` namespace and adds a password under the `password` key.
+
+```shell
+$ oc new-project my-project
+$ oc --namespace my-project create secret generic my-secret --from-literal password=hard-to-remember
+```
+
+### Management By A Group Of Users
+
+When managing secret content between a group of users, it's best to commit the requisite information in our Git-ops
+[repository](https://github.com/openshift/release) to ensure that the correct configuration is persisted and that users
+can cooperate on changing it.
+
+Choose your namespace name and group of administrators, then create a Pull request adding a YAML file with the contents
+to a sub-directory of the `core-services/secrets` directory:
+
+```yaml
+# this is the Namespace in which your Secret will live
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Automation Secrets for MyProject
+    openshift.io/display-name: MyProject CI
+  name: my-project
+---
+# the Group of people who should be able to manage this Secret
+kind: Group
+apiVersion: v1
+metadata:
+  name: my-project-admins
+users:
+  # these names are GitHub usernames
+  - bob
+  - tracy
+  - jim
+  - emily
+---
+# this grants the right to view and update the Secret
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-admins-binding
+  namespace: my-project
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: secret-namespace-manager
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: my-project-admins
+    namespace: my-project
+```
+
+**Note:** The above YAML does _not_ contain your secret data. You will still need to create it with a manual invocation
+of the `oc` CLI. The `openshift/release` repository is public and not an appropriate place to store sensitive information.
+
+If your desired namespace exists already, ask the owners of the namespace if it can be shared. After the pull request is
+merged, the manifests in the folder will be applied automatically to the `api.ci` cluster and you will be ready to use
+the `oc` CLI to persist your secret data:
+
+```shell
+$ oc --namespace my-project create secret generic my-secret --from-literal password=hard-to-remember
+```
+
+
+### Propagating Secret Data
+
+In order to propagate your secret data to all environments in which jobs execute, an entry must be added to the mirroring
+[configuration](https://github.com/openshift/release/tree/master/core-services/secret-mirroring/_config.yaml). The secret
+and any modification on it afterwards will be populated to the targeting namespace(s) on [all clusters](/docs/getting-started/useful-links/#clusters)
+in the build farm.
 
 ```yaml
 - from:
-    namespace: "some-namespace"
-    name: "source-some-secret"
+    namespace: "my-project"
+    name: "my-secret"
   to:
-    namespace: "test-credentials"    # the namespace holding all secrets used in a step
-    name: "target-some-secret"       # a unique identifier for your secret
+    namespace: "test-credentials" # the namespace holding all secrets used in a step
+    name: "my-secret"             # a unique identifier for your secret
 ```
 
-Note that we are in the process of turning down the cluster `api.ci` which currently is still used for the secret mirroring process. A new solution for secret management will be in place before `api.ci` is fully removed.
+**Note:** we are in the process of turning down the `api.ci` cluster which currently hosts the source content for the
+secret mirroring process. A new solution for secret management will be in place before `api.ci` is fully removed.
 
 ## Use A Secret In A Job Step
 
-The most common case is to use secrets in a [step](/docs/architecture/step-registry/#step) of a job. In this case, we **require** the user to mirror secrets to `test-credentials` namespace. The pod which runs the step can access the secrets defined in `credentials` stanza of the step definition. see [injecting-custom-credentials](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials) for details.
+The most common case is to use secrets in a [step](/docs/architecture/step-registry/#step) of a job. In this case, we
+**require** the user to mirror secrets to `test-credentials` namespace. The pod which runs the step can access the secrets
+defined in `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
+for details.
 
 ## Use A Secret In Non-Step jobs
 
 {{< alert title="Warning" color="warning" >}}
-This section is used only for the jobs that had existed before [Test Step Registry](/docs/architecture/step-registry/) was introduced and have not yet been converted to multistage tests with steps. It is strongly suggested to use steps for any new jobs.
+This section is used only for the jobs that had existed before [Test Step Registry](/docs/architecture/step-registry/)
+was introduced and have not yet been converted to multistage tests with steps. It is strongly suggested to use steps for
+any new jobs.
 {{< /alert >}}
 
-For non-step jobs, we have to use `ci` as the targeting namespace in secret-mirroring.
+For non-step jobs, we have to use `ci` as the targeting namespace in the secret mirroring configuration.
 
-* For a job which is generated from `ci-operator`'s config and does not use steps, we can mount the secrets via `secrets` stanza in the ci-operator's config, e.g.,
+* For a job which is generated from `ci-operator` configuration and does not use steps, we can mount the secrets via
+  `secrets` stanza in the `ci-operator` configuration, e.g.,
 
 ```yaml
 tests:
@@ -51,7 +139,8 @@ tests:
     name: "secret-name-in-ci"    # the secret name in the ci namespace
 ```
 
-* For a job which does not even use `ci-operator` at all, i.e. [handcrafted jobs](/docs/how-tos/contributing-openshift-release/#handcrafted-jobs), the following example shows how to use secrets in a job definition. As stated there, **creating handcrafted jobs is discouraged**. 
+* For a job which does not even use `ci-operator` at all, i.e. [handcrafted jobs](/docs/how-tos/contributing-openshift-release/#handcrafted-jobs),
+  the following example shows how to use secrets in a job definition. As stated there, **creating handcrafted jobs is discouraged**. 
 
 ```yaml
 postsubmits:
