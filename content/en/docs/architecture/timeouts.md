@@ -35,7 +35,7 @@ Process did not exit before 30m0s grace period
 
  Responding to `SIGTERM`, `ci-operator` starts to terminate the pods it created. If the pod is for a non-step job from a `ci-operator`'s config, such as the following snippet, the test process which runs `go vet ./...` receives [SIGTERM](https://pkg.go.dev/syscall#SIGTERM) and after that point, the test process has `30s`, e.g., to procedure all artifacts, before it is killed.
 
- ```
+ ```yaml
 tests:
 - as: "vet"                 # names this test "vet"
   commands: "go vet ./..."  # declares which commands to run
