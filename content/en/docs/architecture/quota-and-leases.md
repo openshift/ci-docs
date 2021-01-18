@@ -115,4 +115,4 @@ needed. In order for a `cluster_profile` to be supported, the cloud administrato
 resources, so by the time a job author uses a `cluster_profile`, all the infrastructure should be in place.
 
 For more complex lease configuration, see the multi-stage test
-[section](./step-registry/#leases).
+[section](/docs/architecture/step-registry/#leases).
