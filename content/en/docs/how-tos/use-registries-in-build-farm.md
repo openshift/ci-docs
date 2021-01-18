@@ -12,11 +12,11 @@ some comments on their purpose:
 
 |  Cluster  | Registry URL                                                                                                 | Note                                                                                                                                    |
 |-----------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `app.ci`  | [registry.ci.openshift.org](registry.ci.openshift.org)                                                       | the authoritative, central CI registry                                                                                                  |
-| `api.ci`  | [registry.svc.ci.openshift.org](registry.svc.ci.openshift.org)                                               | the previous central registry; contains identical images to the authoritative registry                                                  |
-| `build01` | [registry.build01.ci.openshift.org](registry.build01.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| `build02` | [registry.build02.ci.openshift.org](registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
+| `app.ci`  | [registry.ci.openshift.org](https://registry.ci.openshift.org)                                                       | the authoritative, central CI registry                                                                                                  |
+| `api.ci`  | [registry.svc.ci.openshift.org](https://registry.svc.ci.openshift.org)                                               | the previous central registry; contains identical images to the authoritative registry                                                  |
+| `build01` | [registry.build01.ci.openshift.org](https://registry.build01.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
+| `build02` | [registry.build02.ci.openshift.org](https://registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
+| `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
 
 # Container Image Data Flows
 
