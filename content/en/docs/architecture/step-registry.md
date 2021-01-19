@@ -468,7 +468,7 @@ tests:
 ## Leases
 
 Tests can acquire leases for cloud quota (described in
-[this page](./quota-and-leases)) in two different ways:
+[this page](/docs/architecture/quota-and-leases)) in two different ways:
 
 ### Implicit Lease Configuration with `cluster_profile`
 
