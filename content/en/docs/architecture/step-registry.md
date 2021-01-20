@@ -108,7 +108,7 @@ The following environment variables will be available to commands in a step:
 |`${KUBEADMIN_PASSWORD_FILE}`| Path to the kubeadmin password file.|After an ephemeral cluster has been installed.|
 |`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|Always.|
 |`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|Always.|
-|`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See the [documentation.](/architecture/leases)|When the test requires a lease.|
+|`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See [below](#leases).|When the test requires a lease.|
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
 [Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables) as well as from
