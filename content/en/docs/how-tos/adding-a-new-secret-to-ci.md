@@ -8,30 +8,18 @@ Jobs execute as `Pod`s; those that need access to sensitive information will hav
 [`Secrets`](https://kubernetes.io/docs/concepts/configuration/secret/). Secret data is managed self-service by the owners
 of the data. While there are many OpenShift clusters in the [CI build farm](/docs/getting-started/useful-links/#clusters),
 owners of secret data simply need to add their `Secret` to the `api.ci` cluster and automation will sync the data out to
-all environments where jobs execute. 
+all environments where jobs execute.
 
 ## Add A New Secret
 
-In order to commit secret data to our system, the data will need to be added to the `api.ci` cluster. Management of the
-secret data can either be done manually by one user or in a semi-automated fashion with a group of managing users.
+In order to commit secret data to our system, the data will need to be added to the `api.ci` cluster.
 
-In both cases, all users who wish to interact with the system must [log in](/docs/how-tos/use-registries-in-build-farm/#how-do-i-log-in-to-pull-images-that-require-authentication)
+All users who wish to interact with the system must [log in](/docs/how-tos/use-registries-in-build-farm/#how-do-i-log-in-to-pull-images-that-require-authentication)
 to the `api.ci` cluster.
 
-### Management By A Single User
+### Creating the manifests
 
-When managing secret content in a fully manual manner with only one user involved, the `oc` CLI can simply be used to
-create an owning namespace and populate the secret data. The following example creates the `my-secret` secret in the
-`my-project` namespace and adds a password under the `password` key.
-
-```shell
-$ oc new-project my-project
-$ oc --namespace my-project create secret generic my-secret --from-literal password=hard-to-remember
-```
-
-### Management By A Group Of Users
-
-When managing secret content between a group of users, it's best to commit the requisite information in our Git-ops
+To manage secrets, some manifests have to be created and committed to our Git-ops
 [repository](https://github.com/openshift/release) to ensure that the correct configuration is persisted and that users
 can cooperate on changing it.
 
@@ -140,7 +128,7 @@ tests:
 ```
 
 * For a job which does not even use `ci-operator` at all, i.e. [handcrafted jobs](/docs/how-tos/contributing-openshift-release/#handcrafted-jobs),
-  the following example shows how to use secrets in a job definition. As stated there, **creating handcrafted jobs is discouraged**. 
+  the following example shows how to use secrets in a job definition. As stated there, **creating handcrafted jobs is discouraged**.
 
 ```yaml
 postsubmits:
