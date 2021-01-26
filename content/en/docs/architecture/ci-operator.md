@@ -196,10 +196,15 @@ reduce build times dramatically.
 ## Publishing Container Images
 
 Once `ci-operator` has built output container `images` for a repository, it can publish them to an integration `ImageStream`
-so that other repositories can consume them. For instance, every image that makes up the OpenShift release payload is
-incrementally updated in an integration `ImageStream`. This allows release payloads to be created incorporating the latest
-tested version of every component. In order to publish `images` to an integration `ImageStream`, add the `promotion` stanza to
-`ci-operator` configuration.
+or `Namespace` so that other repositories can consume them. Publication to an integration `ImageStream` is appropriate when
+there is a requirement to quickly identify all images that belong to a version; tags will take the form of `version:component`.
+Publication to a `Namespace` creates tags in the form of `component:version` and may be more familiar to users.
+
+### Publishing to an Integration Stream
+
+Every image that makes up the OpenShift release payload is incrementally updated in an integration `ImageStream`. This
+allows release payloads to be created incorporating the latest tested version of every component. In order to publish
+`images` to an integration `ImageStream`, add the following `promotion` stanza to `ci-operator` configuration.
 
 * the `pipeline:src` tag, published as `ocp/4.5:repo-scripts` containing the latest version of the repository
 * the `stable:component` tag, published as `ocp/4.5:mycomponent` containing the output component itself
@@ -214,6 +219,27 @@ promotion:
   - "mytests" # does not promote the test image
   namespace: "ocp"
   name: "4.5"
+{{< / highlight >}}
+
+### Publishing to an Integration Namespace
+
+For projects that do not need to refer to all images belonging to a specific version can publish their images to separate
+`ImageStreams` in one `Namespace`.  In order to publish `images` to many integration `ImageStreams`, in one `Namespace`,
+add the following `promotion` stanza to `ci-operator` configuration.
+
+* the `pipeline:src` tag, published as `ocp/repo-scripts:4.5` containing the latest version of the repository
+* the `stable:component` tag, published as `ocp/mycomponent:4.5` containing the output component itself
+
+`ci-operator` configuration:
+
+{{< highlight yaml >}}
+promotion:
+  additional_images:
+    repo-scripts: "src"    # promotes "src" as "repo-scripts"
+  excluded_images:
+  - "mytests" # does not promote the test image
+  namespace: "ocp"
+  tag: "4.5"
 {{< / highlight >}}
 
 ## Describing Inclusion in an OpenShift Release
