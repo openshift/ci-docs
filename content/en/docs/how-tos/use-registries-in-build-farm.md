@@ -173,6 +173,84 @@ If the `ci-operator` configuration for your component configures image [`promoti
 output container images will be published to the central CI registry when changes are merged to your repository. Two main
 configurations are possible for promotion: configuring an `ImageStream` name and namespace or a namespace and a target tag.
 
+### Granting Pull Privileges
+
+In both cases, it will be necessary to declare who should be able to pull the selected images from the registry. By default,
+no pulling privileges are provided to any new image. You may choose to simply allow any authenticated user to pull images
+from the target `Namespace` or to list specific users who may pull images. In both cases, write a pull request to the
+[`openshift/release`](https://github.com/openshift/release) repository that adds a new directory under the
+`release/clusters/app.ci/registry-access` directory. In this directory, provide an `OWNERS` file to allow your team
+to make changes to your manifests and an `admin_manifest.yaml` file that implements your pull policy. Here's an example
+of allowing all authenticated users to pull:
+
+```yaml
+# this is the Namespace in which your images live
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Published Images for MyProject
+    openshift.io/display-name: MyProject CI
+  name: my-project
+---
+# this grants all authenticated users rights to pull images
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-image-puller-binding
+  namespace: my-project
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:image-puller
+subjects:
+# this is the set of all authenticated users
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:authenticated
+```
+
+The following example explicitly lists a set of users who may pull images:
+
+```yaml
+# this is the Namespace in which your images live
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Published Images for MyProject
+    openshift.io/display-name: MyProject CI
+  name: my-project
+---
+# the Group of people who should be able to pull images
+kind: Group
+apiVersion: v1
+metadata:
+  name: my-project-image-pullers
+users:
+  # these names are GitHub usernames
+  - bob
+  - tracy
+  - jim
+  - emily
+---
+# this grants the right to pull images to the group
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-image-pullers-binding
+  namespace: my-project
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:image-puller
+subjects:
+- kind: Group
+  apiGroup: rbac.authorization.k8s.io
+  name: my-project-image-pullers
+  namespace: my-project
+```
+
 ### Publication of New Tags
 
 A configuration that specifies the `ImageStream` name looks like the following and results in new tags on that stream
