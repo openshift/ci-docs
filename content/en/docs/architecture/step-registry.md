@@ -171,9 +171,11 @@ ref:
     The step runs with custom credentials injected.
 {{< / highlight >}}
 
-**Note that access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
-By default, only secrets in the `test-credentials` namespace will be available for mounting into test steps. Please follow the secret-mirroring
-[documentation](https://github.com/openshift/release/blob/master/core-services/secret-mirroring/README.md) to set up a custom secret in that namespace**
+{{< alert title="Warning" color="warning" >}}
+Access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
+By default, only secrets in the `test-credentials` namespace will be available for mounting into test steps. Please follow the secret-management
+[documentation](/docs/how-tos/adding-a-new-secret-to-ci/#propagating-secret-data) to set up a custom secret in that namespace.
+{{< /alert >}}
 
 #### Injecting the `oc` CLI
 
