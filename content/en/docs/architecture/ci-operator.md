@@ -1,5 +1,5 @@
 ---
-title: "Ci Operator"
+title: "CI Operator"
 date: 2020-10-05T11:14:39-04:00
 draft: false
 ---
