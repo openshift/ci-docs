@@ -102,20 +102,20 @@ The following environment variables will be available to commands in a step:
 |:---|:---|:---|
 |`${OPENSHIFT_CI}`|Set to `"true"`, should be used to detect that a script is running in a `ci-operator` environment. | Always. |
 |`${SHARED_DIR}`|Directory on the step's filesystem where files shared between steps can be read and written.|Always.|
-|`${ARTIFACT_DIR}`|`Directory on the step's filesystem where files should be placed to persist them in the job's artifacts.`|Always.|
+|`${ARTIFACT_DIR}`|Directory on the step's filesystem where files should be placed to persist them in the job's artifacts.|Always.|
 |`${CLUSTER_PROFILE_DIR}`|Directory on the step's filesystem where credentials and configuration from the cluster profile are stored.|When the test as defined in a `ci-operator` configuration file sets a `cluster_profile.`|
 |`${KUBECONFIG}`| Path to `system:admin` credentials for the ephemeral OpenShift cluster under test.|After an ephemeral cluster has been installed.|
 |`${KUBEADMIN_PASSWORD_FILE}`| Path to the kubeadmin password file.|After an ephemeral cluster has been installed.|
-|`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|Always.|
-|`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|Always.|
+|`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|When the test imports or builds an `initial` release. See the [docs](docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
+|`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|When the test imports or builds a `latest` release. . See the [docs](docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
 |`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See [below](#leases).|When the test requires a lease.|
+|`${IMAGE_FORMAT}`|The registry location from which images built or imported for this test may be pulled.|Always. Deprecated, use [dependencies](/docs/architecture/ci-operator/#referencing-images) to provide tests with fully resolved pull specifications of images.|
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
-[Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables).
-If a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
+`ci-operator` through [leases](#leases), [parameters](#parameters) and [dependencies](/docs/architecture/ci-operator/#referencing-images).
+A further set of environment variables are made available by [Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables);
+if a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
 straightforward approach exists to achieve the same outcome.
-
-[Parameters](#parameters) declared by steps and set by tests will also be available as environment variables.
 
 #### Sharing Data Between Steps
 
