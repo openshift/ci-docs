@@ -111,8 +111,7 @@ The following environment variables will be available to commands in a step:
 |`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See the [documentation.](/architecture/leases)|When the test requires a lease.|
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
-[Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables) as well as from
-[`ci-operator`](https://github.com/openshift/ci-tools/blob/master/TEMPLATES.md#parameters-available-to-templates).
+[Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables).
 If a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
 straightforward approach exists to achieve the same outcome.
 
