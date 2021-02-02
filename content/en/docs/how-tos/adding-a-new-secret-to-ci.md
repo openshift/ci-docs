@@ -80,7 +80,7 @@ $ oc --namespace my-project create secret generic my-secret --from-literal passw
 ### Propagating Secret Data
 
 In order to propagate your secret data to all environments in which jobs execute, an entry must be added to the mirroring
-[configuration](https://github.com/openshift/release/tree/master/core-services/secret-mirroring/_config.yaml). The secret
+[configuration](https://github.com/openshift/release/tree/master/core-services/secret-mirroring/_mapping.yaml). The secret
 and any modification on it afterwards will be populated to the targeting namespace(s) on [all clusters](/docs/getting-started/useful-links/#clusters)
 in the build farm.
 
