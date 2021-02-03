@@ -2,6 +2,7 @@
 title: "Migrating CI Jobs from Templates to Multi-stage Tests"
 date: 2020-10-30T21:49:06+02:00
 draft: false
+description: How to self-service migrate jobs from using the deprecated Template approach to the multi-stage system.
 ---
 
 OpenShift CI offers two mechanisms for setting up end-to-end tests: older

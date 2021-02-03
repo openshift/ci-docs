@@ -2,6 +2,7 @@
 title: "Branch Protection"
 date: 2020-10-05T11:14:39-04:00
 draft: false
+description: An overview of the integration between OpenShift CI and GitHub branch protection.
 ---
 ## What Is Branch Protection?
 

@@ -2,6 +2,7 @@
 title: "Interacting With CI Image Registries"
 date: 2020-12-15T16:08:01-04:00
 draft: false
+description: How to interact with the CI image registries, set up service account access and interact with images for a specific job.
 ---
 
 # Summary of Available Registries

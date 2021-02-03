@@ -2,6 +2,7 @@
 title: "Testing Operators Built With The Operator SDK and Deployed Through OLM"
 date: 2020-10-05T11:14:39-04:00
 draft: false
+decription: How to configure tests for a component that is deployed as an operator through OLM.
 ---
 
 `ci-operator` supports building, deploying, and testing operator bundles, whether the operator repository uses the

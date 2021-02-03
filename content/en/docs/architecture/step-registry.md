@@ -1,7 +1,8 @@
 ---
-title: "What are Multistage Tests and the Test Step Registry?"
+title: "Multi-Stage Tests and the Test Step Registry"
 date: 2020-10-05T10:49:33-04:00
 draft: false
+description: An overview of how multi-stage tests and the step registry make complex, DRY CI job definitions possible.
 ---
 
 The multistage test style in the `ci-operator` is a modular test design that allows users to create new tests by combining smaller, individual test steps.

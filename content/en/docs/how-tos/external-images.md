@@ -2,6 +2,7 @@
 title: "Using External Images in CI"
 date: 2020-10-05T11:14:39-04:00
 draft: false
+description: How to import external images to the CI environments for use in jobs.
 ---
 
 The `ci-operator` config only allows to reference `ImageStreamTags`, it does not allow to specify arbitrary Docker pull specs. In order

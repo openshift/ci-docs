@@ -2,6 +2,7 @@
 title: "CI Operator"
 date: 2020-10-05T11:14:39-04:00
 draft: false
+description: An overview of the architecture of ci-operator, the OpenShift CI workflow engine.
 ---
 
 # What is `ci-operator` and how does it work?
