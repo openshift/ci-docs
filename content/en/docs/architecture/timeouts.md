@@ -2,6 +2,7 @@
 title: "Job Execution Timeouts"
 date: 2020-12-21T23:27:39-04:00
 draft: false
+description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do. 
 ---
 
 A typical OpenShift CI job runs [ci-operator](/docs/architecture/ci-operator/) in a pod which for each [step](/docs/architecture/step-registry/#step) of the job creates a pod, executing the commands defined by `tests.steps.test.commands` of a step in the job. A _test process_ is a process which runs such commands. There are timeouts in various phases of a job execution. In this document, we will explain those timeouts, show the logs if they occur in a job, and how the test process will be notified, and how to modify the values of those timeouts.

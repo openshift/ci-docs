@@ -2,6 +2,7 @@
 title: "Contributing CI Configuration to the openshift/release Repository"
 date: 2020-10-05T11:14:39-04:00
 draft: false
+description: How to self-service contribute or change configuration for jobs or the broader CI system. 
 ---
 
 The [openshift/release](https://github.com/openshift/release) repository holds CI configuration for OpenShift component
