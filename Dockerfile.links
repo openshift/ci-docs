@@ -1,10 +1,10 @@
-FROM klakegg/hugo:0.75.1-ext-ubuntu as builder
+FROM registry.ci.openshift.org/ci/hugo:0.75.1-ext-ubuntu as builder
 
 COPY . /src/
 
 RUN set -x && ln -s /bin/bash /usr/bin/bash && make generate
 
-FROM klakegg/html-proofer:3.18.5
+FROM registry.ci.openshift.org/ci/html-proofer:3.18.5
 
 COPY --from=builder /src/public/ /src/public/
 
