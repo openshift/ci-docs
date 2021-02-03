@@ -50,10 +50,10 @@ code under test. For example, the container image could have contents from the c
 need to contain a component matching the version of OpenShift used in the test (like installer). When using this configuration option,
 ensure that the tag is already present in one of the following places:
 
-* [a pipeline image](https://github.com/openshift/ci-tools/blob/master/ARCHITECTURE.md#build-graph-traversal)
-* [an external image](https://github.com/openshift/ci-tools/blob/master/CONFIGURATION.md#base_images)
-* [an image built by `ci-operator`](https://github.com/openshift/ci-tools/blob/master/CONFIGURATION.md#images)
-* [an image imported from a release ImageStream]()
+* [a pipeline image](/docs/architecture/ci-operator/#referencing-images)
+* [an external image](/docs/architecture/ci-operator/#configuring-inputs)
+* [an image built by `ci-operator`](/docs/architecture/ci-operator/#building-artifacts)
+* [an image imported from a release ImageStream](/docs/architecture/ci-operator/#referencing-images)
 
 Note that static validation for this field is limited because the set of images originating from the release `ImageStream` is only known at runtime.
 

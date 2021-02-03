@@ -70,7 +70,7 @@ The `operator.bundles` stanza is a list, so it is possible to build multiple bun
 When `ci-operator` builds at least one operator bundle from a repository, it will also automatically build an ephemeral
 index image to package those bundles. Test workloads should consume the bundles via this index image. The index image is
 named ci-index and can be exposed to test steps via the
-[dependencies](http://localhost:1313/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
+[dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
 
 The ephemeral index is built from scratch and only the bundles built in the current `ci-operator` run will be added to it,
 nothing else. The bundles are added to the index using the `semver` mode, which means that the `spec.version` stanza in the
