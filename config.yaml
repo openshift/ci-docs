@@ -4,6 +4,7 @@ title: "Openshift CI docs"
 theme: "docsy"
 sectionPagesMenu: "main"
 contentDir: "content/en"
+relativeURLs: true
 params:
   offlineSearch: true
   github_repo: "https://github.com/openshift/ci-docs"
