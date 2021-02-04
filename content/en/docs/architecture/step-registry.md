@@ -107,8 +107,8 @@ The following environment variables will be available to commands in a step:
 |`${CLUSTER_PROFILE_DIR}`|Directory on the step's filesystem where credentials and configuration from the cluster profile are stored.|When the test as defined in a `ci-operator` configuration file sets a `cluster_profile.`|
 |`${KUBECONFIG}`| Path to `system:admin` credentials for the ephemeral OpenShift cluster under test.|After an ephemeral cluster has been installed.|
 |`${KUBEADMIN_PASSWORD_FILE}`| Path to the kubeadmin password file.|After an ephemeral cluster has been installed.|
-|`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|When the test imports or builds an `initial` release. See the [docs](docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
-|`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|When the test imports or builds a `latest` release. . See the [docs](docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
+|`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|When the test imports or builds an `initial` release. See the [docs](/docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
+|`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|When the test imports or builds a `latest` release. . See the [docs](/docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
 |`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See [below](#leases).|When the test requires a lease.|
 |`${IMAGE_FORMAT}`|The registry location from which images built or imported for this test may be pulled.|Always. Deprecated, use [dependencies](/docs/architecture/ci-operator/#referencing-images) to provide tests with fully resolved pull specifications of images.|
 
