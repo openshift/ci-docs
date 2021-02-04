@@ -30,8 +30,8 @@ when an image changes on the authoritative registry, that change is propagated t
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
 **Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative
-registry is [registry.ci.openshift.org](registry.ci.openshift.org). The previous authoritative registry,
-[registry.svc.ci.openshift.org](registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
+registry is [registry.ci.openshift.org](https://registry.ci.openshift.org). The previous authoritative registry,
+[registry.svc.ci.openshift.org](https://registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
 and will continue to do so for the time being while users migrate to using the new registry.
 
 # Common Questions
@@ -40,9 +40,9 @@ and will continue to do so for the time being while users migrate to using the n
 
 All registries are the internal OpenShift image registry for the cluster they reside on, so authenticating to the registry
 requires authentication to the cluster that hosts it. Once logged in to the OpenShift cluster, the `oc` CLI can be used to
-authenticate to the registry in question. For example, for the [registry.build01.ci.openshift.org](registry.build01.ci.openshift.org)
+authenticate to the registry in question. For example, for the [registry.build01.ci.openshift.org](https://registry.build01.ci.openshift.org)
 registry, the cluster is `build01`. Using the [the list of clusters](/docs/getting-started/useful-links/#clusters),
-the console URL for this cluster is found to be [console.build01.ci.openshift.org](console.build01.ci.openshift.org).
+the console URL for this cluster is found to be [console.build01.ci.openshift.org](https://console.build01.ci.openshift.org).
 After logging in to this cluster using the console and copying the log-in command to authenticate your local `oc` CLI,
 you can run `oc registry login` to authenticate to the registry.
 
@@ -166,7 +166,7 @@ image with any normal container engine:
 $ podman pull registry.build02.ci.openshift.org/ci-op-2c2tvgti/pipeline:src
 ```
 
-**Warning:** Only `vSphere` system administrators can access the images on [registry.apps.build01-us-west-2.vmc.ci.openshift.org](registry.apps.build01-us-west-2.vmc.ci.openshift.org).
+**Warning:** Only `vSphere` system administrators can access the images on [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org).
 
 ## How do I access the latest published images for my component?
 

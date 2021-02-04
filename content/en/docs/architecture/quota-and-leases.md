@@ -76,7 +76,7 @@ If it is not clear exactly how many concurrent jobs can share the cloud provider
 In addition to registering the volume of concurrent jobs that are allowed against a new cloud platform, it is required
 that the leasing server is configured to reap leases which have not seen a recent heartbeat. This is done by adding the
 name of the resource type to the
-[reaper's configuration](https://github.com/openshift/release/blob/master/core-services/prow/03_deployment/boskos_reaper.yaml#L27).
+[reaper's configuration](https://github.com/openshift/release/blob/e5a0ae275001b08192a2b9e70587bba1e71f29a6/clusters/app.ci/prow/03_deployment/boskos_reaper.yaml#L26).
 
 ## Configuration for Heterogeneous Resources
 

@@ -50,7 +50,7 @@ After 20 jobs have run and the success rate is 100%, the job will be considered 
 #### Finalize the Job Name
 In order to make sure the job is reporting on the build cop dashboards so build cops are alerted if it starts failing, rename the job to begin with release- and not canary-, choosing the final name of the suite. This name change will include your job in the release job metrics and dashboards.
 #### Add the Job to the Release Gating Suite as Optional
-Edit the release controller’s configuration files to add your suite by name, setting optional: true. For example, the 4.2 release gating suites are defined [here](https://github.com/openshift/release/blob/master/ci-operator/infra/openshift/release-controller/releases/release-ocp-4.2.json).
+Edit the release controller’s configuration files to add your suite by name, setting optional: true. For example, the 4.2 release gating suites are defined [here](https://github.com/openshift/release/blob/master/core-services/release-controller/_releases/release-ocp-4.2.json).
 #### Mark new Job as Required in the Release Gating Suite
 Once the optional job is running successfully on OCP nightlies for a week, reconfigure your job to be required in the release and assign a release lead to approve the pull request to openshift/release.
 #### Sign Up for Build Cop Rotations
