@@ -1,4 +1,4 @@
-baseURL: "https://docs.ci.openshift.org/"
+baseURL: "/"
 languageCode: "en-us"
 title: "Openshift CI docs"
 theme: "docsy"
