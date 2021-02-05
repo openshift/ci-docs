@@ -114,6 +114,22 @@ users:
   - jim
   - emily
 ---
+# this adds the admins to the project.
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-project-viewer-binding
+  namespace: my-project
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: my-project-admins
+    namespace: my-project
+---
 # this grants the right to read the ServiceAccount's credentials and pull
 # images to the admins.
 kind: RoleBinding
