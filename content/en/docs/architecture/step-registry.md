@@ -180,8 +180,9 @@ By default, only secrets in the `test-credentials` namespace will be available f
 #### Injecting the `oc` CLI
 
 Steps can make the `oc` CLI available to their commands by adding the `cli` configuration item to the test step, specifying which OpenShift
-release the CLI should be sourced from. For example, the following configuration pulls in a CentOS image, a custom OCP release and runs a test
-where the release's CLI is injected to the test step.
+release the CLI should be sourced from. The `ci-operator` configuration must use `tag_specification` or `releases` to configure which
+release payloads the `oc` CLI may be injected from. For example, the following configuration pulls in a CentOS image, configures a custom OCP
+release using `releases` and runs a test where the release's CLI is injected to the test step.
 
 {{< highlight yaml >}}
 base_images:
@@ -208,8 +209,12 @@ tests:
               memory: 200Mi
 {{< /highlight >}}
 
+{{< alert title="Info" color="info" >}}
 If a test configuration uses `tag_specification` to import an OCP release, the `"initial"` and `"latest"` releases will be available for
-sourcing the CLI.
+sourcing the CLI. A `ci-operator` test configuration may use both `releases` _and_ `tag_specification` as long as the `releases` field
+does not configure an initial or latest release. See the [documentation](/docs/architecture/ci-operator#describing-inclusion-in-an-openshift-release)
+for more details.
+{{< /alert >}}
 
 ## Chain
 
