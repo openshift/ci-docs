@@ -267,10 +267,11 @@ tag_specification:
 {{< / highlight >}}
 
 When `ci-operator` begins to test a repository, it will snapshot the current state of the integration `ImageStream`,
-importing all tags into the test `Namespace`. Any output image tags built from the repository under test overwrite those
-that are imported from the integration `ImageStream`. An ephemeral release payload is built from the resulting
-`ImageStream`, containing the latest published versions of all components and the proposed version of the component under
-test.
+importing all tags into the test `Namespace` and making it available as a release named `initial` and exposed by default
+to test code under `${RELEASE_IMAGE_INITIAL}`. Any output image tags built from the repository under test overwrite
+those that are imported from the integration `ImageStream`. An ephemeral release payload is built from the resulting
+`ImageStream`, containing the latest published versions of all components and the proposed version of the component
+under test. The ephemeral release is named `latest` and exposed to test code under `${RELEASE_IMAGE_LATEST}`.
 
 ### Testing With an Existing OpenShift Release
 
