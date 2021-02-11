@@ -270,7 +270,8 @@ example for the [`Workflow`](#workflow) section above.
 
 Since the `ci-operator` configuration and workflows share the same fields, it is possible to override fields specified in a workflow.
 In cases where both the workflow and a `ci-operator` configuration specify the same field, the `ci-operator` configuration’s field has
-priority (i.e. the value from the `ci-operator` configuration is used).
+priority (i.e. the value from the `ci-operator` configuration is used).  List and mapping fields have a few special rules, described
+in the [hierarchical propagation](#hierarchical-propagation) section.
 
 Example of a `ci-operator` configuration that overrides a workflow field:
 
@@ -416,25 +417,10 @@ variations easier. More complex combinations are encouraged to use separate step
 Each item in the `env` section consists of the following fields:
 
 * `name`: environment variable name
-* `default` (optional): the value assigned if no other node in the hierarchy provides one (described below)
+* `default` (optional): the value assigned if no other node in the hierarchy
+  provides one (described in the [hierarchical propagation](#hierarchical-propagation)
+  section).
 * `documentation` (optional): a textual description of the parameter
-
-### Hierarchical Propagation
-
-Environment variables can be added to chains and workflows in the registry. These variables will be propagated down the hierarchy.
-That is: a variable in the env section of a chain will propagate to all of its sub-chains and sub-steps, a variable in the env
-section of a workflow will propagate to all of its stages.
-
-{{< highlight yaml >}}
-chain:
-  as: some-chain
-  steps:
-  - ref: some-step # TEST_VARIABLE will propagate to this step
-  - chain: other-chain # TEST_VARIABLE will propagate to all elements in this chain
-  env:
-  - name: TEST_VARIABLE
-    default: test value
-{{< / highlight >}}
 
 ### Required Parameters
 
@@ -466,6 +452,41 @@ tests:
     test:
     - some-ref
 {{< / highlight >}}
+
+## Hierarchical Propagation
+
+Some fields of individual steps can be changed by the chains, workflows, and
+test definitions that include them. Those are: [parameters](#parameters),
+[dependencies](/docs/architecture/ci-operator#referring-to-images-in-tests), and
+[leases](#leases).
+
+Values set in parent elements will be propagated down the hierarchy. That is: a
+variable in the `env` section of a chain will propagate to all of its sub-chains
+and sub-steps, a variable in the `env` section of a workflow or test will
+propagate to all of its stages. The same applies for dependencies and leases.
+
+{{< highlight yaml >}}
+chain:
+  as: some-chain
+  steps:
+  - ref: some-step # TEST_VARIABLE will propagate to this step
+  - chain: other-chain # TEST_VARIABLE will propagate to all elements in this chain
+  env:
+  - name: TEST_VARIABLE
+    default: test value
+{{< / highlight >}}
+
+One special rule applies to list and mapping fields that are specified both in a
+test and its workflow.  Instead of completely overriding the workflow value, as
+is the case for scalar values, the two sections are merged according to the
+following rules:
+
+- Parameters and dependencies declared in the test override those in the
+  workflow if they target the same environment variable. Otherwise, the
+  resulting parameter list is the combination of both sections.
+- Leases declared in the test must not target an environment variable already
+  present in the workflow. Otherwise, the resulting lease list is the
+  combination of both sections.
 
 ## Leases
 
