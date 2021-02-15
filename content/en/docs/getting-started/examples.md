@@ -113,7 +113,7 @@ repository under `ci-operator/config/org/other/org-other-master.yaml`:
 {{< highlight yaml >}}
 - as: org-repo-e2e
   steps:
-    `cluster_profile`: aws
+    cluster_profile: aws
     workflow: ipi
     test:
     - ref: org-repo-e2e
