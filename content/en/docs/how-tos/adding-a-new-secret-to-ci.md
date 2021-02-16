@@ -82,8 +82,10 @@ subjects:
     namespace: my-project
 ```
 
-**Note:** The above YAML does _not_ contain your secret data. You will still need to create it with a manual invocation
+{{< alert title="Info" color="info" >}}
+The above YAML does _not_ contain your secret data. You will still need to create it with a manual invocation
 of the `oc` CLI. The `openshift/release` repository is public and not an appropriate place to store sensitive information.
+{{< /alert >}}
 
 If your desired namespace exists already, ask the owners of the namespace if it can be shared. After the pull request is
 merged, the manifests in the folder will be applied automatically to the `api.ci` cluster and you will be ready to use
@@ -110,8 +112,10 @@ in the build farm.
     name: "my-secret"             # a unique identifier for your secret
 ```
 
-**Note:** we are in the process of turning down the `api.ci` cluster which currently hosts the source content for the
+{{< alert title="Info" color="info" >}}
+We are in the process of turning down the `api.ci` cluster which currently hosts the source content for the
 secret mirroring process. A new solution for secret management will be in place before `api.ci` is fully removed.
+{{< /alert >}}
 
 ## Use A Secret In A Job Step
 

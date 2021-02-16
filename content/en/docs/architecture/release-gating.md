@@ -32,7 +32,9 @@ Poor candidates include:
 * Random software from the internet (that may contain vulnerabilities that could be used to attack our CI infrastructure)
 * Personal projects that use similar APIs and patterns to projects already being tested
 
-**Note:** OpenShift CI creates thousands of clusters a week - we can certainly afford to run a few more tests.  However, we want to spread that investment to derive the maximum benefit for everyone, so having OpenShift CI run 30 variations of your exact same tests in slightly different configurations 4 times a day may not be the best way to test.
+{{< alert title="Note" color="info" >}}
+OpenShift CI creates thousands of clusters a week - we can certainly afford to run a few more tests.  However, we want to spread that investment to derive the maximum benefit for everyone, so having OpenShift CI run 30 variations of your exact same tests in slightly different configurations 4 times a day may not be the best way to test.
+{{< /alert >}}
 
 ### Identifying Which Jobs Should Not Gate a Release
 Not all test scenarios and test suites are considered release gating.  On a given day we may generate tens of release payloads, but not choose to execute or iterate the full set of suites on those jobs.  Also, some scenarios (such as upgrade rollback) are intended to generate statistical signal (a given rollback may succeed or fail due to factors outside of the test control).  All release informing jobs should start as periodics (as described below) and some may be promoted to be “release-triggered” jobs.

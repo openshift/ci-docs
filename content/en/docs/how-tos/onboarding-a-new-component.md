@@ -49,7 +49,9 @@ on the left. Your webhook should be set up with the following parameters:
 |Event types|all|
 |Active|yes|
 
-*Note:*  Don’t add `/` at the end of the payload url.
+{{< alert title="Warning" color="warning" >}}
+Don’t add `/` at the end of the payload url when configuring the webhook!
+{{< /alert >}}
 
 ### Granting Robots Privileges and Installing the GitHub App
 

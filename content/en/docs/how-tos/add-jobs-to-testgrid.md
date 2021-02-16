@@ -26,9 +26,13 @@ Since release informing jobs get run every time we build a new payload for that 
 #### Adding a release gating job to TestGrid
 Release gating jobs are picked up automatically to be added to TestGrid. If the job has already been configured in the release controller nothing further needs to be done. For information on how to configure a job to be release gating refer to [How do I set a job to be release-gating?](#how-do-i-set-a-job-to-be-release-gating)
 
-**Note 1:** If a job in the release definition is an upgrade job it goes into the overall informing dashboard (because upgrades cross dashboards).
+{{< alert title="Info" color="info" >}}
+If a job in the release definition is an upgrade job it goes into the overall informing dashboard (because upgrades cross dashboards).
+{{< /alert >}}
 
-**Note 2:** If the release gating job has an entry in the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) the new entry would override the default on the job. But the override would be invalid if the release gating job is blocking and the annotation is informing.
+{{< alert title="Info" color="info" >}}
+If the release gating job has an entry in the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) the new entry would override the default on the job. But the override would be invalid if the release gating job is blocking and the annotation is informing.
+{{< /alert >}}
 
 #### Adding a non-release gating job to TestGrid
 If a non-release gating job is added to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) it would simply add the job to TestGrid in the specified dashboard.
@@ -42,9 +46,10 @@ If the PR is not merged in a timely manner
 1. Search for the PR titled [Update OpenShift testgrid definitions by auto-testgrid-generator job](https://github.com/kubernetes/test-infra/pulls?q=is%3Apr+is%3Aopen+Update+OpenShift+testgrid+definitions+by+auto-testgrid-generator+job) in [`kubernetes/test-infra`](https://github.com/kubernetes/test-infra)
 2. Request the assignee to approve the PR
 
-
-**Note:** Adding a job to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) alone does not make it a "true" informing job (it just adds the job to the testgrid). 
+{{< alert title="Info" color="info" >}}
+Adding a job to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) alone does not make it a "true" informing job (it just adds the job to the testgrid).
 A true informing job needs to be in the [release controller config](https://github.com/openshift/release/tree/master/core-services/release-controller/_releases) and the release controller runs the job on new payloads and reports the results. Jobs in the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) would just run on whatever periodic schedule you configured it for.
+{{< /alert >}}
 
 ## How do I set a job to be release-gating?
 * Release gating jobs are configured via the `verify` property in [`_releases/release-*.json`](https://github.com/openshift/release/tree/master/core-services/release-controller/_releases). 
