@@ -29,10 +29,12 @@ central, authoritative registry. Users should always pull from this registry for
 when an image changes on the authoritative registry, that change is propagated to all build farm clusters so that the
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
-**Note:** Today, we are in the process of migrating between authoritative image registries. The current authoritative
+{{< alert title="Info" color="info" >}}
+Today, we are in the process of migrating between authoritative image registries. The current authoritative
 registry is [registry.ci.openshift.org](https://registry.ci.openshift.org). The previous authoritative registry,
 [registry.svc.ci.openshift.org](https://registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
 and will continue to do so for the time being while users migrate to using the new registry.
+{{< /alert >}}
 
 # Common Questions
 
@@ -58,8 +60,10 @@ $ cat ~/.docker/config.json | jq '.auths["registry.build01.ci.openshift.org"]'
 
 ```
 
-**Note:** Today, authentication to the OpenShift cluster is delegated to GitHub and requires that you are a member of the
+{{< alert title="Info" color="info" >}}
+Today, authentication to the OpenShift cluster is delegated to GitHub and requires that you are a member of the
 `OpenShift` organization.
+{{< /alert >}}
 
 ## How do I get a token for programmatic access to the central CI registry?
 

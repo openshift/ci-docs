@@ -55,7 +55,9 @@ ensure that the tag is already present in one of the following places:
 * [an image built by `ci-operator`](/docs/architecture/ci-operator/#building-artifacts)
 * [an image imported from a release ImageStream](/docs/architecture/ci-operator/#referencing-images)
 
-Note that static validation for this field is limited because the set of images originating from the release `ImageStream` is only known at runtime.
+{{< alert title="Note" color="info" >}}
+Static validation for this field is limited because the set of images originating from the release `ImageStream` is only known at runtime.
+{{< /alert >}}
 
 #### Referencing a Literal Image
 
