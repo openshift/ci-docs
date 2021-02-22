@@ -188,6 +188,11 @@ images:
       - destination_dir: "."
         source_path: "/go/bin/oc" # inject the OpenShift clients into the build context directory
   to: "mytests" # names the output container image "mytests"
+- dockerfile_literal: |- # Trivial dockerfiles can just be inlined
+    FROM base
+    RUN yum install -y python2
+  from: "test-bin"
+  to: test-bin-with-python2
 {{< / highlight >}}
 
 By making use of the previously compiled artifacts in the intermediate `pipeline:bin` image, this repository is able to
