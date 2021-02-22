@@ -142,7 +142,6 @@ tests:
 
 There are multiple different workflows that implement the upgrade test:
 - [`openshift-upgrade-$PLATFORM`](https://steps.ci.openshift.org/workflow/openshift-upgrade-aws): upgrade test workflow with logs collected via Loki (**recommended**)
-- [`openshift-upgrade-$PLATFORM-hosted-loki`](https://steps.ci.openshift.org/workflow/openshift-upgrade-aws-hosted-loki): upgrade test workflow with logs collected via Loki hosted on Observatorium.
 
 ### `openshift_installer_src`
 
