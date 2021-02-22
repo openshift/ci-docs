@@ -243,7 +243,7 @@ promotion:
   tag: "4.5"
 {{< / highlight >}}
 
-## Describing Inclusion in an OpenShift Release
+## Describing OpenShift Releases Involved in Tests {#describing-inclusion-in-an-openshift-release}
 
 `ci-operator` gives first-class support to repositories which need to run end-to-end tests in the context of an OpenShift
 cluster. `ci-operator` supports two mechanisms for testing in the context of an OpenShift release. First, it is possible
@@ -251,6 +251,25 @@ to use the container `images` built as part of the test to build an ephemeral re
 build parts of OpenShift to test versions that include components under test. Second, it is possible to reference
 existing release payloads that have already been created, in order to validate those releases or for repositories to
 test their functionality against published versions of OpenShift.
+
+### Should I Use an Ephemeral or Published Release?
+
+The main factor in deciding which kind of release to use is whether the tested component is a part of OpenShift itself
+or not (i.e., if you want to test _"OpenShift itself"_ or _"something on OpenShift"_). Additionally, the decision should
+take into account what expectations you have on the OpenShift cluster reliability.
+
+You should use an [ephemeral release](#testing-with-an-ephemeral-openshift-release) if the component you are testing is
+part of OpenShift itself. Ephemeral releases include the tested, CI-built versions of the OpenShift component images
+so that the tested components are involved in full end-to-end test workflow, including installation. Using ephemeral
+releases satisfies the _"test OpenShift itself"_ use case. Ephemeral releases are also a suitable choice if you need to
+test on the most recent merged OpenShift code. These releases contain at least the code present in the latest (even
+rejected) CI release, and often even newer.
+
+The usual case for using [existing releases](#testing-with-an-existing-openshift-release) is testing _"something on
+OpenShift."_ That means testing software that is not part of OpenShift itself: optional operators, layered products and
+others. You should use existing releases when your testing does not depend that much on the precise version of the
+OpenShift cluster installed. Existing releases have clearer stability expectations because you control what  kind
+of release will be used: from the latest CI candidate to stable versions already released to customers.
 
 ### Testing With an Ephemeral OpenShift Release
 
