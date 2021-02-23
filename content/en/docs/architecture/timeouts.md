@@ -93,7 +93,7 @@ time="2021-02-15T15:27:53Z" level=info msg="Received signal." signal=interrupt
 
 #### Step Registry Test Process Timeouts
 
-Each [step](/docs/architecture/step-registry/#step) may be configured to have a specific execution time budget with `active_deadline_seconds` and grace period with `termination_grace_period_seconds`, which directly set the respective fields on the `Pod` that executes the step. Kubernetes will handle early termination for this step. These options may be provided one at a time, in order to set only a grace period, for instance. Note that the grace period for a step must be long enough to both generate any artifacts or logs that need to be uploaded _and_ for the upload to occur. The following step definition shows how to specify the values of `active_deadline_seconds` and `termination_grace_period_seconds`:
+Each [step](/docs/architecture/step-registry/#step) may be configured to have a specific execution time budget with `timeout` and grace period with `grace_period`. The timeout is handled by a wrapper around the test process; the grace period implicitly sets the respective field (`pod.spec.terminationGracePeriodSeconds`) on the `Pod` that executes the step by assuming that generating artifacts takes 80% of cleanup time, while uploading takes 20%. For instance, when a step is configured to have a `grace_period` of 100 seconds, the overall termination grace period on the `Pod` will be 125% of that, or 125s. These options may be provided one at a time, in order to set only a grace period, for instance. Note that the calculations for the termination grace period above mean that the grace period configured for a step must only be long enough to both generate any artifacts. The following step definition shows how to specify the values of `timeout` and `grace_period`:
 
 ```yaml
 ref:
@@ -104,14 +104,14 @@ ref:
     requests:
       cpu: 1000m
       memory: 100Mi
-  active_deadline_seconds: 600
-  termination_grace_period_seconds: 30
+  timeout: 5m0s
+  grace_period: 30s
   documentation: |-
     Runs the end-to-end suite published by org/repo.
 ```
 
 {{< alert title="Warning" color="warning" >}}
-The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podspec-v1-core) for more details.
+The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podspec-v1-core) for more details. For these reasons, no timeout configured in the system makes use of this setting, instead relying on a thin wrapper around the executing code that's injected by Prow itself.
 {{< /alert >}}
 
 ## How Interruptions May Be Handled
@@ -120,7 +120,7 @@ Two main approaches exist to handling interruptions for a test process: first, t
 
 ### Handling `SIGTERM` In A Test Process
 
-An individual test process configured as a step in a job workflow may handle `SIGTERM` itself to gracefully exit and produce all logs and artifacts necessary. Handling interruption signals within a test process is useful when test process state is necessary to correctly handle interruption. Note that the grace period for a step must be long enough to both generate any artifacts or logs that need to be uploaded _and_ for the upload to occur. Here's an example of a step configuration that handles `SIGTERM` itself:
+An individual test process configured as a step in a job workflow may handle `SIGTERM` itself to gracefully exit and produce all logs and artifacts necessary. Handling interruption signals within a test process is useful when test process state is necessary to correctly handle interruption. Note that the grace period for a step must only be long enough to both generate any artifacts - time taken to upload logs and artifacts is taken from a separate budget. Here's an example of a step configuration that handles `SIGTERM` itself:
 
 ```yaml
 ref:
@@ -131,7 +131,7 @@ ref:
     requests:
       cpu: 1000m
       memory: 100Mi
-  termination_grace_period_seconds: 120
+  grace_period: 120s
   documentation: |-
     Runs the test suite from source code.
 ```
