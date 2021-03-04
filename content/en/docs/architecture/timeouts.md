@@ -93,7 +93,7 @@ time="2021-02-15T15:27:53Z" level=info msg="Received signal." signal=interrupt
 
 #### Step Registry Test Process Timeouts
 
-Each [step](/docs/architecture/step-registry/#step) may be configured to have a specific execution time budget with `timeout` and grace period with `grace_period`. The timeout is handled by a wrapper around the test process; the grace period implicitly sets the respective field (`pod.spec.terminationGracePeriodSeconds`) on the `Pod` that executes the step by assuming that generating artifacts takes 80% of cleanup time, while uploading takes 20%. For instance, when a step is configured to have a `grace_period` of 100 seconds, the overall termination grace period on the `Pod` will be 125% of that, or 125s. These options may be provided one at a time, in order to set only a grace period, for instance. Note that the calculations for the termination grace period above mean that the grace period configured for a step must only be long enough to both generate any artifacts. The following step definition shows how to specify the values of `timeout` and `grace_period`:
+Each [step](/docs/architecture/step-registry/#step) may be configured to have a specific execution time budget with `timeout` and grace period with `grace_period`. The timeout is handled by a wrapper around the test process; the grace period implicitly sets the respective field (`pod.spec.terminationGracePeriodSeconds`) on the `Pod` that executes the step by assuming that generating artifacts takes 80% of cleanup time, while uploading takes 20%. For instance, when a step is configured to have a `grace_period` of 100 seconds, the overall termination grace period on the `Pod` will be 125% of that, or 125s. These options may be provided one at a time, in order to set only a grace period, for instance. Note that the calculations for the termination grace period above mean that the grace period configured for a step must only be long enough to generate any artifacts. The following step definition shows how to specify the values of `timeout` and `grace_period`:
 
 ```yaml
 ref:
@@ -120,7 +120,7 @@ Two main approaches exist to handling interruptions for a test process: first, t
 
 ### Handling `SIGTERM` In A Test Process
 
-An individual test process configured as a step in a job workflow may handle `SIGTERM` itself to gracefully exit and produce all logs and artifacts necessary. Handling interruption signals within a test process is useful when test process state is necessary to correctly handle interruption. Note that the grace period for a step must only be long enough to both generate any artifacts - time taken to upload logs and artifacts is taken from a separate budget. Here's an example of a step configuration that handles `SIGTERM` itself:
+An individual test process configured as a step in a job workflow may handle `SIGTERM` itself to gracefully exit and produce all logs and artifacts necessary. Handling interruption signals within a test process is useful when test process state is necessary to correctly handle interruption. Note that the grace period for a step must only be long enough to generate any artifacts - time taken to upload logs and artifacts is taken from a separate budget. Here's an example of a step configuration that handles `SIGTERM` itself:
 
 ```yaml
 ref:
