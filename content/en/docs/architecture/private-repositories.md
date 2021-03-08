@@ -1,6 +1,5 @@
 ---
 title: "Private Repositories and Fixing Embargoed CVEs"
-draft: false
 description: An overview of the workflows surrounding embargoed CVEs and private repository forks.
 ---
 

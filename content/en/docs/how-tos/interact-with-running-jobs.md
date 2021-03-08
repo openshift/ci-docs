@@ -1,6 +1,5 @@
 ---
 title: "Interacting With Running CI Jobs"
-draft: false
 description: How to interact with jobs currently running on the CI cluster for your pull requests.
 ---
 

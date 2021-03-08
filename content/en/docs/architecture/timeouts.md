@@ -1,6 +1,5 @@
 ---
 title: "Handling Job Timeouts and Interruptions"
-draft: false
 description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do when handling them. 
 ---
 

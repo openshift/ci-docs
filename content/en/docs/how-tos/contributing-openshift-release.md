@@ -1,6 +1,5 @@
 ---
 title: "Contributing CI Configuration to the openshift/release Repository"
-draft: false
 description: How to self-service contribute or change configuration for jobs or the broader CI system. 
 ---
 

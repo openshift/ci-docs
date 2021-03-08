@@ -1,6 +1,5 @@
 ---
 title: "Set Up Slack Alerts for Periodic Job Results"
-draft: false
 description: How to set up alerting to Slack for a CI job.
 ---
 

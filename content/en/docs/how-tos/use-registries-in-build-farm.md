@@ -1,6 +1,5 @@
 ---
 title: "Interacting With CI Image Registries"
-draft: false
 description: How to interact with the CI image registries, set up service account access and interact with images for a specific job.
 ---
 

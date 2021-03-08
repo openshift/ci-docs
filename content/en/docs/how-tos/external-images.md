@@ -1,6 +1,5 @@
 ---
 title: "Using External Images in CI"
-draft: false
 description: How to import external images to the CI environments for use in jobs.
 ---
 

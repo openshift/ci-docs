@@ -1,6 +1,5 @@
 ---
 title: "Adding a New Secret to CI"
-draft: false
 description: How to self-service manage secret data provided to jobs during execution.
 ---
 

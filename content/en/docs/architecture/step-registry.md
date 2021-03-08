@@ -1,6 +1,5 @@
 ---
 title: "Multi-Stage Tests and the Test Step Registry"
-draft: false
 description: An overview of how multi-stage tests and the step registry make complex, DRY CI job definitions possible.
 ---
 

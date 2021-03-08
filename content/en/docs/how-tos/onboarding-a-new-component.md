@@ -1,6 +1,5 @@
 ---
 title: Onboarding a New Component for Testing and Merge Automation
-draft: false
 description: How to onboard a new component repository to the CI system for testing and merge automation.
 ---
 

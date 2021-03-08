@@ -1,6 +1,5 @@
 ---
 title: "Mirror an Image to an External Registry"
-draft: false
 description: How to mirror an image built in the CI system out to an external registry.
 ---
 

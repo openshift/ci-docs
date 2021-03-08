@@ -1,6 +1,5 @@
 ---
 title: "Examples"
-draft: false
 description: Examples of common tasks in CI configuration.
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: "Extending OpenShift Release Gates"
-draft: false
 description: An overview of how CI jobs are configured to gate OpenShift releases and how these configurations can be changed.
 ---
 

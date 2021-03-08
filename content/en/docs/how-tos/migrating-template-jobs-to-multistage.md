@@ -1,6 +1,5 @@
 ---
 title: "Migrating CI Jobs from Templates to Multi-stage Tests"
-draft: false
 description: How to self-service migrate jobs from using the deprecated Template approach to the multi-stage system.
 ---
 

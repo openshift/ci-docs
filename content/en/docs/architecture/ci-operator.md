@@ -1,6 +1,5 @@
 ---
 title: "CI Operator"
-draft: false
 description: An overview of the architecture of ci-operator, the OpenShift CI workflow engine.
 ---
 

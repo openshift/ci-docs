@@ -1,6 +1,5 @@
 ---
 title: "Branch Protection"
-draft: false
 description: An overview of the integration between OpenShift CI and GitHub branch protection.
 ---
 ## What Is Branch Protection?

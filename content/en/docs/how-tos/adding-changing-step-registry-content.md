@@ -1,6 +1,5 @@
 ---
 title: "Adding and Changing Step Registry Content"
-draft: false
 description: How to contribute or change the content of the step registry.
 ---
 
