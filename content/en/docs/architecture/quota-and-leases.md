@@ -1,6 +1,5 @@
 ---
 title: "Cloud Quota Handling and Leases"
-date: 2020-10-05T11:14:39-04:00
 draft: false
 description: An overview of cloud compute quotas and aggregate concurrency limits for CI jobs.
 ---

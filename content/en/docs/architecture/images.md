@@ -1,6 +1,5 @@
 ---
 title: "OCP Builder Images"
-date: 2020-01-22T23:27:39-04:00
 draft: false
 description: An overview of the building process of CI images and productized images.
 ---

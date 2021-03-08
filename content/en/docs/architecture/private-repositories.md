@@ -1,6 +1,5 @@
 ---
 title: "Private Repositories and Fixing Embargoed CVEs"
-date: 2020-10-05T11:14:39-04:00
 draft: false
 description: An overview of the workflows surrounding embargoed CVEs and private repository forks.
 ---

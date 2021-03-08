@@ -1,6 +1,5 @@
 ---
 title: "Adding a New Secret to CI"
-date: 2020-12-21T10:08:01-04:00
 draft: false
 description: How to self-service manage secret data provided to jobs during execution.
 ---

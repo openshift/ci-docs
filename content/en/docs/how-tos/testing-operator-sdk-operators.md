@@ -1,6 +1,5 @@
 ---
 title: "Testing Operators Built With The Operator SDK and Deployed Through OLM"
-date: 2020-10-05T11:14:39-04:00
 draft: false
 description: How to configure tests for a component that is deployed as an operator through OLM.
 ---

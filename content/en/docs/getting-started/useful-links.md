@@ -1,6 +1,5 @@
 ---
 title: "Useful Links"
-date: 2020-10-05T11:14:39-04:00
 draft: false
 description: Useful links to build farm clusters, hosted services, CI APIs and human contacts.
 ---

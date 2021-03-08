@@ -1,6 +1,5 @@
 ---
 title: "Add a Job to TestGrid"
-date: 2020-10-28T11:14:39-04:00
 draft: false
 description: How to add a new job to a TestGrid page and how this designation relates to release gating configuration.
 ---
