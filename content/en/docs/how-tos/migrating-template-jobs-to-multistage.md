@@ -17,73 +17,140 @@ supersede template-based tests. DPTP wants to migrate all existing template-base
 jobs to multi-stage workflows in the medium term. We expect this to cause no
 service disruption.
 
-## User-facing Differences Between Template and Multi-Stage Tests
+## Migrating Handcrafted Jobs
 
-Template-based tests used mostly hardcoded sequences of containers (usually
-called `setup`, `test` and `teardown`). Multi-stage tests usually consist of a
-higher number (usually, around ten) of `Pods` that each execute a separated
-test step, so the output change accordingly. The higher number of executed
-`Pods` may also slightly increase total job runtime; executing each Pod has an
-overhead which accumulates over the whole workflow.
+Some template-based jobs are not generated from `ci-operator` configuration but
+were written manually, usually to overcome some limitation of generated jobs
+or because some one-off customization was necessary. Multi-stage tests features
+remove most reasons to handcraft a job, so migrating jobs from templates to
+multi-stage involves also migrating them from handcrafted to generated.
 
-You can examine what exact steps an individual job will resolve to
-on the [Job Search](https://steps.ci.openshift.org/search) page.
+The high-level procedure for migrating a job looks like this:
 
-### Collected Artifacts
+1. Determine what the current job is doing: what tests does it run, what image
+   does it use, are there any additional parameters, etc.
+2. Determine if there is a multi-stage workflow doing the same thing, or at least
+   if there are existing building blocks (individual steps) to use.
+3. Add an item to the list of tests in the corresponding ci-operator configuration
+   file, and regenerate jobs.
+4. If done right, the generator will "adopt" the previously handcrafted job
+   and will just update its definition, keeping the existing customizations as
+   if it were a generated job from the start.
+5. Test the newly generated job using rehearsals to see if it gives a correct
+   signal.
 
-Template-based tests put all artifacts into a single directory together, no
-matter if the artifacts came from setup, test or teardown phase. Multi-stage
-workflows' artifacts are separated in a separate directory for each step
-executed. Most of the artifacts captured from the cluster after tests were
-executed are collected by the `gather-must-gather` step (surprisingly, runs
-`must-gather`) and `gather-extra` (gathers even more artifacts that
-`must-gather` does not) steps.
+For an example of a handcrafted template job migrated to a generated multi-stage
+one, see [this PR](https://github.com/openshift/release/pull/16476).
 
-#### Content of `artifacts/$TEST-NAME/` (template-based)
+### Determine what the current job is doing
 
-All captured artifacts are together:
-
+Find the definition of the job under `ci-operator/jobs`:
 ```
-container-logs/
-installer/
-junit/
-metrics/
-network/
-nodes/
-pods/
-apiservices.json
-audit-logs.tar
-...
-<more JSON dumps>
+$ git grep periodic-ci-kubernetes-conformance-k8s ci-operator/jobs/
+ci-operator/jobs/openshift/kubernetes/openshift-kubernetes-master-periodics.yaml:  name: periodic-ci-kubernetes-conformance-k8s
 ```
 
-#### Content of `artifacts/$TEST-NAME/` (multi-stage)
+The job always uses one of the templates by mounting the respective ConfigMap.
+The volume is usually called `job-definition` and the ConfigMap always has a
+`prow-job-cluster-launch-installer-` prefix:
 
-Separate directories per step:
-
-```
-gather-audit-logs/
-gather-extra/
-gather-must-gather/
-ipi-conf-gcp/
-ipi-conf/
-ipi-deprovision-deprovision/
-ipi-install-install/
-ipi-install-rbac/
-test/
+```yaml
+volumes:
+- configMap:
+    name: prow-job-cluster-launch-installer-src
+  name: job-definition
 ```
 
-### Notable Cluster Differences
+The name of the config map usually contains a cloud platform and also hints what the
+template does: `e2e` templates run common OpenShift tests, `src` templates run
+a custom command in the context of the `src` image and `custom-test-image` run
+a custom command in the context of another, specified image.
 
-Certain cluster properties may be different between testing clusters installed by
-template-based jobs and the ones provisioned by multi-stage workflows.
+Additionally, some jobs specify a `CLUSTER_VARIANT` environmental variable that
+further affects how the job will install a testing cluster:
 
-- AWS clusters have default-sized workers (`m4.large`) in clusters installed by
-  multi-stage workflows. Templates previously hardcoded a worker size `m4.xlarge`
-  override, so AWS clusters in multi-stage jobs are less powerful and may be
-  insufficient for some test workloads. The issue is tracked in
-  [DPTP-1740](https://issues.redhat.com/browse/DPTP-1740). Jobs that need more
-  powerful clusters may use templates instead of multi-stage workflows for now.
+```yaml
+spec:
+  containers:
+  - ...
+    env:
+    - name: CLUSTER_VARIANT
+      value: fips
+```
+
+This configuration together should give you an idea about what kind of test
+the job implements. Usually, it will be some combination of test (shared e2e or
+custom command), cloud platform (GCP, AWS, etc.) and an optional variant (FIPS,
+compact etc.). 
+
+### Determine what workflow and/or steps to use as a replacement
+
+Inspect the [step registry](https://steps.ci.openshift.org/) and figure out if
+there is an existing content that implements the testing procedure you discovered
+in the previous step. Knowing how [multi-stage tests](https://docs.ci.openshift.org/docs/architecture/step-registry/)
+work in general helps a lot in this step.
+
+For shared end-to-end tests, most of the existing platform/variant combinations
+are already covered by an existing `openshift-e2e-$PLATFORM-$VARIANT` workflow,
+such as `openshift-e2e-aws-ovn`.
+
+Jobs running tests in a custom test image or `src` image are expressed as
+workflow-using tests with overriden `test` section, so search for an appropriate
+install/teardown workflow, such as `ipi-aws`.
+
+### Add a test to ci-operator config
+
+The following example shows how to express a job that was using `prow-job-cluster-launch-installer-src`
+template to run a custom command in the `src` image. The `...-custom-test-image`
+template-based job would differ only in its `from:` stanza:
+
+```yaml
+tests:
+- as: e2e-test
+  steps:
+    cluster_profile: aws     # needs to match the workflow
+    test:                    # override the `test` section of the workflow
+    - as: test               # name of the step
+      commands: make test    # execute `make test`...
+      from: src              # ...inside the src image
+      resources:             # explicitly specify resources for the step
+        requests:
+          cpu: 100m
+    workflow: ipi-aws        # `ipi-$PLATFORM` workflows implement the "usual" OpenShift installation
+```
+
+The e2e workflows usually need even less configuration:
+
+```yaml
+- as: e2e-vsphere
+  steps:
+    cluster_profile: vsphere
+    env:
+      TEST_SUITE: openshift/conformance/parallel
+    workflow: openshift-e2e-vsphere-upi
+
+```
+Note that the behavior of the `openshift-tests` binary is controlled by parameters
+of the [`openshift-e2e-test`](https://steps.ci.openshift.org/reference/openshift-e2e-test)
+step, not by overriding the actual executed command like it was in the template job.
+
+### Make the generated job "adopt" the previous handcrafted job
+
+Handcrafted jobs often have custom modifications that e.g. control when they are
+triggered. In order for the generated job to keep this behavior, rename the original
+job to the name it will be given by the generator (`{periodic-ci-,pull-ci-}$ORG-$REPO-$BRANCH-$TEST`)
+before running the generator. This will make the generator "adopt" the job and overwrite
+just the necessary parts of it, keeping the customization.
+
+Alternatively, you can just generate the new job and delete the old one, too. Doing
+this will not keep the customizations on the old job, though.
+
+### Test the generated job
+
+All generated jobs are rehearsable by default, so a PR with the change will receive
+a [rehearsal run](https://docs.ci.openshift.org/docs/how-tos/contributing-openshift-release/#rehearsals)
+of the new job which you can inspect to see if the new job gives the expected
+signal.
 
 ## Migrating Jobs Generated from `ci-operator` Configurations
 
@@ -255,3 +322,59 @@ custom image to execute a custom test. This method should be sufficient for most
 users. Alternatively, it is possible to build a custom image using the `images`
 stanza by explicitly injecting `openshift-tests` into the desired image and use
 the resulting image to run the tests.
+
+## User-facing Differences Between Template and Multi-Stage Tests
+
+Template-based tests used mostly hardcoded sequences of containers (usually
+called `setup`, `test` and `teardown`). Multi-stage tests usually consist of a
+higher number (usually, around ten) of `Pods` that each execute a separated
+test step, so the output change accordingly. The higher number of executed
+`Pods` may also slightly increase total job runtime; executing each Pod has an
+overhead which accumulates over the whole workflow.
+
+You can examine what exact steps an individual job will resolve to
+on the [Job Search](https://steps.ci.openshift.org/search) page.
+
+### Collected Artifacts
+
+Template-based tests put all artifacts into a single directory together, no
+matter if the artifacts came from setup, test or teardown phase. Multi-stage
+workflows' artifacts are separated in a separate directory for each step
+executed. Most of the artifacts captured from the cluster after tests were
+executed are collected by the `gather-must-gather` step (surprisingly, runs
+`must-gather`) and `gather-extra` (gathers even more artifacts that
+`must-gather` does not) steps.
+
+#### Content of `artifacts/$TEST-NAME/` (template-based)
+
+All captured artifacts are together:
+
+```
+container-logs/
+installer/
+junit/
+metrics/
+network/
+nodes/
+pods/
+apiservices.json
+audit-logs.tar
+...
+<more JSON dumps>
+```
+
+#### Content of `artifacts/$TEST-NAME/` (multi-stage)
+
+Separate directories per step:
+
+```
+gather-audit-logs/
+gather-extra/
+gather-must-gather/
+ipi-conf-gcp/
+ipi-conf/
+ipi-deprovision-deprovision/
+ipi-install-install/
+ipi-install-rbac/
+test/
+```
