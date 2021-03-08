@@ -1,7 +1,5 @@
 ---
 title: "Mirror an Image to an External Registry"
-date: 2020-10-05T11:14:39-04:00
-draft: false
 description: How to mirror an image built in the CI system out to an external registry.
 ---
 

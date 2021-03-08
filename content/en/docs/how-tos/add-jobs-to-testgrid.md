@@ -1,7 +1,5 @@
 ---
 title: "Add a Job to TestGrid"
-date: 2020-10-28T11:14:39-04:00
-draft: false
 description: How to add a new job to a TestGrid page and how this designation relates to release gating configuration.
 ---
 This document lays out the process of getting a CI job recorded as blocking or informing a release as well as the process for having job outputs exposed in a TestGrid page. While all jobs that block or inform a release are necessarily exposed in TestGrid pages, it is not required that a job have influence on an OpenShift release for the job's output to be present in a TestGrid overview.
