@@ -42,13 +42,20 @@ base_images:
     namespace: "ocp"
     name: "operand"
     tag: "latest"
+  operator-index:    # imports the base index for the bundle
+    namespace: "ci"
+    name: "redhat-operator-index"
+    tag: "v4.7"
 images:
 - from: "ubi"
   to: "tested-operator"
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
-  - dockerfile_path: "path/to/Dockerfile" # defaults to `bundle.Dockerfile`
+  - as: my-bundle                         # optional
+    dockerfile_path: "path/to/Dockerfile" # defaults to `bundle.Dockerfile`
     context_dir: "path/"                  # defaults to .
+    base_index: "operator-index"          # optional
+    update_graph: "replaces"              # defaults to `semver`
   substitutions:
   # replace references to the operand with the imported version (`base_images` stanza)
   - pullspec: "quay.io/openshift/operand:1.3"
@@ -65,7 +72,7 @@ When configuring a bundle build, five options are available:
   and the bundle will only be accessible via the default index image (`ci-index`).
 * `dockerfile_path`: a path to the `Dockerfile` that builds the bundle image, defaulting to `bundle.Dockerfile`
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
-* `base_index`: the base index to add the bundle to (ex: `registry.redhat.io/redhat/redhat-operator-index:v4.7`).
+* `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`.
   If unspecified, the bundle will be added to an empty index. Requires `as` to be set.
 * `update_graph`: the update mode to use when adding the bundle to the `base_index`. Can be: `semver`, `semver-skippatch`,
   or `replaces` (default: `semver`). Requires `base_index` to be set.
