@@ -40,13 +40,20 @@ base_images:
     namespace: "ocp"
     name: "operand"
     tag: "latest"
+  operator-index:    # imports the base index for the bundle
+    namespace: "ci"
+    name: "redhat-operator-index"
+    tag: "v4.7"
 images:
 - from: "ubi"
   to: "tested-operator"
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
-  - dockerfile_path: "path/to/Dockerfile" # defaults to bundle.`Dockerfile`
+  - as: my-bundle                         # optional
+    dockerfile_path: "path/to/Dockerfile" # defaults to `bundle.Dockerfile`
     context_dir: "path/"                  # defaults to .
+    base_index: "operator-index"          # optional
+    update_graph: "replaces"              # defaults to `semver`
   substitutions:
   # replace references to the operand with the imported version (`base_images` stanza)
   - pullspec: "quay.io/openshift/operand:1.3"
@@ -56,24 +63,33 @@ operator:
     with: "pipeline:tested-operator"
 {{< / highlight >}}
 
-When configuring a bundle build, two options are available:
+When configuring a bundle build, five options are available:
 
-* `dockerfile_path`: a path to the `Dockerfile` that builds the bundle image, defaulting to bundle.`Dockerfile`
+* `as`: the image name for the built bundle. Specifying a name for the bundle image allows a multistage workflow
+  directly access the bundle by name. If not provided, a dynamically generated name will be created for the bundle
+  and the bundle will only be accessible via the default index image (`ci-index`).
+* `dockerfile_path`: a path to the `Dockerfile` that builds the bundle image, defaulting to `bundle.Dockerfile`
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
+* `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`.
+  If unspecified, the bundle will be added to an empty index. Requires `as` to be set.
+* `update_graph`: the update mode to use when adding the bundle to the `base_index`. Can be: `semver`, `semver-skippatch`,
+  or `replaces` (default: `semver`). Requires `base_index` to be set.
 
 The `operator.bundles` stanza is a list, so it is possible to build multiple bundle `images` from one repository.
 
 ## Building an Index
 
 When `ci-operator` builds at least one operator bundle from a repository, it will also automatically build an ephemeral
-index image to package those bundles. Test workloads should consume the bundles via this index image. The index image is
-named ci-index and can be exposed to test steps via the
+index image to package those bundles. Test workloads should consume the bundles via this index image. For bundles that do
+not have a configured name via the `as` field, the index image is named `ci-index`. Bundles with `as` set have an index
+called `ci-index-` appended by the value from `as`. The index can be exposed to test steps via the
 [dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
 
-The ephemeral index is built from scratch and only the bundles built in the current `ci-operator` run will be added to it,
-nothing else. The bundles are added to the index using the `semver` mode, which means that the `spec.version` stanza in the
-CSV must be a valid semantic version. Also, if the CSV has a `spec.replaces` stanza, it is ignored, because the index will
-not contain a bundle with the replaced version.
+For bundles without `base_index` configured, the ephemeral index is built from scratch and only the bundles without
+`base_index` set and built in the current `ci-operator` run will be added to it, nothing else. The bundles are added to
+the index using the `semver` mode, which means that the `spec.version` stanza in the CSV must be a valid semantic version.
+Also, if the CSV has a `spec.replaces` stanza, it is ignored, because the index will not contain a bundle with the
+replaced version.
 
 ## Validating Bundle and Index `Builds`
 
@@ -85,8 +101,8 @@ present.
 # Running Tests
 
 Once `ci-operator` builds the operator bundle and index, they are available to be used as a `CatalogSource` by OLM for
-deploying and testing the operator. The index image is called ci-index and can be exposed to multi-stage test workloads
-via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
+deploying and testing the operator. The default index image is called `ci-index` and can be exposed to multi-stage test
+workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
 
 Step configuration example:
 {{< highlight yaml >}}
@@ -101,7 +117,9 @@ ref:
 {{< / highlight >}}
 
 Any test workflow involving such step will require `ci-operator` to build the index image before it executes the workflow.
-The `OO_INDEX` environmental variable set for the step will contain the pull specification of the index image.
+The `OO_INDEX` environmental variable set for the step will contain the pull specification of the index image. For tests with
+a named bundle, the correct index image can be configured via the `dependencies` field in the test's ci-operator config. See
+the [Simple Operator Installation](/docs/how-tos/testing-operator-sdk-operators#simple-operator-installation) section below.
 
 # Step Registry Content for Operators
 
@@ -137,7 +155,7 @@ using these workflows need to provide the following parameters:
 
 The combination of `OO_INSTALL_NAMESPACE` and `OO_TARGET_NAMESPACES `values determines the `InstallMode` when installing the
 operator. The default `InstallMode` is `AllNamespaces` (the operator will be installed into a newly created namespace of a
-random name, targeting all namespaces).
+random name, targeting all namespaces). For named bundles, the index dependency can also be configured in the test's config.
 
 A user-provided test can expect to have `${KUBECONFIG}` set, with administrative privileges, and for the operator under
 test to be fully deployed at the time that the test begins. The following example runs a test in this manner
@@ -154,6 +172,9 @@ tests:
       OO_INSTALL_NAMESPACE: "kubevirt-hyperconverged"
       OO_PACKAGE: "kubevirt-hyperconverged"
       OO_TARGET_NAMESPACES: '!install'
+    dependencies:
+    - env: "OO_INDEX"
+      name: "ci-index-my-bundle" # if the bundle being tested is named, update the dependency to match
     test:
     - as: "e2e"
       from: "src"               # the end-to-end tests run in the source repository
