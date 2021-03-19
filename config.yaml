@@ -20,6 +20,9 @@ menu:
     url: https://github.com/openshift/ci-tools
     weight: 60
 markup:
+  goldmark:
+    renderer:
+      unsafe: true
   highlight:
     anchorLineNos: true
     codeFences: true
