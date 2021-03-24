@@ -1,6 +1,6 @@
 ---
 title: "Contributing CI Configuration to the openshift/release Repository"
-description: How to self-service contribute or change configuration for jobs or the broader CI system. 
+description: How to self-service contribute or change configuration for jobs or the broader CI system.
 ---
 
 The [openshift/release](https://github.com/openshift/release) repository holds CI configuration for OpenShift component
@@ -54,20 +54,20 @@ that runs all these tools before a pull request submission:
 {{< highlight make >}}
 $ make update
 make jobs
-docker pull registry.svc.ci.openshift.org/ci/ci-operator-prowgen:latest
-docker run --rm <...> registry.svc.ci.openshift.org/ci/ci-operator-prowgen:latest <...>
-docker pull registry.svc.ci.openshift.org/ci/sanitize-prow-jobs:latest
-docker run --rm <...> registry.svc.ci.openshift.org/ci/sanitize-prow-jobs:latest <...>
+docker pull registry.ci.openshift.org/ci/ci-operator-prowgen:latest
+docker run --rm <...> registry.ci.openshift.org/ci/ci-operator-prowgen:latest <...>
+docker pull registry.ci.openshift.org/ci/sanitize-prow-jobs:latest
+docker run --rm <...> registry.ci.openshift.org/ci/sanitize-prow-jobs:latest <...>
 make ci-operator-config
-docker pull registry.svc.ci.openshift.org/ci/determinize-ci-operator:latest
-docker run --rm -v <...> registry.svc.ci.openshift.org/ci/determinize-ci-operator:latest <...>
+docker pull registry.ci.openshift.org/ci/determinize-ci-operator:latest
+docker run --rm -v <...> registry.ci.openshift.org/ci/determinize-ci-operator:latest <...>
 make prow-config
-docker pull registry.svc.ci.openshift.org/ci/determinize-prow-config:latest
-docker run --rm <...> registry.svc.ci.openshift.org/ci/determinize-prow-config:latest <...>
+docker pull registry.ci.openshift.org/ci/determinize-prow-config:latest
+docker run --rm <...> registry.ci.openshift.org/ci/determinize-prow-config:latest <...>
 make registry-metadata
-docker pull registry.svc.ci.openshift.org/ci/generate-registry-metadata:latest
+docker pull registry.ci.openshift.org/ci/generate-registry-metadata:latest
 <...>
-docker run --rm -v <...> registry.svc.ci.openshift.org/ci/generate-registry-metadata:latest <...>
+docker run --rm -v <...> registry.ci.openshift.org/ci/generate-registry-metadata:latest <...>
 {{< / highlight >}}
 
 ### Rehearsals
@@ -162,9 +162,9 @@ through the necessary steps and generates the configuration for you:
 
 {{< highlight make >}}
 make new-repo
-docker pull registry.svc.ci.openshift.org/ci/repo-init:latest
+docker pull registry.ci.openshift.org/ci/repo-init:latest
 <...>
-docker run --rm -it <...> registry.svc.ci.openshift.org/ci/repo-init:latest --release-repo <...>
+docker run --rm -it <...> registry.ci.openshift.org/ci/repo-init:latest --release-repo <...>
 Welcome to the repository configuration initializer.
 In order to generate a new set of configurations, some information will be necessary.
 

@@ -12,7 +12,6 @@ some comments on their purpose:
 |  Cluster  | Registry URL                                                                                                 | Note                                                                                                                                    |
 |-----------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | [`app.ci`](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/) | [registry.ci.openshift.org](https://registry.ci.openshift.org)                                                       | the authoritative, central CI registry                                                                                                  |
-| [`api.ci`](https://console.svc.ci.openshift.org/) | [registry.svc.ci.openshift.org](https://registry.svc.ci.openshift.org)                                               | the previous central registry; contains identical images to the authoritative registry                                                  |
 | [`build01`](https://console.build01.ci.openshift.org/) | [registry.build01.ci.openshift.org](https://registry.build01.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
 | [`build02`](https://console.build02.ci.openshift.org/) | [registry.build02.ci.openshift.org](https://registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
 | `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
@@ -29,9 +28,7 @@ copies they hold are up-to-date and jobs that run there run with the correct con
 
 {{< alert title="Info" color="info" >}}
 Today, we are in the process of migrating between authoritative image registries. The current authoritative
-registry is [registry.ci.openshift.org](https://registry.ci.openshift.org). The previous authoritative registry,
-[registry.svc.ci.openshift.org](https://registry.svc.ci.openshift.org), contains an up-to-date version of all images as well,
-and will continue to do so for the time being while users migrate to using the new registry.
+registry is [registry.ci.openshift.org](https://registry.ci.openshift.org).
 {{< /alert >}}
 
 # Common Questions
@@ -150,7 +147,7 @@ subjects:
     namespace: my-project
 ```
 
-After the pull request is merged, your manifests will be automatically applied to the cluster hosting the central CI 
+After the pull request is merged, your manifests will be automatically applied to the cluster hosting the central CI
 registry. Make sure your `oc` CLI is [logged in](#how-do-i-log-in-to-pull-images-that-require-authentication) to the
 `app.ci` cluster via the [console](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/), then you
 will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:

@@ -145,7 +145,7 @@ artifacts into a separate output image base. For instance, a repository could ad
 
 {{< highlight yaml >}}
 # this image is replaced by the build system to provide repository source code
-FROM registry.svc.ci.openshift.org/ocp/builder:golang-1.13 AS builder
+FROM registry.ci.openshift.org/ocp/builder:golang-1.13 AS builder
 # the repository's source code will be available under $GOPATH of /go
 WORKDIR /go/src/github.com/myorg/myrepo
 # this COPY bring the repository's source code from the build context into an image layer
@@ -154,7 +154,7 @@ COPY . .
 RUN go build ./cmd/...
 
 # this is the production output image base and matches the "base" build_root
-FROM registry.svc.ci.openshift.org/openshift/origin-v4.5:base
+FROM registry.ci.openshift.org/openshift/origin-v4.5:base
 # inject the built artifact into the output
 COPY --from=builder /go/src/github.com/myorg/myrepo/mybinary /usr/bin/
 {{< / highlight >}}
@@ -176,7 +176,7 @@ images:
   inputs:
     bin: # declares that the "bin" tag is used as the builder image when overwriting that FROM instruction
       as:
-      - "registry.svc.ci.openshift.org/ocp/builder:golang-1.13"
+      - "registry.ci.openshift.org/ocp/builder:golang-1.13"
   to: "mycomponent" # names the output container image "mycomponent"
 - dockerfile_path: "tests/Dockerfile"
   from: "test-bin" # base the build off of the built test binaries
