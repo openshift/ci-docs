@@ -37,18 +37,19 @@ registry is [registry.ci.openshift.org](https://registry.ci.openshift.org).
 
 All registries are the internal OpenShift image registry for the cluster they reside on, so authenticating to the registry
 requires authentication to the cluster that hosts it. Once logged in to the OpenShift cluster, the `oc` CLI can be used to
-authenticate to the registry in question. For example, for the [registry.build01.ci.openshift.org](https://registry.build01.ci.openshift.org)
-registry, the cluster is `build01`. Using the [the list of clusters](/docs/getting-started/useful-links/#clusters),
-the console URL for this cluster is found to be [console.build01.ci.openshift.org](https://console.build01.ci.openshift.org).
-After logging in to this cluster using the console and copying the log-in command to authenticate your local `oc` CLI,
-you can run `oc registry login` to authenticate to the registry.
+authenticate to the registry in question.  The primary example here is the central CI registry `registry.ci.openshift.org`
+which is backed by the `app.ci`cluster.
+
+Using the [the list of clusters](/docs/getting-started/useful-links/#clusters), navigate to the [console URL](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/).
+After logging in to this cluster using the console, use the link in the top right "Copy login command" to authenticate your local `oc` CLI.
+Then you can run `oc registry login` to authenticate to the registry.
 
 ```bash
 $ oc registry login
-info: Using registry public hostname registry.build01.ci.openshift.org
-Saved credentials for registry.build01.ci.openshift.org
+info: Using registry public hostname registry.ci.openshift.org
+Saved credentials for registry.ci.openshift.org
 
-$ cat ~/.docker/config.json | jq '.auths["registry.build01.ci.openshift.org"]'
+$ cat ~/.docker/config.json | jq '.auths["registry.ci.openshift.org"]'
 {
   "auth": "token"
 }
