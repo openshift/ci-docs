@@ -129,6 +129,29 @@ test_binary_build_commands: "go test -c -o mytests" # these commands are run to 
 The content created with these OpenShift `Builds` is addressable in the `ci-operator` configuration simply with the tag. For
 instance, the `pipeline:bin` image can be referenced as `bin` when the content in that image is needed in derivative `Builds`.
 
+### Using the Build Cache
+
+For repositories where `git` history is large or the amount of compilation time used to create the `bin` image is large,
+it may be beneficial to opt into using the build cache. This cache contains the resulting image from the `bin` build,
+which contains both all of the `git` data created during the `src` build as well as the Go build cache. `ci-operator` will
+publish this cache by default, no configuration is needed to ensure the cache exists. Jobs that use the build cache will
+therefore only need to do incremental cloning and building, which can significantly speed up execution time. In order to
+opt into using the build cache, set `use_build_cache: true` in your build root configuration:
+
+{{< highlight yaml >}}
+build_root: # declares that the release:golang-1.13 image has the build-time dependencies
+  use_build_cache: true # opts into using the build cache
+  image_stream_tag:
+    name: "release"
+    namespace: "openshift"
+    tag: "golang-1.13"
+{{< / highlight >}}
+
+In the above example, the root image is `openshift/release:golang-1.13` and the cached image will be the previously-
+published `bin` image for the specific branch of the repository under test. The build cache will _only_ be used if it
+was built off of the same build root image as would otherwise be imported. That is to say, if the underlying root image
+(here `openshift/release:golang-1.13`) changes, the build cache will be invalid and will not be used.
+
 ## Building Container Images
 
 Once container `images` exist with output artifacts for a repository, additional output container `images` may be built that
