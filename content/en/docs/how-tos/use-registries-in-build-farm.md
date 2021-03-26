@@ -16,6 +16,11 @@ some comments on their purpose:
 | [`build02`](https://console.build02.ci.openshift.org/) | [registry.build02.ci.openshift.org](https://registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
 | `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
 
+{{< alert title="Warning" color="warning" >}}
+The previous registry `registry.svc.ci.openshift.org` has been decommissioned. If there is any reference to its image, e.g., in your Dockerfile,
+please use the current authoritative registry [registry.ci.openshift.org](https://registry.ci.openshift.org) instead.
+{{< /alert >}}
+
 # Container Image Data Flows
 
 Today, three major data flows exist for container images in the OpenShift CI ecosystem. First, when a job executes on
@@ -25,11 +30,6 @@ images are built on a build farm and [promoted](/docs/architecture/ci-operator/#
 central, authoritative registry. Users should always pull from this registry for any images they interact with. Third,
 when an image changes on the authoritative registry, that change is propagated to all build farm clusters so that the
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
-
-{{< alert title="Info" color="info" >}}
-Today, we are in the process of migrating between authoritative image registries. The current authoritative
-registry is [registry.ci.openshift.org](https://registry.ci.openshift.org).
-{{< /alert >}}
 
 # Common Questions
 
