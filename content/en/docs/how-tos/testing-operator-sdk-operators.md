@@ -168,13 +168,60 @@ tests:
     workflow: "optional-operators-ci-aws"
     cluster_profile: "aws"
     env:
-      OO_CHANNEL: "1.2.0"
-      OO_INSTALL_NAMESPACE: "kubevirt-hyperconverged"
-      OO_PACKAGE: "kubevirt-hyperconverged"
+      OO_CHANNEL: "alpha"
+      OO_INSTALL_NAMESPACE: "myoperator-test-namespace"
+      OO_PACKAGE: "myoperator"
       OO_TARGET_NAMESPACES: '!install'
     dependencies:
-    - env: "OO_INDEX"
-      name: "ci-index-my-bundle" # if the bundle being tested is named, update the dependency to match
+      OO_INDEX: "ci-index-my-bundle" # if the bundle being tested is named, update the dependency to match
+    test:
+    - as: "e2e"
+      from: "src"               # the end-to-end tests run in the source repository
+      commands: "make test-e2e" # the commands to run end-to-end tests
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+{{< / highlight >}}
+
+## Operator Upgrade Testing
+
+The `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade) ,
+[gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp-upgrade),
+[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure-upgrade)) family of workflows take the same steps as
+the simple operator installation described above, but specify a different operator to install initially and then perform an upgrade
+from the initial operator/bundle to the newly built operator/bundle.
+
+These workflows enhance the simple operator installation workflows (like
+[optional-operators-ci-aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws)) with an additional
+[optional-operators-ci-upgrade](https://steps.ci.openshift.org/reference/optional-operators-ci-upgrade) step. Tests
+using these workflows need to provide the parameters specified for the simple operator installation tests plus the following:
+
+|Parameter|Description|
+|:---|:---|
+|`OO_INITIAL_CSV`|The name of initial version of the operator CSV to install.|
+|`OO_INITIAL_CHANNEL`|The name of the channel the initial CSV is in.|
+|`OO_LATEST_CSV`|The name of the CSV being upgraded to.|
+
+The following example runs a test that installs an initial version of an operator and then upgrades before performing a functional tests.
+
+`ci-operator` configuration:
+{{< highlight yaml >}}
+tests:
+- as: "operator-e2e-upgrade"
+  steps:
+    workflow: "optional-operators-ci-aws-upgrade"
+    cluster_profile: "aws"
+    env:
+      OO_CHANNEL: "alpha"
+      OO_INSTALL_NAMESPACE: "myoperator-test-namespace"
+      OO_PACKAGE: "myoperator"
+      OO_TARGET_NAMESPACES: '!install'
+      OO_INITIAL_CSV: "myoperator.v1.1.2"
+      OO_INITIAL_CHANNEL: "v1.1"
+      OO_LATEST_CSV: "myoperator.v1.2.0"
+    dependencies:
+      OO_INDEX: "ci-index-my-bundle" # operator upgrade tests require bundles with a base_index, and thus must be named
     test:
     - as: "e2e"
       from: "src"               # the end-to-end tests run in the source repository
