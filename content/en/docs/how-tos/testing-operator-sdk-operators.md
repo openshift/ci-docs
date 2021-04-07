@@ -57,7 +57,7 @@ operator:
   substitutions:
   # replace references to the operand with the imported version (`base_images` stanza)
   - pullspec: "quay.io/openshift/operand:1.3"
-    with: "stable:operand"
+    with: "pipeline:operand"
   # replace references to the operator with the built version (`images` stanza)
   - pullspec: "quay.io/openshift/tested-operator:1.3"
     with: "pipeline:tested-operator"
