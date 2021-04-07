@@ -265,7 +265,7 @@ jobs BEFORE you reference them from another component (via the image-references 
 1. Ensure you have successfully published your image to the CI integration stream
 1. Follow the [ART instructions](https://mojo.redhat.com/docs/DOC-1179058) to have them build your image
     * On the [dist-git part of the process](https://mojo.redhat.com/docs/DOC-1168290) it is critical that you ensure your component/image names match as described in the bulleted criteria
-1. Ensure a single successful build is run (sync with ART
+1. Ensure a single successful build is run (sync with ART to confirm)
 1. Open the PR to add your new image to another component (your operator, usually)
 1. Once the PR is merged, verify that the [nightly builds](https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
 
