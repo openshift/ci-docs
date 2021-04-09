@@ -23,7 +23,7 @@ To manage secrets, some manifests have to be created and committed to our Git-op
 can cooperate on changing it.
 
 Choose your namespace name and group of administrators, then create a Pull request adding a YAML file with the contents
-to a sub-directory of the `core-services/secrets` directory:
+to a sub-directory of the `clusters/build-clusters/api.ci/secrets` directory:
 
 ```yaml
 # this is the Namespace in which your Secret will live
