@@ -8,7 +8,7 @@ description: Useful links to build farm clusters, hosted services, CI APIs and h
 The clusters that currently comprise CI are:
 
 * [api.ci](https://console.svc.ci.openshift.org/): legacy Openshift 3.11 cluster in GCP. Job execution is being migrated out of it.
-* [app.ci](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/): Openshift Dedicated 4.x cluster containing most Prow services.
+* [app.ci](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/): Openshift Dedicated 4.x cluster containing most Prow services including registry.ci.openshift.org (our image registry for CI builds).
 * [build01](https://console.build01.ci.openshift.org/): Openshift 4.x cluster in AWS that executes a growing subset of the jobs.
 * [build02](https://console.build02.ci.openshift.org/): Openshift 4.x cluster in GCP that executes a growing subset of the jobs.
 * `vsphere`: external cluster used for vSphere tests, not managed by DPTP.
