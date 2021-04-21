@@ -24,7 +24,7 @@ During feature freeze, the expectation is that merges to the active development 
 
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
-|`master/main`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
+|`master/main`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`|no|
 |`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
 |`release-4.x`|nowhere|merges blocked|yes|
 |`release-4.x+1`|`ocp/4.x+1`|merges blocked|yes|
