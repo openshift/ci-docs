@@ -33,3 +33,23 @@ base_images:
     name:  boskos
     tag: latest
 {{< / highlight >}}
+
+Note that if your image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and ensure that you use the [`Local`](https://docs.openshift.com/container-platform/4.7/rest_api/image_apis/imagestream-image-openshift-io-v1.html) `referencePolicy` on your `ImageStream` to allow downstream consumers to not require authentication:
+
+{{< highlight yaml >}}
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: secret
+  namespace: my-namespace
+spec:
+  tags:
+  - name: latest
+    from:
+      kind: DockerImage
+      name: secret.io/secret/secret:latest
+    importPolicy:
+      scheduled: true
+    referencePolicy: # this is required for downstream users to pull this image without authenticating
+      type: Local
+{{< / highlight >}}
