@@ -344,9 +344,9 @@ releases:
       product: okd
       version: "4.3"
   latest:
-    release:          # references a version released to customers
-      channel: stable # configures the release channel to search
-      version: "4.4"
+    release:          # references a version from Red Hat's Cincinnati update service https://api.openshift.com/api/upgrades_info/v1/graph
+      channel: stable # configures the release channel to search.  The major.minor from version will be appended automatically, so the Cincinnati request for this will use 'stable-4.4'.
+      version: "4.4"  # selects the largest Semantic Version in the configured channel.  https://semver.org/spec/v2.0.0.html#spec-item-11
   previous:
     candidate:
       product: ocp
