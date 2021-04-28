@@ -347,6 +347,10 @@ releases:
     release:          # references a version from Red Hat's Cincinnati update service https://api.openshift.com/api/upgrades_info/v1/graph
       channel: stable # configures the release channel to search.  The major.minor from version will be appended automatically, so the Cincinnati request for this will use 'stable-4.4'.
       version: "4.4"  # selects the largest Semantic Version in the configured channel.  https://semver.org/spec/v2.0.0.html#spec-item-11
+  firstz:
+    release:           # same as the 'latest' example above
+      channel: stable  # same as the 'latest' example above
+      version: "4.4.3" # selects the 4.4.3 release.  This is probably only useful for tip-to-first-z rollback tests.  Most folks will want to use the 'latest' example above
   previous:
     candidate:
       product: ocp
