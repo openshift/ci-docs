@@ -297,6 +297,8 @@ others. You should use existing releases when your testing does not depend that 
 OpenShift cluster installed. Existing releases have clearer stability expectations because you control what  kind
 of release will be used: from the latest CI candidate to stable versions already released to customers.
 
+Alternatively, a job can [claim a pre-installed cluster](#testing-with-a-cluster-from-a-cluster-pool) from a cluster pool. These clusters are available to jobs for testing much faster because their installation is not a part of the job itself. Available cluster configurations (cloud platform, version, etc.) may vary. They will be installed using an existing, long-lived release such as publicly available OCP versions. Because the clusters are pre-installed, they cannot be customized. They will not contain any content derived from the pull request which triggers the job. Hence, these clusters are only suitable for jobs that want to test on top of OpenShift, not for jobs that test OCP itself.
+
 ### Testing With an Ephemeral OpenShift Release
 
 The `tag_specification` configuration option enables a repository to declare which version of OpenShift it is a part of by
@@ -365,6 +367,54 @@ releases:
         lower: "4.4.0"
         upper: "4.5.0-0"
 {{< / highlight >}}
+
+### Testing with a Cluster from a Cluster Pool
+The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by `dpp`. If the cluster is successfuly claimed from the pool, `ci-operator` executes the specified multi-stage test and provides it the credentials to access the cluster via two environmental variables:
+
+-  `${KUBECONFIG}`: Path to `system:admin` credentials.
+-  `${KUBEADMIN_PASSWORD_FILE}`: Path to the `kubeadmin` password file.
+
+
+```yaml
+- as: e2e
+  cluster_claim:
+    architecture: amd64
+    cloud: aws
+    owner: dpp
+    product: ocp
+    timeout: 1h0m0s
+    version: "4.7"
+  steps:
+    test:
+    - as: claim
+      commands: |
+        printenv KUBECONFIG
+        printenv KUBEADMIN_PASSWORD_FILE
+        oc get node
+        oc config view
+        oc whoami
+      from: cli
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+```
+
+The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the timeout, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
+
+- almost no time to claim a running cluster in the pool;
+- 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after beining provisioned;
+- 40 to 60 minutes to create a new cluster if all the pre-installed clusters in the pool are taken by other jobs.
+
+The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details. By default, OpenShift CI provides the following pools backed by DPP-owned accounts:
+
+```console
+$ oc --context app.ci get clusterpools --all-namespaces -l owner=dpp --show-labels
+NAMESPACE         NAME                             READY   SIZE   BASEDOMAIN                  IMAGESET          LABELS
+ci-cluster-pool   ci-ocp-4-7-amd64-aws-us-east-1   1       1      hive.aws.ci.openshift.org   ocp-4.7.0-amd64   architecture=amd64,cloud=aws,owner=dpp,product=ocp,region=us-east-1,version=4.7
+```
+
+Note that `cluster_claim` and `cluster_profile` are mutually exclusive because [the latter](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) indicates installing a cluster on demand, instead of claiming a pre-installed cluster in a pool.
 
 ## Declaring Tests
 
