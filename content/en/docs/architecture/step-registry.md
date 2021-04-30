@@ -128,6 +128,10 @@ Steps are more commonly expected to communicate between each other by using stat
 installs some components or changes configuration, a later step could check for that as a pre-condition by using `oc` or the API to view the
 cluster's configuration.
 
+{{< alert title="Note" color="info" >}}
+The `${SHARED_DIR}` may _only_ contain files. No directories or nested structures are supported.
+{{< /alert >}}
+
 #### A Note on `$KUBECONFIG`
 
 In the default execution environment, commands run in steps will be given the `$KUBECONFIG` environment variable to allow them to interact with
