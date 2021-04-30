@@ -110,7 +110,7 @@ The following environment variables will be available to commands in a step:
 |`${RELEASE_IMAGE_INITIAL}`|Image pull specification for the initial release payload snapshot when the test began to run.|When the test imports or builds an `initial` release. See the [docs](/docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
 |`${RELEASE_IMAGE_LATEST}`|Image pull specification for the ephemeral release payload used to install the ephemeral OpenShift cluster.|When the test imports or builds a `latest` release. . See the [docs](/docs/architecture/ci-operator/#describing-inclusion-in-an-openshift-release).|
 |`${LEASED_RESOURCE}`|The name of the resource leased to grant access to cloud quota. See [below](#leases).|When the test requires a lease.|
-|`${IMAGE_FORMAT}`|The registry location from which images built or imported for this test may be pulled.|Always. Deprecated, use [dependencies](/docs/architecture/ci-operator/#referencing-images) to provide tests with fully resolved pull specifications of images.|
+|`${IMAGE_FORMAT}`|The registry location from which images built or imported for this test may be pulled.|Always except [claiming a cluster](/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool). Deprecated, use [dependencies](/docs/architecture/ci-operator/#referencing-images) to provide tests with fully resolved pull specifications of images.|
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
 `ci-operator` through [leases](#leases), [parameters](#parameters) and [dependencies](/docs/architecture/ci-operator/#referencing-images).
