@@ -59,8 +59,10 @@ branch-protection:
             - my-other-ci-system
           branches:
             << branch >>:
-              # Do not protect this branch
-              protect: false
+              # Do not protect this branch. This setting can be set
+              # for the org, repo or branch. Set it at the highest level
+              # that makes sense. Lower levels can not override it.
+              unmanaged: true
 {{< / highlight >}}
 
 An overview of all available settings and a more detailled explanation can be found in the
@@ -75,6 +77,9 @@ configured for such a branch, `branchprotector` will not manage its branch prote
 However, if there **is not** a required Prow job on a branch, `protect: false` causes `branchprotector`
 to ensure the branch protection is disabled on the branch (and therefore, the `openshift-merge-robot`
 account needs the admin permissions that are necessary for this operation).
+
+If your goal is to not have Prow manage the branch proection, please use `unmanaged: true` instead of
+`protect: false`.
 
 | Required jobs | `protect:` stanza  | What `branchprotector` does  | Requires admin |
 |---|---|---|---|
