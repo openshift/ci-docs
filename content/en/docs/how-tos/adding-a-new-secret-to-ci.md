@@ -5,115 +5,24 @@ description: How to self-service manage secret data provided to jobs during exec
 
 Jobs execute as `Pod`s; those that need access to sensitive information will have access to it through mounted Kubernetes
 [`Secrets`](https://kubernetes.io/docs/concepts/configuration/secret/). Secret data is managed self-service by the owners
-of the data. While there are many OpenShift clusters in the [CI build farm](/docs/getting-started/useful-links/#clusters),
-owners of secret data simply need to add their `Secret` to the `api.ci` cluster and automation will sync the data out to
-all environments where jobs execute.
+of the data.
 
 ## Add A New Secret
 
-In order to commit secret data to our system, the data will need to be added to the `api.ci` cluster.
+In order to add a new secret to our system, you will first need to create a secret collection. Secret collections are managed
+at [selfservice.vault.ci.openshift.org](https://selfservice.vault.ci.openshift.org). Just head there, log in, create a new
+one and ideally also add your teammates as members. Important: Secret collection names are globally unique in our system.
 
-All users who wish to interact with the system must [log in](/docs/how-tos/use-registries-in-build-farm/#how-do-i-log-in-to-pull-images-that-require-authentication)
-to the `api.ci` cluster.
+The secrets themselves are managed in our Vault instance at [vault.ci.openshift.org](https://vault.ci.openshift.org).
+You need to use the OIDC auth to log in there. After logging in, click on `kv`, then `selfservice` and you should see your secret collection.
 
-### Creating the manifests
-
-To manage secrets, some manifests have to be created and committed to our Git-ops
-[repository](https://github.com/openshift/release) to ensure that the correct configuration is persisted and that users
-can cooperate on changing it.
-
-Choose your namespace name and group of administrators, then create a Pull request adding a YAML file with the contents
-to a sub-directory of the `core-services/secrets` directory:
+To create a new secret, simply click `Create secret` and put your data into it. To actually use it, it needs to be propagated
+into the build clusters. For this, two special keys in the Vault secret itself exist:
 
 ```yaml
-# this is the Namespace in which your Secret will live
-apiVersion: v1
-kind: Namespace
-metadata:
-  annotations:
-    openshift.io/description: Automation Secrets for MyProject
-    openshift.io/display-name: MyProject CI
-  name: my-project
----
-# the Group of people who should be able to manage this Secret
-kind: Group
-apiVersion: v1
-metadata:
-  name: my-project-admins
-users:
-  # these names are GitHub usernames
-  - bob
-  - tracy
-  - jim
-  - emily
----
-# this adds the admins to the project.
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: my-project-viewer-binding
-  namespace: my-project
-roleRef:
-  kind: ClusterRole
-  apiGroup: rbac.authorization.k8s.io
-  name: view
-subjects:
-  - kind: Group
-    apiGroup: rbac.authorization.k8s.io
-    name: my-project-admins
-    namespace: my-project
----
-# this grants the right to view and update the Secret
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: my-project-admins-binding
-  namespace: my-project
-roleRef:
-  kind: ClusterRole
-  apiGroup: rbac.authorization.k8s.io
-  name: secret-namespace-manager
-subjects:
-  - kind: Group
-    apiGroup: rbac.authorization.k8s.io
-    name: my-project-admins
-    namespace: my-project
+secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters
+secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
 ```
-
-{{< alert title="Info" color="info" >}}
-The above YAML does _not_ contain your secret data. You will still need to create it with a manual invocation
-of the `oc` CLI. The `openshift/release` repository is public and not an appropriate place to store sensitive information.
-{{< /alert >}}
-
-If your desired namespace exists already, ask the owners of the namespace if it can be shared. After the pull request is
-merged, the manifests in the folder will be applied automatically to the `api.ci` cluster and you will be ready to use
-the `oc` CLI to persist your secret data:
-
-```shell
-$ oc --namespace my-project create secret generic my-secret --from-literal password=hard-to-remember
-```
-
-
-### Propagating Secret Data
-
-In order to propagate your secret data to all environments in which jobs execute, an entry must be added to the mirroring
-[configuration](https://github.com/openshift/release/tree/master/core-services/secret-mirroring/_mapping.yaml). The secret
-and any modification on it afterwards will be populated to the targeting namespace(s) on [all clusters](/docs/getting-started/useful-links/#clusters)
-in the build farm.
-
-```yaml
-- from:
-    namespace: "my-project"
-    name: "my-secret"
-  to:
-    namespace: "test-credentials" # the namespace holding all secrets used in a step
-    name: "my-secret"             # a unique identifier for your secret
-```
-
-{{< alert title="Info" color="info" >}}
-We are in the process of turning down the `api.ci` cluster which currently hosts the source content for the
-secret mirroring process. A new solution for secret management will be in place before `api.ci` is fully removed.
-{{< /alert >}}
 
 ## Use A Secret In A Job Step
 
