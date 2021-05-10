@@ -49,16 +49,6 @@ Hive maintains the number of clusters in the pool as specified by its `size`. A 
 
 It is suggested to put the relevant manifests to the cluster pool in the same `namespace`. Hive [replaces](https://github.com/openshift/hive/blob/master/docs/clusterpools.md#install-config-template) `baseDomain` with the value taken from the pool's spec and `metadata.name` with a random string in the installation config from `secret/install-config-aws-us-east-1` and then passes it onto the OpenShift installer. Customizations such as the number of workers and the type of instances can be made there. A `ClusterImageSet` which a cluster level CRD defines the production and its version of the installed cluster.
 
-If any manifest contains sensitive information, e.g., `secret/hive-aws-credentials`, see [how to add a secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/). The following snippet in [secret-mirroring](https://github.com/openshift/release/blob/master/core-services/secret-mirroring/_mapping.yaml)'s configuration propagates `secret/hive-aws-credentials` in `namespace/cvp` on `api.ci` to `namespace/cvp-cluster-pool` on `app.ci` where Hive is deployed.
-
-```yaml
-- from:
-    namespace: cvp
-    name: hive-aws-credentials
-  to:
-    cluster: app.ci
-    namespace: cvp-cluster-pool 
-    name: hive-aws-credentials
-```
+If any manifest contains sensitive information, e.g., `secret/hive-aws-credentials`, see [how to add a secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/).
 
 When those manifests for a pool are applied on the cluster `app.ci`, the cluster pool `cvp-cluster-pool` can be used to [claim a cluster for tests](/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool).
