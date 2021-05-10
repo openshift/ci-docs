@@ -58,7 +58,7 @@ In order to add labels, move PRs and issues into milestones, merge PRs, etc, the
 If your repository is in the OpenShift organization and it was created by Dev Productivity team, it probably has Team
 OpenShift Robots added by default as part of the repo creation process. To check if your repo has the robots added,
 please ask in slack in #forum-dp-platform or open a ticket. If your repo does not have robots, then open a new ticket
-in their [JIRA project](https://jira.coreos.com/projects/DPP/summary) with the details.
+in their [JIRA project](https://issues.redhat.com/projects/DPP/summary) with the details.
 
 If your component repository is **not** in this organization:
 
