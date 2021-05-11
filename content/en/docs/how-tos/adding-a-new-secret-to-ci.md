@@ -24,6 +24,14 @@ secretsync/target-namespace: "test-credentials" # The Namespace of your secret i
 secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
 ```
 
+As an advanced feature, it is also possible to limit the clusters to which the secret should be synced. This is not needed
+in most cases and will result in failures if used for secrets that are used by jobs. This also works by using a special
+key in vault:
+
+```yaml
+secretsync/target-clusters: "one-cluster,another-cluster"
+```
+
 ## Use A Secret In A Job Step
 
 The most common case is to use secrets in a [step](/docs/architecture/step-registry/#step) of a job. In this case, we
