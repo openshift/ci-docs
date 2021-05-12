@@ -12,6 +12,7 @@ of the data.
 In order to add a new secret to our system, you will first need to create a secret collection. Secret collections are managed
 at [selfservice.vault.ci.openshift.org](https://selfservice.vault.ci.openshift.org). Just head there, log in, create a new
 one and ideally also add your teammates as members. Important: Secret collection names are globally unique in our system.
+{{< alert title="Info" color="info" >}} Users must have logged in to the DPTP Vault system at least once before they are listed as potential members. {{< /alert >}}
 
 The secrets themselves are managed in our Vault instance at [vault.ci.openshift.org](https://vault.ci.openshift.org).
 You need to use the OIDC auth to log in there. After logging in, click on `kv`, then `selfservice` and you should see your secret collection.
