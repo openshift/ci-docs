@@ -572,17 +572,6 @@ variable in the `env` section of a chain will propagate to all of its sub-chains
 and sub-steps, a variable in the `env` section of a workflow or test will
 propagate to all of its stages. The same applies for dependencies and leases.
 
-{{< highlight yaml >}}
-chain:
-  as: some-chain
-  steps:
-  - ref: some-step # TEST_VARIABLE will propagate to this step
-  - chain: other-chain # TEST_VARIABLE will propagate to all elements in this chain
-  env:
-  - name: TEST_VARIABLE
-    default: test value
-{{< / highlight >}}
-
 One special rule applies to list and mapping fields that are specified both in a
 test and its workflow.  Instead of completely overriding the workflow value, as
 is the case for scalar values, the two sections are merged according to the
@@ -594,3 +583,101 @@ following rules:
 - Leases declared in the test must not target an environment variable already
   present in the workflow. Otherwise, the resulting lease list is the
   combination of both sections.
+
+### Examples
+
+A step declaring a parameter:
+
+{{< highlight yaml >}}
+ref:
+  as: openshift-e2e-test
+  # …
+  env:
+  - name: TEST_SUITE
+    default: openshift/conformance/parallel
+{{< / highlight >}}
+
+Simply including the step in a test will use the default value:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+{{< / highlight >}}
+
+The value can be overridden when it is included in the test:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-disruptive
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
+
+To avoid repeating the same section in all tests, a workflow can be created that
+contains the override. The test can still choose to override the workflow value.
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e-disruptive
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-disruptive
+  steps:
+    workflow: openshift-e2e-disruptive
+{{< / highlight >}}
+
+Alternatively, the same can be achieved using a chain:
+
+{{< highlight yaml >}}
+chain:
+  as: openshift-e2e-tests
+  steps:
+  - ref: openshift-e2e-test
+  env:
+  - name: TEST_SUITE
+    default: openshift/disruptive
+{{< / highlight >}}
+
+The chain can then be included either in the test or the workflow.
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-disruptive
+  steps:
+    test:
+    - chain: openshift-e2e-tests
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e-disruptive
+  steps:
+    test:
+    - chain: openshift-e2e-tests
+{{< / highlight >}}
+
+Chains can be arbitrarily nested, and each parent can in turn override the
+value:
+
+{{< highlight yaml >}}
+chain:
+  as: openshift-e2e-tests-somewhat-contrived
+  steps:
+  - chain: openshift-e2e-tests
+  env:
+  - name: TEST_SUITE
+    default: serial
+{{< / highlight >}}
