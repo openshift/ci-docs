@@ -524,7 +524,7 @@ tests:
     test:
     - as: test
       leases:
-      # overriden by the parent section
+      # overridden by the parent section
       - resource_type: aws-quota-slice
         env: AWS_LEASED_RESOURCE
       # added to the parent section
