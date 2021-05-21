@@ -12,7 +12,7 @@ This document describes how to set up cluster pools backed by custom cloud platf
 
 ## Create a cluster pool
 
-In the openshift/release repository, create a folder in the [`clusters/app.ci/pools`](https://github.com/openshift/release/tree/master/clusters/app.ci/pools) directory that will contain manifests of all your pools (see [openshift-ci](https://github.com/openshift/release/tree/master/clusters/app.ci/pools/openshift-ci) as an example). Then place the manifests for the new `ClusterPool` there.
+In the openshift/release repository, create a folder in the [`clusters/hive/pools`](https://github.com/openshift/release/tree/master/clusters/hive/pools) directory that will contain manifests of all your pools (see [openshift-ci](https://github.com/openshift/release/tree/master/clusters/hive/pools/openshift-ci) as an example). Then place the manifests for the new `ClusterPool` there.
 
 ```yaml
 apiVersion: hive.openshift.io/v1
