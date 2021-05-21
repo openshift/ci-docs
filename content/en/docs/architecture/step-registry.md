@@ -649,7 +649,7 @@ tests:
 {{< / highlight >}}
 
 To avoid repeating the same section in all tests, a workflow can be created that
-contains the override. The test can still choose to override the workflow value.
+contains the override.
 
 {{< highlight yaml >}}
 workflow:
@@ -666,6 +666,41 @@ tests:
 - as: e2e-disruptive
   steps:
     workflow: openshift-e2e-disruptive
+{{< / highlight >}}
+
+The test can still choose to override the workflow value.
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-serial
+  steps:
+    workflow: openshift-e2e-disruptive
+  env:
+    TEST_SUITE: serial
+{{< / highlight >}}
+
+If the workflow declared more variables, this override would be safe as the two
+sections are merged as expected:
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e-disruptive
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/disruptive
+      EXTRA_PARAMETER: value
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-serial
+  steps:
+    workflow: openshift-e2e-disruptive
+  env:
+    TEST_SUITE: serial
+    # EXTRA_PARAMETER will also be part of this section at runtime
 {{< / highlight >}}
 
 Alternatively, the same can be achieved using a chain:
