@@ -446,8 +446,10 @@ tests:
 
 {{< alert title="Warning" color="warning" >}}
 Parameters must be declared in the `env` section of every step that requires
-them, as shown here. Simply setting the parameter in a parent component is not
-sufficient.
+them, as shown here: setting values in parent components is not sufficient.
+Basic compliance with this rule is enforced and simple cases of unused values
+will result in validation errors, but not all can be detected, resulting in
+parameter values not being set.
 {{< /alert >}}
 
 {{< alert title="Warning" color="warning" >}}
