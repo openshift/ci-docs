@@ -444,21 +444,6 @@ tests:
       TEST_SUITE: openshift/conformance/parallel
 {{< / highlight >}}
 
-{{< alert title="Warning" color="warning" >}}
-Parameters must be declared in the `env` section of every step that requires
-them, as shown here: setting values in parent components is not sufficient.
-Basic compliance with this rule is enforced and simple cases of unused values
-will result in validation errors, but not all can be detected, resulting in
-parameter values not being set.
-{{< /alert >}}
-
-{{< alert title="Warning" color="warning" >}}
-Note that `env` is a top-level field in steps (and chains), alongside the `as`
-field, while it is placed in the `steps` field in tests (and workflows). The
-strict YAML validation used to parse these files will generate an error, but
-this is still a common source of confusion.
-{{< /alert >}}
-
 If a parameter has a sensible default value, it can be declared in the step:
 
 {{< highlight yaml >}}
@@ -502,6 +487,74 @@ workflow:
 
 For more advanced uses of parameters and overrides, see the [hierarchical
 propagation](#hierarchical-propagation) section.
+
+### Common mistakes
+
+#### Step/chain/workflow/test does not accept `env` field
+
+Verify that the `env` field is placed correctly. Note that it is a top-level
+field in steps and chains, alongside the `as` field, while it is placed in the
+`steps` field in tests and workflows. The strict YAML validation used to parse
+these files will generate an error, but this is still a common source of
+confusion.
+
+{{< highlight yaml >}}
+ref:
+  as: openshift-e2e-test
+  # …
+  env:
+  - name: TEST_SUITE
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  steps:
+    # …
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
+
+#### Parameter is not set
+
+Parameters must be declared in the `env` section of every step that requires
+them. Setting values in parent components is not sufficient. Basic compliance
+with this rule is enforced and simple cases of unused values will result in
+validation errors, but not all can be detected, resulting in parameter values
+not being set.
+
+{{< highlight yaml >}}
+ref:
+  as: openshift-e2e-test
+  # …
+  env:
+  - name: TEST_SUITE
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+ref:
+  as: step-with-no-parameters
+  # …
+  # No parameters declared
+  # env: {}
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    - ref: step-with-no-parameters
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
+
+In this case, `TEST_SUITE` will be set in `openshift-e2e-test` since it is
+declared in its `env` section, but _will not_ be set in
+`step-with-no-parameters`. If that is desired, a similar `env` section should be
+added to that step as well. Note that this case evades the unused parameter
+validation since at least one step declares that it uses the relevant parameter.
 
 ## Leases
 
