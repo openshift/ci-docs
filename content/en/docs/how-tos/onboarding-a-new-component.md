@@ -8,50 +8,7 @@ description: How to onboard a new component repository to the CI system for test
 This document overviews the workflow for onboarding new public component repositories to the Openshift CI. Private
 repositories are not supported at this time, but will be in the future
 
-## Repository Configuration
-
-### Webhook Delivery
-
-Our CI system is event-driven from GitHub via webhook delivery; the system will only function if webhooks for all events
-are delivered from a repo or org. Today, we have organization-level webhooks delivered for all repos in the following
-orgs:
-
-* openshift
-* openshift-s2i
-* operator-framework
-
-If you are onboarding a new component in one of these orgs, you do not need to configure webhooks individually for your
-repository, please continue on to the [Prow Configuration](#prow-configuration) section.
-
-#### Token Retrieval
-
-Webhook deliveries to the CI system are encrypted with an HMAC token provided when configuring the webhook in the GitHub
-UI. A CI administrator can configure the webhook appropriately for your repository if you grant them edit access, or you
-can contact a CI administrator to get a copy of the token so that you may add the webhook yourself.
-
-Contact a CI administrator via the [@dptp-helpdesk alias](https://coreos.slack.com/admin/user_groups) in the
-[#forum-testplatform channel](https://coreos.slack.com/archives/CBN38N3MW) in the CoreOS slack.
-
-#### Webhook Setup
-
-In order to configure the webhook delivery, you will need edit access to the repository you are onboarding. To set up a
-webhook, navigate through the GitHub UI to the settings page for your repository, then choose “Webhooks” from the menu
-on the left. Your webhook should be set up with the following parameters:
-
-|Parameter|Value|
-|:---|:---|
-|Payload URL|https://hook.ci.openshift.org/hook|
-|Content Type|`application/json`|
-|Secret|see [Token Retrieval](#token-retrieval) above|
-|SSL Verification|enabled|
-|Event types|all|
-|Active|yes|
-
-{{< alert title="Warning" color="warning" >}}
-Don’t add `/` at the end of the payload url when configuring the webhook!
-{{< /alert >}}
-
-### Granting Robots Privileges and Installing the GitHub App
+## Granting Robots Privileges and Installing the GitHub App
 
 In order to add labels, move PRs and issues into milestones, merge PRs, etc, the robots will need write access to your repository.
 
