@@ -406,14 +406,22 @@ environment variable that is uniform across all tests is all that is required,
 it can be declared directly in the test script.
 {{< /alert >}}
 
-Each parameter declaration in the `env` section consists of the following fields:
+In the context of the step registry, parameters are used in two distinct
+scenarios, described in the following sections: declared by the test step author
+as inputs, or set by the test author.
+
+### Declaring step parameters
+
+Each parameter declaration in the `env` section consists of the following
+fields:
 
 * `name`: environment variable name
-* `default` (optional): the value assigned if no other node in the hierarchy
-  provides one
+* `default` (optional): the value assigned if none is provided
 * `documentation` (optional): a textual description of the parameter
 
-The simplest form of a parameter declaration in a step is:
+Parameters are declared in the `env` section (note that the placement of this
+section varies depending on the component type, see [common
+mistakes](#common-mistakes)). The simplest form of declaration in a step is:
 
 {{< highlight yaml >}}
 ref:
@@ -430,9 +438,13 @@ ref:
   - name: TEST_SUITE
 {{< / highlight >}}
 
-Omitting a default value makes `TEST_SUITE` a required parameter. A test that
+`TEST_SUITE` is declared as an input parameter to the step and will be available
+at runtime as an environment variable. Different tests can set the parameter to
+different values to create test variations.
+
+Omitting a default value makes `TEST_SUITE` a required parameter.  A test that
 wishes to use this step must give the parameter a value in its corresponding
-`env` section. Failing to do so will result in a validation error.
+`env` section --- failing to do so will result in a validation error.
 
 {{< highlight yaml >}}
 tests:
@@ -479,10 +491,87 @@ is the same as that of a test:
 workflow:
   as: openshift-e2e-serial
   steps:
+    env:
+      TEST_SUITE: openshift/conformance/serial
+{{< / highlight >}}
+
+Tests can then use the workflow instead and dispense the `env` section:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  steps:
+    workflow: openshift-e2e-serial
+    test:
+    - ref: openshift-e2e-test
+{{< / highlight >}}
+
+For more advanced uses of parameters and overrides, see the [hierarchical
+propagation](#hierarchical-propagation) section.
+
+### Setting parameter values
+
+Once a registry component exists that declares one or more parameters, it can be
+used by other components and tests. Components and their parameters can be found
+either directly in the step registry directory in
+[`openshift/release`](https://github.com/openshift/release/tree/master/ci-operator/step-registry)
+or via the [step registry web page](https://steps.ci.openshift.org). The latter
+shows what parameters are available for each type (follow the links for
+examples):
+
+- [Steps](https://steps.ci.openshift.org/reference/openshift-e2e-test#environment)
+  list their input parameters, along with the default values if they exist.
+- [Chains](https://steps.ci.openshift.org/chain/ipi-conf-aws#environment) and
+  [workflows](https://steps.ci.openshift.org/workflow/openshift-e2e-aws#environment)
+  list their parameters as well as all parameters that are declared in their
+  child components (other chains and steps).
+
+Assuming a preexisting step declared as:
+
+{{< highlight yaml >}}
+ref:
+  as: openshift-e2e-test
+  from: tests
+  commands: openshift-e2e-test-commands.sh
+  resources:
+    requests:
+      cpu: "3"
+      memory: 600Mi
+    limits:
+      memory: 4Gi
+  env:
+  - name: TEST_SUITE
+    default: openshift/conformance/serial
+{{< / highlight >}}
+
+{{< alert title="Note" color="info" >}}
+These examples are simplified versions for illustrative purposes of the
+components present in the registry. See their original definitions for the full
+contents and their documentation for intended usage.
+{{< /alert >}}
+
+A test can use this step directly:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+{{< / highlight >}}
+
+The default value declared in the step will be used for the `TEST_SUITE`
+parameter. If desired, it can be overridden with an `env` section in the test
+declaration:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-disruptive
+  steps:
     test:
     - ref: openshift-e2e-test
     env:
-      TEST_SUITE: openshift/conformance/serial
+      TEST_SUITE: openshift/disruptive
 {{< / highlight >}}
 
 For more advanced uses of parameters and overrides, see the [hierarchical
