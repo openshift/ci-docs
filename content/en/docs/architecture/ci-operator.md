@@ -430,7 +430,7 @@ The claim will be fulfilled immediately if a cluster is available in the cluster
 The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details. By default, OpenShift CI provides the following pools backed by DPP-owned accounts:
 
 ```console
-$ oc --context app.ci get clusterpools --all-namespaces -l owner=dpp --show-labels
+$ oc --context hive get clusterpools --all-namespaces -l owner=dpp --show-labels
 NAMESPACE         NAME                             READY   SIZE   BASEDOMAIN                  IMAGESET          LABELS
 ci-cluster-pool   ci-ocp-4-7-amd64-aws-us-east-1   1       1      hive.aws.ci.openshift.org   ocp-4.7.0-amd64   architecture=amd64,cloud=aws,owner=dpp,product=ocp,region=us-east-1,version=4.7
 ```
