@@ -757,7 +757,12 @@ following rules:
 
 ### Examples
 
-A step declaring a parameter:
+This section contains more exotic examples not present in
+[Parameters](#parameters) or elsewhere.
+
+#### Tests and workflows
+
+Starting from a step that declares a parameter:
 
 {{< highlight yaml >}}
 ref:
@@ -768,7 +773,18 @@ ref:
     default: openshift/conformance/parallel
 {{< / highlight >}}
 
-Simply including the step in a test will use the default value:
+As has already been described, a test or workflow can include the step. Without
+any additional `env` sections, the default value declared in the step --- the
+lowest level of the hierarchy, but the highest that declares a value --- will be
+used.
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+{{< / highlight >}}
 
 {{< highlight yaml >}}
 tests:
@@ -776,22 +792,30 @@ tests:
   steps:
     test:
     - ref: openshift-e2e-test
+- as: e2e-with-workflow
+  steps:
+    workflow: openshift-e2e
 {{< / highlight >}}
 
-The value can be overridden when it is included in the test:
+In all these examples, the `TEST_SUITE` parameter will be set to the default
+value declared in the step.
+
+#### Test/workflow override
+
+If a value different from the parameter's default is desired, it can be declared
+in either the workflow or the test.
 
 {{< highlight yaml >}}
 tests:
 - as: e2e-disruptive
   steps:
-    test:
-    - ref: openshift-e2e-test
+    workflow: openshift-e2e
     env:
       TEST_SUITE: openshift/disruptive
 {{< / highlight >}}
 
-To avoid repeating the same section in all tests, a workflow can be created that
-contains the override.
+Here, the previously declared workflow is used and the value is set in the test.
+Alternatively, it could be set in the workflow.
 
 {{< highlight yaml >}}
 workflow:
@@ -807,10 +831,45 @@ workflow:
 tests:
 - as: e2e-disruptive
   steps:
-    workflow: openshift-e2e-disruptive
+    workflow: openshift-e2e
 {{< / highlight >}}
 
-The test can still choose to override the workflow value.
+Including a step and giving its parameters values are independent actions, so
+yet another option would be:
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+{{< / highlight >}}
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-disruptive
+  steps:
+    workflow: openshift-e2e
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
+
+#### Test overrides workflow
+
+Following the propagation rules described previously in this section, even if a
+workflow defines a parameter value, the test can still choose to override it.
+The value in the test's `env` section will be used, as it is at a higher level
+in the hierarchy.
+
+{{< highlight yaml >}}
+workflow:
+  as: openshift-e2e-disruptive
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/disruptive
+{{< / highlight >}}
 
 {{< highlight yaml >}}
 tests:
@@ -818,18 +877,17 @@ tests:
   steps:
     workflow: openshift-e2e-disruptive
   env:
-    TEST_SUITE: serial
+    TEST_SUITE: serial # overrides the value set in the workflow
 {{< / highlight >}}
 
-If the workflow declared more variables, this override would be safe as the two
-sections are merged as expected:
+This would be safe even if the workflow declared more variables: the two
+sections are merged as expected.
 
 {{< highlight yaml >}}
 workflow:
   as: openshift-e2e-disruptive
   steps:
-    test:
-    - ref: openshift-e2e-test
+    # …
     env:
       TEST_SUITE: openshift/disruptive
       EXTRA_PARAMETER: value
@@ -842,10 +900,18 @@ tests:
     workflow: openshift-e2e-disruptive
   env:
     TEST_SUITE: serial
-    # EXTRA_PARAMETER will also be part of this section at runtime
+    # EXTRA_PARAMETER will retain its value
 {{< / highlight >}}
 
-Alternatively, the same can be achieved using a chain:
+#### Chains
+
+Chains introduce additional levels of propagation. They can also declare
+parameters, dependencies, and leases, which override those declared in their
+steps. Because they can be arbitrarily nested, more complex overriding patterns
+can be constructed.
+
+The examples in [test/workflow override](#testworkflow-override) could be
+rewritten using chains.
 
 {{< highlight yaml >}}
 chain:
@@ -857,16 +923,6 @@ chain:
     default: openshift/disruptive
 {{< / highlight >}}
 
-The chain can then be included either in the test or the workflow.
-
-{{< highlight yaml >}}
-tests:
-- as: e2e-disruptive
-  steps:
-    test:
-    - chain: openshift-e2e-tests
-{{< / highlight >}}
-
 {{< highlight yaml >}}
 workflow:
   as: openshift-e2e-disruptive
@@ -875,15 +931,13 @@ workflow:
     - chain: openshift-e2e-tests
 {{< / highlight >}}
 
-Chains can be arbitrarily nested, and each parent can in turn override the
-value:
-
 {{< highlight yaml >}}
-chain:
-  as: openshift-e2e-tests-somewhat-contrived
+tests:
+- as: e2e-disruptive
   steps:
-  - chain: openshift-e2e-tests
-  env:
-  - name: TEST_SUITE
-    default: serial
+    test:
+    - chain: openshift-e2e-tests
+- as: e2e-with-workflow
+  steps:
+    workflow: openshift-e2e-disruptive
 {{< / highlight >}}
