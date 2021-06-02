@@ -221,22 +221,16 @@ cache the Go build. If multiple output `images` exist that rely on a previously 
 reduce build times dramatically.
 
 ## Build Arguments
-The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.openshift.com/container-platform/4.7/cicd/builds/build-strategies.html#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument can either from the field `value` in the configuration or from a referred secret. __Note__ that it is [required](/docs/how-tos/adding-a-new-secret-to-ci/#use-a-secret-in-a-job-step) to use a secret in the `test-credentials` namespace.
+The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.openshift.com/container-platform/4.7/cicd/builds/build-strategies.html#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument is taken from the field `value` in the configuration.
 
 ```yaml
 images:
 - build_args:
-    - name: user
-      value: jack
-    - name: password
-      secret_key_ref:
-        namespace: test-credentials
-        name: build-credentials
-        key: password
+    - name: product
+      value: okd
   dockerfile_literal: |-
     FROM centos:8
-    ARG user=tom
-    ARG password=secret
+    ARG product=ocp
   from: os
   to: test-image
 ```
