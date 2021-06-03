@@ -25,13 +25,18 @@ spec:
       scheduled: true
 {{< / highlight >}}
 
-Now you can use the image like this:
+Now you can use the image like this in the [job configuration file](https://github.com/openshift/release/tree/master/ci-operator/config) of your repository:
 {{< highlight yaml >}}
 base_images:
   my-external-image::
     namespace: ci
-    name:  boskos
+    name:  image-name
     tag: latest
+tests:
+- as: my-test
+  commands: cmd
+  container:
+    from: my-external-image
 {{< / highlight >}}
 
 Note that if your image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and ensure that you use the [`Local`](https://docs.openshift.com/container-platform/4.7/rest_api/image_apis/imagestream-image-openshift-io-v1.html) `referencePolicy` on your `ImageStream` to allow downstream consumers to not require authentication:
