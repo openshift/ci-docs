@@ -1,31 +1,23 @@
 ---
 title: "Using External Images in CI"
-description: How to import external images to the CI environments for use in jobs.
+description: How to mirror external images to the CI environments for use in jobs.
 ---
 
 The `ci-operator` config only allows to reference `ImageStreamTags`, it does not allow to specify arbitrary Docker pull specs. In order
-to use external images, they need to be imported. For this, create a file in the
-[`openshift/release` repository in the `clusters/app.ci/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/clusters/app.ci/supplemental-ci-images)
-that looks like the following:
+to use external images, they need to be mirrored to [the central CI registry](/docs/how-tos/use-registries-in-build-farm/#summary-of-available-registries).
 
+## Mirror Public Images
 
-{{< highlight yaml >}}
-apiVersion: image.openshift.io/v1
-kind: ImageStream
-metadata:
-  name: boskos
-  namespace: ci
-spec:
-  tags:
-  - name: latest
-    from:
-      kind: DockerImage
-      name: gcr.io/k8s-staging-boskos/boskos:latest
-    importPolicy:
-      scheduled: true
+If the source image is open to the public, we can mirror the image by adding it into a mapping file in
+[the `core-services/image-mirroring/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/supplemental-ci-images/) of `openshift/release` repository. The following line in the `mapping_supplemental_ci_images_ci` file mirrors 
+`gcr.io/k8s-staging-boskos/boskos:latest` to `registry.ci.openshift.org/ci/boskos:latest`. The naming convention of the mapping file is `mapping_supplemental_ci_images_<namespace>`, e.g., the images in `mapping_supplemental_ci_images_ci` are mirrored to the namespace `ci`.
+
+{{< highlight text >}}
+gcr.io/k8s-staging-boskos/boskos:latest registry.ci.openshift.org/ci/boskos:latest
 {{< / highlight >}}
 
-Now you can use the image like this:
+The hourly periodic job `periodic-image-mirroring-supplemental-ci-images` mirrors all the images defined in the mapping files.
+Once it is mirrored, you can use the image like this:
 {{< highlight yaml >}}
 base_images:
   my-external-image::
@@ -34,22 +26,8 @@ base_images:
     tag: latest
 {{< / highlight >}}
 
-Note that if your image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and ensure that you use the [`Local`](https://docs.openshift.com/container-platform/4.7/rest_api/image_apis/imagestream-image-openshift-io-v1.html) `referencePolicy` on your `ImageStream` to allow downstream consumers to not require authentication:
+## Mirror Private Images
 
-{{< highlight yaml >}}
-apiVersion: image.openshift.io/v1
-kind: ImageStream
-metadata:
-  name: secret
-  namespace: my-namespace
-spec:
-  tags:
-  - name: latest
-    from:
-      kind: DockerImage
-      name: secret.io/secret/secret:latest
-    importPolicy:
-      scheduled: true
-    referencePolicy: # this is required for downstream users to pull this image without authenticating
-      type: Local
-{{< / highlight >}}
+If the image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and define a new periodic [mirroring job](/docs/how-tos/mirroring-to-quay/) with it.
+
+We cannot reuse the existing job as the keys in the credentials config are registries and we might have to set up multiple credentials for the same registry.
