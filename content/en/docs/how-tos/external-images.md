@@ -20,7 +20,7 @@ The hourly periodic job `periodic-image-mirroring-supplemental-ci-images` mirror
 Once it is mirrored, you can use the image like this:
 {{< highlight yaml >}}
 base_images:
-  my-external-image::
+  my-external-image:
     namespace: ci
     name:  boskos
     tag: latest
