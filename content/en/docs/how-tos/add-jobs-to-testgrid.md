@@ -33,8 +33,7 @@ If the release gating job has an entry in the [`_allow-list.yaml`](https://githu
 {{< /alert >}}
 
 #### Adding a non-release gating job to TestGrid
-If a non-release gating job is added to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) it would simply add the job to TestGrid in the specified dashboard.
-
+If a non-release gating job is added to the [`_allow-list.yaml`](https://github.com/openshift/release/blob/master/core-services/testgrid-config-generator/_allow-list.yaml) it would simply add the job to TestGrid in the specified dashboard (which is useful for marking jobs `broken`).
 
 Refer to the README for the [TestGrid config generator tool](https://github.com/openshift/ci-tools/tree/master/cmd/testgrid-config-generator) for more details regarding how the testgrid-config-generator works.
 
