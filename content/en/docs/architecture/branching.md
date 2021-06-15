@@ -36,7 +36,7 @@ During code freeze, the active development branch opens to contributions that ta
 |-|-|-|-|
 |`master/main`|`ocp/4.x+1`|`lgtm`, `approved`|no|
 |`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
-|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `group-lead-approved`|yes|
+|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `group-lead-approved`|no|
 |`release-4.x+1`|nowhere|merges blocked|yes|
 
 ## General Availability For 4.x Release
