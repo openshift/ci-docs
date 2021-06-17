@@ -11,6 +11,7 @@
 {{ end }}
 
 {{/* Everything above here is copied from themes/docsy/layouts/partials/head-css.html to add the below section */}}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css" integrity="sha384-Vwj80kTHnbvFQKFx/DXnuzcgBarxFKFKVn0/CvmrVdyYhYHbg2e05M8TF4dskCwA" crossorigin="anonymous">
 <style>
 @media(min-width:992px) {
  .td-max-width-on-larger-screens,
@@ -28,4 +29,13 @@
  .td-content>.alert {
   max-width:100%;
  }
+}
+
+td.details-control {
+    background: url('https://datatables.net/examples/resources/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('https://datatables.net/examples/resources/details_close.png') no-repeat center center;
+}
 </style>

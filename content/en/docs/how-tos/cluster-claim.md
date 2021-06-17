@@ -52,3 +52,24 @@ It is suggested to put the relevant manifests to the cluster pool in the same `n
 If any manifest contains sensitive information, e.g., `secret/hive-aws-credentials`, see [how to add a secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/).
 
 When those manifests for a pool are applied on the cluster `hive`, the cluster pool `cvp-cluster-pool` can be used to [claim a cluster for tests](/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool).
+
+## Existing Cluster Pools
+
+</script>
+{{< rawhtml >}}
+
+<table id="table_pools" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th></th>
+            <th>NAMESPACE</th>
+            <th>NAME</th>
+            <th>READY</th>
+            <th>SIZE</th>
+            <th>MAX SIZE</th>
+            <th>IMAGE SET</th>
+            <th>OWNER</th>
+        </tr>
+    </thead>
+</table>
+{{< /rawhtml >}}
