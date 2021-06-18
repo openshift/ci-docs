@@ -413,6 +413,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
         requests:
           cpu: 100m
           memory: 200Mi
+    workflow: generic-claim # expose images, gather logs (https://steps.ci.openshift.org/workflow/generic-claim)
 ```
 
 The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the timeout, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
@@ -430,6 +431,9 @@ ci-cluster-pool   ci-ocp-4-7-amd64-aws-us-east-1   1       1      hive.aws.ci.op
 ```
 
 Note that `cluster_claim` and `cluster_profile` are mutually exclusive because [the latter](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) indicates installing a cluster on demand, instead of claiming a pre-installed cluster in a pool.
+
+If you are using `cluster_claim` to replace a workflow such as [ipi-aws](https://steps.ci.openshift.org/workflow/ipi-aws), you may have also removed important steps such as exposing images (pre) and gathering logs (post).
+You can reinstate these steps by introducing a workflow such as [generic-claim](https://steps.ci.openshift.org/workflow/generic-claim).
 
 ## Declaring Tests
 
