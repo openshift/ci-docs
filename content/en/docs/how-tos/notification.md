@@ -11,7 +11,7 @@ reporter_config:
     channel: '#forum'
     job_states_to_report:
     - failure
-    report_template: 'Job {{.Spec.Job}} failed.'
+    report_template: Job {{.Spec.Job}} failed.
 ```
 
 For example, by the above snippet, a Slack alert will be sent out to `#forum` channel when there is a failure of the job. The alert is formatted by `report_template`.
@@ -32,7 +32,7 @@ reporter_config:
     channel: '#forum'
     job_states_to_report:
     - failure
-    report_template: 'Job {{.Spec.Job}} failed'
+    report_template: Job {{.Spec.Job}} failed.
 spec: {}  # Valid Kubernetes PodSpec.
 ```
 
