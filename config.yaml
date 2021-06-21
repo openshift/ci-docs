@@ -7,7 +7,7 @@ contentDir: "content/en"
 params:
   offlineSearch: true
   github_repo: "https://github.com/openshift/ci-docs"
-  api_v1_url: "http://localhost:8090"
+  api_v1_url: "https://cluster-display.ci.openshift.org"
 enableGitInfo: true
 menu:
   main:
