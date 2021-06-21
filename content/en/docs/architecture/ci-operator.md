@@ -393,6 +393,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
 ```yaml
 - as: e2e
   cluster_claim:
+    # architecture, cloud, owner, product, and version are used to determine a cluster pool by matching the labels
     architecture: amd64
     cloud: aws
     owner: dpp
@@ -415,13 +416,13 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
           memory: 200Mi
 ```
 
-The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the timeout, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
+The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the `timeout`, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
 
 - almost no time to claim a running cluster in the pool;
 - 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after beining provisioned;
 - 40 to 60 minutes to create a new cluster if all the pre-installed clusters in the pool are taken by other jobs.
 
-The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details. By default, OpenShift CI provides the following pools backed by DPP-owned accounts. See [the existing cluster pools](/docs/how-tos/cluster-claim/#existing-cluster-pools).
+The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details and check out [the existing cluster pools](/docs/how-tos/cluster-claim/#existing-cluster-pools). By default, OpenShift CI provides the pools backed by DPP-owned accounts.
 
 
 Note that `cluster_claim` and `cluster_profile` are mutually exclusive because [the latter](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) indicates installing a cluster on demand, instead of claiming a pre-installed cluster in a pool.

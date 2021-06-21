@@ -20,13 +20,13 @@ kind: ClusterPool
 metadata:
   name: ci-ocp-4-7-amd64-aws-us-east-1
   namespace: cvp-cluster-pool
-  labels: # product, version, architecture, cloud, owner are used to filter out a pool when a job claims a cluster
-    product: ocp
-    version: "4.7"
+  labels: # architecture, cloud, owner, product, version are used to filter out a pool when a job claims a cluster
     architecture: amd64
     cloud: aws
+    product: ocp
     owner: cvp
-    region: us-east-1
+    region: us-east-1 # the region where the cluster is installed, not yet used in label matching
+    version: "4.7"
 spec:
   baseDomain: hive.example.org # the base domain to install the cluster
   imageSetRef:
@@ -55,6 +55,8 @@ When those manifests for a pool are applied on the cluster `hive`, the cluster p
 
 ## Existing Cluster Pools
 
+The following table shows the existing cluster pools that a user can claim a cluster from. Each pool defines a set of characters about the clusters that are provisioned out of it. For instance, the cluster pool `ci-ocp-4-6-amd64-aws-us-east-1` is composed of OCP 4.6 clusters on AWS's `us-east-1` region. The values of **READY**, **SIZE** and **MAX SIZE** are taken from [the status and the specification of each pool](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#ClusterPool).  Clicking <img src="https://datatables.net/examples/resources/details_open.png" alt="details button"> shows the more details of the cluster pool, such as the release image that is used for provisioning a cluster and the labels defined on the pool. The Search box can filter out the pools according to the given keyword.
+
 </script>
 {{< rawhtml >}}
 
@@ -73,3 +75,7 @@ When those manifests for a pool are applied on the cluster `hive`, the cluster p
     </thead>
 </table>
 {{< /rawhtml >}}
+
+{{< alert title="Info" color="info" >}}
+The cluster pools in namespace `fake-cluster-pool` are for DPTP's internal usage, such as e2e tests for the pool feature of `ci-operator`. For example, the claims against the pool `fake-ocp-4-7-amd64-aws` are annotated with `hive.openshift.io/fake-cluster: "true"` which tells Hive to return a syntactically correct `kubeconfig` right away without provisioning any cluster.
+{{< /alert >}}
