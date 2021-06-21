@@ -421,13 +421,8 @@ The claim will be fulfilled immediately if a cluster is available in the cluster
 - 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after beining provisioned;
 - 40 to 60 minutes to create a new cluster if all the pre-installed clusters in the pool are taken by other jobs.
 
-The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details. By default, OpenShift CI provides the following pools backed by DPP-owned accounts:
+The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/docs/how-tos/cluster-claim/) document for more details. By default, OpenShift CI provides the following pools backed by DPP-owned accounts. See [the existing cluster pools](/docs/how-tos/cluster-claim/#existing-cluster-pools).
 
-```console
-$ oc --context hive get clusterpools --all-namespaces -l owner=dpp --show-labels
-NAMESPACE         NAME                             READY   SIZE   BASEDOMAIN                  IMAGESET          LABELS
-ci-cluster-pool   ci-ocp-4-7-amd64-aws-us-east-1   1       1      hive.aws.ci.openshift.org   ocp-4.7.0-amd64   architecture=amd64,cloud=aws,owner=dpp,product=ocp,region=us-east-1,version=4.7
-```
 
 Note that `cluster_claim` and `cluster_profile` are mutually exclusive because [the latter](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) indicates installing a cluster on demand, instead of claiming a pre-installed cluster in a pool.
 
