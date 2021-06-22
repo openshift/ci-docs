@@ -518,10 +518,15 @@ ImageStreams will exist in the `Namespace` executing a test workflow:
 
 |`ImageStream`|Description|
 |:---|:---|
-|`pipeline`|  Input `images` described with `base_images` and `build_root` as well as `images` holding built artifacts (such as `src` or `bin`) and output `images` as defined in `images`.|
+|`pipeline`|  Input `images` described with `base_images` and `build_root`, images holding built artifacts (such as `src` or `bin`), output `images` as defined in `images`, and several internal images used by `ci-operator`.|
 |`release`|Tags of this ImageStreams hold OpenShift release payload `images` for installing and upgrading ephemeral OpenShift clusters for testing; a tag will be present for every named release configured in releases. If a `tag_specification` is provided, two tags will be present, `:initial` and `:latest`.|
 |`stable-<name>`|Images composing the `release:name` release payload, present when `<name>` is configured in `releases`.|
 |`stable`|Same as above, but for the release:latest release payload. Appropriate tags are overridden using the container `images` built during the test.|
+
+Note that the `pipeline` `ImageStream` is a namespace shared between the
+configuration and `ci-operator` itself. Name conflicts can occur if the
+configuration uses reserved or duplicated names. Static validation is performed
+when the configuration is loaded and it will be rejected in that case.
 
 ### Referring to Images in `ci-operator` Configuration
 
