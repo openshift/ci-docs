@@ -394,6 +394,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
 - as: e2e
   cluster_claim:
     # architecture, cloud, owner, product, and version are used to determine a cluster pool by matching the labels
+    as: custom    # optional; release name to use when importing cluster claim release; defaults to `latest`
     architecture: amd64
     cloud: aws
     owner: dpp
@@ -409,7 +410,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
         oc get node
         oc config view
         oc whoami
-      from: cli
+      from: stable-custom:cli # refer to cli tag from cluster claim release named in `as` under `cluster_claim`. It works for other tags as well.
       resources:
         requests:
           cpu: 100m
