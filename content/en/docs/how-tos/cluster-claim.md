@@ -12,6 +12,7 @@ This document describes how to set up cluster pools backed by custom cloud platf
 
 ## Create a cluster pool
 
+A Hive instance is deployed on an dedicated OpenShift cluster, called `hive`. All the resources for a cluster pool are managed on the `hive` cluster.
 In the openshift/release repository, create a folder in the [`clusters/hive/pools`](https://github.com/openshift/release/tree/master/clusters/hive/pools) directory that will contain manifests of all your pools (see [openshift-ci](https://github.com/openshift/release/tree/master/clusters/hive/pools/openshift-ci) as an example). Then place the manifests for the new `ClusterPool` there.
 
 ```yaml
@@ -49,9 +50,9 @@ Hive maintains the number of clusters in the pool as specified by its `size`. A 
 
 It is suggested to put the relevant manifests to the cluster pool in the same `namespace`. Hive [replaces](https://github.com/openshift/hive/blob/master/docs/clusterpools.md#install-config-template) `baseDomain` with the value taken from the pool's spec and `metadata.name` with a random string in the installation config from `secret/install-config-aws-us-east-1` and then passes it onto the OpenShift installer. Customizations such as the number of workers and the type of instances can be made there. A `ClusterImageSet` which a cluster level CRD defines the production and its version of the installed cluster.
 
-If any manifest contains sensitive information, e.g., `secret/hive-aws-credentials`, see [how to add a secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/).
+If any manifest contains sensitive information, e.g., `secret/hive-aws-credentials`, see [how to add a secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/). Make sure to set the key `secretsync/target-clusters: "hive"` for the secret to ensure it is synced only to the cluster that needs it.
 
-When those manifests for a pool are applied on the cluster `hive`, the cluster pool `cvp-cluster-pool` can be used to [claim a cluster for tests](/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool).
+When those manifests for a pool are applied on the `hive` cluster, the cluster pool `cvp-cluster-pool` can be used to [claim a cluster for tests](/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool).
 
 ## Existing Cluster Pools
 
