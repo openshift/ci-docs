@@ -432,6 +432,8 @@ Note that `cluster_claim` and `cluster_profile` are mutually exclusive because [
 If you are using `cluster_claim` to replace a workflow such as [ipi-aws](https://steps.ci.openshift.org/workflow/ipi-aws), you may have also removed important steps such as exposing images (pre) and gathering logs (post).
 You can reinstate these steps by introducing a workflow such as [generic-claim](https://steps.ci.openshift.org/workflow/generic-claim).
 
+The pull secret `${CLUSTER_PROFILE_DIR}/pull-secret` does not exist if a test claims a cluster. The same content can be accessed by [adding the `ci-pull-credentials` secret in the `test-credentials` namespace to your test](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials): the key in the secret is `.dockerconfigjson`.
+
 ## Declaring Tests
 
 Tests as executed by `ci-operator` run a set of commands inside of a container; this is implemented by scheduling a `Pod`
