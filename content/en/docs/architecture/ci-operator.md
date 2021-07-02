@@ -384,7 +384,7 @@ releases:
 {{< / highlight >}}
 
 ### Testing with a Cluster from a Cluster Pool
-The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by `dpp`. If the cluster is successfuly claimed from the pool, `ci-operator` executes the specified multi-stage test and provides it the credentials to access the cluster via two environmental variables:
+The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by `openshift-ci`. If the cluster is successfuly claimed from the pool, `ci-operator` executes the specified multi-stage test and provides it the credentials to access the cluster via two environmental variables:
 
 -  `${KUBECONFIG}`: Path to `system:admin` credentials.
 -  `${KUBEADMIN_PASSWORD_FILE}`: Path to the `kubeadmin` password file.
@@ -397,7 +397,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
     as: custom    # optional; release name to use when importing cluster claim release; defaults to `latest`
     architecture: amd64
     cloud: aws
-    owner: dpp
+    owner: openshift-ci
     product: ocp
     timeout: 1h0m0s
     version: "4.7"
