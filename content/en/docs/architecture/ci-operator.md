@@ -439,7 +439,7 @@ The pull secret `${CLUSTER_PROFILE_DIR}/pull-secret` does not exist if a test cl
 Tests as executed by `ci-operator` run a set of commands inside of a container; this is implemented by scheduling a `Pod`
 under the hood. `ci-operator` can be configured to run one of two types of tests: simple, single-stage container tests and
 longer, multi-stage container tests. A single-stage test will schedule one `Pod` and execute the commands specified. Note
-that the default working directory for any container image in the `pipeline` `ImageStream` is the root of the cloned
+that the default working directory for any container image is in the root of the cloned
 repository under test. The following example uses this approach to run static verification of source code:
 
 `ci-operator` configuration:
@@ -450,6 +450,7 @@ tests:
   commands: "go vet ./..."  # declares which commands to run
   container:
     from: "src"             # runs the commands in "pipeline:src"
+    clone: false            # if the repo should be cloned, true for base_images, false otherwise (but images in the "pipeline" stream already clone the repo in the "src" step)
 {{< / highlight >}}
 
 The second approach to describing tests allows for multiple containers to be chained together and describes a more
