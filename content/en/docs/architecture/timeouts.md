@@ -61,6 +61,13 @@ plank: # Prow's controller to launch Pods for jobs
       timeout: 6h0m0s
 ```
 
+For configuring on a specific job, use a block [like][decoration_config-timeout-example]:
+
+```yaml
+decoration_config:
+  timeout: 8h0m0s
+```
+
 When this timeout is reached in a job, the following log lines will be shown in the test log:
 
 ```
@@ -194,3 +201,5 @@ done
 ### Declaring Post Steps
 
 When the amount of work necessary to respond to an interrupt is large, or the work does not depend on specific test process state, it is best to write the work as a `post-` step that will be executed once `ci-operator` begins handling the interrupt. For an example of such a step, see the [`must-gather`](https://steps.ci.openshift.org/reference/gather-must-gather) step in the [`gather`](https://steps.ci.openshift.org/chain/gather) chain, which holds generic steps that gather debugging information from OpenShift clusters under test to help with processing job output after the fact. All `post-` steps that run after `ci-operator` begins handling the interrupt must finish before the configured [grace period](#prow-test-process-timeouts).
+
+[decoration_config-timeout-example]: https://github.com/openshift/release/blob/8708ff67f91fb654f8a06213825d609f92c80135/ci-operator/jobs/infra-periodics.yaml#L366-L367
