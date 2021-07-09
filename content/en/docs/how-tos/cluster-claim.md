@@ -37,7 +37,7 @@ available on the `hive` cluster. If you are not familiar with OpenShift CI custo
    Hive [Cloud Credentials](https://github.com/openshift/hive/blob/master/docs/using-hive.md#cloud-credentials)
    document.
 3. Set `secretsync/target-clusters` key to `hive` to make sure your credentials are synced to the necessary cluster.
-4. Set `secretsync/target-namespace` key to a name of the namespace that will hold your pools (`$team-cluster-pool` is a
+4. Set `secretsync/target-namespace` key to a name of the namespace that will hold your pools (`${team}-cluster-pool` is a
    good baseline name).
 5. Set `secretsync/target-name` to a name under which the secret will be accessible in the
    cluster (`$platform-credentials` is a good baseline name).
@@ -52,7 +52,7 @@ At the end, you should have a secret similar to the following in Vault:
   "aws_secret_access_key": "AWS ACCESS KEY",
   "secretsync/target-clusters": "hive",
   "secretsync/target-name": "demo-aws-credentials",
-  "secretsync/target-namespace": "dptp-demo-cluster-pools"
+  "secretsync/target-namespace": "dptp-demo-cluster-pool"
 }
 ```
 
@@ -66,13 +66,58 @@ At the end, you should have a secret similar to the following in Vault:
 
 2. Create `OWNERS` file in the directory to allow your teammates make and approve changes.
 3. Create a manifest for the namespace that will hold your Hive resources (the namespace name must match the one where
-   you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)):
+   you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)) and set up RBACs for the pool
+   owners to debug on the `hive` cluster:
 
-```yaml
+```console
+$ make TEAM=team OWNERS=user1,user2 new-pool-admins
+
+# ${team}-cluster-pool is assumed to be the namespace name as described above
+# modify manually if you chose another name
+$ cat clusters/hive/pools/team/admins_team-cluster-pool_rbac.yaml 
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: dptp-demo-cluster-pools
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: team-cluster-pool
+- apiVersion: user.openshift.io/v1
+  kind: Group
+  metadata:
+    name: team-pool-admins
+  users:
+  - user1
+  - user2
+# hive-cluster-pool-admin contains the permission of accessing all resources created for a pool
+# https://github.com/openshift/hive/blob/master/docs/clusterpools.md#managing-admins-for-cluster-pools
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: team-pool-admins
+    namespace: team-cluster-pool
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: hive-cluster-pool-admin
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: team-pool-admins
+# The pool owners need the following cluster permissions to select namespaces created for their pools
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: team-pool-admins
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: cluster-namespace-view
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: team-pool-admins
+kind: List
+metadata: {}
 ```
 
 ### Create a Manifest for Your Cluster Pool
@@ -212,11 +257,31 @@ document.
 
 ## Troubleshooting Cluster Pools
 
+### Accessing Cluster Installation logs
 The cluster pools are maintained by Hive behind the scenes, so installation failures, cloud platform account
 misconfigurations and similar issues are not exposed to actual CI jobs: the jobs will simply never successfully claim a
-cluster if Hive fails to install them. Currently, cluster pool owners cannot access the logs or other troubleshooting
-information on the `hive` cluster. For now, work with DPTP (ping `@dptp-helpdesk` on #forum-testplatform Slack channel)
-to troubleshoot pools that never get ready clusters.
+cluster if Hive fails to install them.
+
+The installation logs can be found in the `hive` container logs with the following commands:
+
+```console
+# filter out the namespaces with the cluster pool's name
+$ pool_name=dptp-demo-cluster-pool
+$ oc get namespace --selector hive.openshift.io/cluster-pool-name=${pool_name}
+dptp-demo-cluster-pool-pclkt              Active   16m
+
+# get the provision pod name
+$ oc get pod --namespace dptp-demo-cluster-pool-pclkt
+NAME                                                            READY   STATUS     RESTARTS   AGE
+dptp-demo-cluster-pool-pclkt-0-h5tml-provision-m2pp9   1/3     NotReady   0          18m
+...
+
+# access the logs
+$ namespace=$(oc get namespaces --selector hive.openshift.io/cluster-pool-name=${pool_name} -o custom-columns=":metadata.name"  --no-headers | head -n 1)
+$ pod=$(oc --namespace $namespace get pod --sort-by=.metadata.creationTimestamp -l hive.openshift.io/cluster-deployment-name=$namespace --no-headers -o custom-columns=":metadata.name" | head -n 1)
+$ oc --namespace $namespace logs $pod -c hive
+```
+
 
 ## Existing Cluster Pools
 
