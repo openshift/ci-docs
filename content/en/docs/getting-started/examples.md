@@ -15,6 +15,26 @@ Use the [`openshift-e2e-aws`](https://steps.ci.openshift.org/workflow/openshift-
     workflow: openshift-e2e-aws
 {{< / highlight >}}
 
+# How do I write a simple "Execute this command in a container" test?
+
+Use a container test. Container tests are set up to always contain the source code, either by
+explicitly cloning it if they use an image that is in `base_images` or implicitly if they reference
+a `pipeline` image like `src`.
+
+{{< highlight yaml >}}
+base_images:
+  golangci-lint:
+    namespace: ci
+    name: golangci-lint
+    tag: v1.37.1
+tests:
+- as: lint
+  commands: golangci-lint run ./...
+  container:
+    from: golangci-lint
+    clone: true # Defaults to "true", set to "false" if you do not want your source code to be present.
+{{< /highlight >}}
+
 # How do I use an image from another repo in my repo’s tests?
 
 In order to use an image from one repository in the tests of another, it is necessary to first publish the image from
