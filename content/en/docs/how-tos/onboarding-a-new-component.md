@@ -60,7 +60,7 @@ to consume and react to them. A live list of plugins and their descriptions is h
 website](https://prow.ci.openshift.org/plugins), please consult that list while reading the following section for more
 detail.
 
-In order to create a new Plugin configuration for your repository the following target can be used:
+After initializing your repository with the `make new-repo` target, you can create a new Plugin configuration for your repository with the following target:
 
 {{< highlight bash >}}
 make prow-config
