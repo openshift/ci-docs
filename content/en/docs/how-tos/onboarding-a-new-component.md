@@ -19,12 +19,12 @@ in their [JIRA project](https://issues.redhat.com/projects/DPP/summary) with the
 
 If your component repository is **not** in this organization:
 
-1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as collaborators for the repository.
-1. Contact a CI administrator to accept the invitation
+1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as [collaborators](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository) for the repository.
+1. Contact a CI administrator to accept the invitation. Otherwise, This will happen automatically after some time.
 1. By default, we enable [branch-protection](/docs/architecture/branch-protection) for
 	 all prow-controlled repos. This requires `openshift-merge-robot` to be an admin of the repo. We can disable it in
    prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
-1. If a repository is [enrolled in centralized branch management](https://docs.google.com/document/d/1USkRjWPVxsRZNLG5BRJnm5Q1LSk-NtBgrxl2spFRRU8/edit#heading=h.ur4381uqbo8z) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
+1. If a repository is [enrolled in centralized branch management](https://docs.ci.openshift.org/docs/architecture/branching/) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
 
 Additionally, all repositories need the [Openshift CI](https://github.com/apps/openshift-ci) GitHub App installed. We plan to eventually replace the bot accounts entirely
 with that app, but that work is not yet done.
@@ -47,7 +47,8 @@ make new-repo
 {{< / highlight >}}
 
 This should fully configure your repository, so the changes that it produces are ready to be submitted in a pull
-request.
+request. The resulting yaml file called `$org-$repo-$branch.yaml`
+will be found in the `ci-operator/config/$org/$repo` directory.
 
 
 ### Enabling Plugins
@@ -59,13 +60,21 @@ to consume and react to them. A live list of plugins and their descriptions is h
 website](https://prow.ci.openshift.org/plugins), please consult that list while reading the following section for more
 detail.
 
-Plugin configuration is stored in
+After initializing your repository with the `make new-repo` target, you can create a new Plugin configuration for your repository with the following target:
+
+{{< highlight bash >}}
+make prow-config
+{{< / highlight >}}
+
+This will place a new `_pluginconfig.yaml` file in the `/core-services/prow/02_config/$org/$repo` directory.
+This file is used to configure the specific plugins for your repository.
+
+Default plugin configuration is stored in
 [`_plugins.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_plugins.yaml) in the
 [openshift/release](https://github.com/openshift/release) repository. Plugins are enabled for a repository or
 organization under the `plugins` key. Plugin-specific configuration is under keys like `label` or `owners`. The set of a
 repository’s enabled plugins is the union of plugins configured for the repository’s organization (found at the
-`plugins.yaml["plugins"]["$org"]` key) and the repository itself (found at the `plugins.yaml["plugins"]["$org/$repo"]`
-key).
+`plugins.yaml["plugins"]["$org"]` key) and the repository itself (found in the `/core-services/prow/02_config/$org/$repo/_pluginconfig.yaml` file).
 
 Most individual plugins can be configured to change their behavior; only some plugins allow for granular configuration
 at a repository level, many only expose global configuration options for all repositories that Prow monitors. If you
@@ -140,7 +149,8 @@ be placed into both `ci-operator/config/$org/$repo` and `ci-operator/jobs/$org/$
 
 ### Enabling Automatic Merges
 
-Prow’s `tide` component periodically searches for pull requests that fit merge criteria (for instance, presence of a `lgtm`
+Prow’s [`tide`](https://github.com/kubernetes/test-infra/tree/master/prow/tide) component
+periodically searches for pull requests that fit merge criteria (for instance, presence of a `lgtm`
 label and absence of the `do-not-merge/hold` label) and merges them. `Tide` furthermore requires not only that all required
 tests in the Prow configuration succeed and all posted statuses on the GitHub pull request are green but also that the
 tests tested the latest commit in the pull request on top of the latest commit in the branch that the pull request is
