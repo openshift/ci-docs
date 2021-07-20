@@ -142,7 +142,7 @@ steps to set up the test environment:
 
 These workflows enhance the general installation workflows (like
 [ipi-aws](https://steps.ci.openshift.org/workflow/ipi-aws)) with an additional
-[optional-operators-ci-subscribe](https://steps.ci.openshift.org/reference/optional-operators-ci-subscribe) step. Tests
+[optional-operators-subscribe](https://steps.ci.openshift.org/reference/optional-operators-subscribe) step. Tests
 using these workflows need to provide the following parameters:
 
 |Parameter|Description|
