@@ -213,12 +213,15 @@ branches for the future releases are managed by automation and should not be cha
 
 ## Feature Branches
 
-Any branch whose name has a prefix matching to any branch with a `ci-operator` configuration file is considered a "feature
-branch". Pull requests to feature branches trigger the same CI `presubmit` jobs (but not postsubmits) like configured for
-the base branch, without any additional configuration. This also means that such "feature branches" cannot have a
-separate, different `ci-operator` configuration. For example, if a repo has an `org-repo-release-2.0.yaml` config
-(specifying CI config for the `release-2.0` branch of that repository), the same CI presubmits will trigger on pull
-requests to a `release-2.0.1` branch, and the repo cannot have an `org-repo-release-2.0.1`.yaml configuration file.
+Any branch whose name matches a `$base-$suffix` pattern, where `$base` is a branch with a `ci-operator` configuration
+file, is considered a "feature branch". Pull requests to feature branches trigger the same CI `presubmit` jobs (but not
+postsubmits) like configured for the base branch, without any additional configuration. This also means that such
+"feature branches" cannot have a separate, different `ci-operator` configuration. For example, if a repo has an
+`org-repo-release-2.0.yaml` config (specifying CI config for the `release-2.0` branch of that repository), the same CI
+presubmits will trigger on pull requests to a `release-2.0-feature` branch, and the repo cannot have an
+`org-repo-release-2.0-feature.yaml` configuration file. It can still have a separate `org-repo-release-2.0.1.yaml` file,
+because branches are only considered to be feature branches if their suffix is separated from the base name with `-`
+separator (so `release-2.0-bump` is a feature branch of `release-2.0`, but `release-2.0.1` is not).
 
 ## Variants
 
