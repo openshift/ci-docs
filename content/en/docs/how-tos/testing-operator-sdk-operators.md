@@ -83,7 +83,18 @@ When `ci-operator` builds at least one operator bundle from a repository, it wil
 index image to package those bundles. Test workloads should consume the bundles via this index image. For bundles that do
 not have a configured name via the `as` field, the index image is named `ci-index`. Bundles with `as` set have an index
 called `ci-index-` appended by the value from `as`. The index can be exposed to test steps via the
-[dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
+[dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature. 
+
+For example - if `operator.bundles` specifies following bundle:
+
+```YAML
+operator:
+  bundles:
+  - as: my-bundle
+  ....
+```
+
+Then index image built by CI is called `ci-index-my-bundle` and should be specified as `OO_INDEX` in examples below.
 
 For bundles without `base_index` configured, the ephemeral index is built from scratch and only the bundles without
 `base_index` set and built in the current `ci-operator` run will be added to it, nothing else. The bundles are added to
