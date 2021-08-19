@@ -67,4 +67,24 @@ any of the jobs as sample and simply replace all occurences of the value found i
 
 In oder to push images to an external  repository, credentials are needed. Use `docker` or `podman` to create a docker config
 file as described [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#log-in-to-docker)
-and then talk to @dptp-helpdesk in the #forum-testplatform channel in the CoreOS Slack to get it into the clusters.
+and then use our [self-service portal](/docs/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) to add it to the clusters,
+using the following keys in Vault:
+
+{{< highlight yaml >}}
+secretsync/target-namespace: "ci"
+secretsync/target-name: "registry-push-credentials-quay.io-NEW_ORGANIZATION"
+secretsync/target-clusters: "app.ci"
+{{< / highlight >}}
+
+Then, the mirroring jobs can mount the secret as a volume:
+
+{{< highlight yaml >}}
+periodics:
+- name: periodic-image-mirroring-NEW_ORGANIZATION
+  spec:
+    # rest of the Pod config here ...
+    volumes:
+    - name: push
+      secret:
+        secretName: registry-push-credentials-quay.io-NEW_ORGANIZATION # this matches the secretsync/target-name
+{{< / highlight >}}
