@@ -50,8 +50,8 @@ images:
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
   - as: my-bundle                         # optional
-    dockerfile_path: "path/to/Dockerfile" # defaults to `bundle.Dockerfile`
     context_dir: "path/"                  # defaults to .
+    dockerfile_path: "to/Dockerfile" # defaults to `bundle.Dockerfile`, relative to `context_dir`
     base_index: "operator-index"          # optional
     update_graph: "replaces"              # defaults to `semver`
   substitutions:
@@ -68,8 +68,9 @@ When configuring a bundle build, five options are available:
 * `as`: the image name for the built bundle. Specifying a name for the bundle image allows a multistage workflow
   directly access the bundle by name. If not provided, a dynamically generated name will be created for the bundle
   and the bundle will only be accessible via the default index image (`ci-index`).
-* `dockerfile_path`: a path to the `Dockerfile` that builds the bundle image, defaulting to `bundle.Dockerfile`
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
+* `dockerfile_path`: a path (relative to `context_dir`) to the `Dockerfile` that builds the bundle image,
+  defaulting to `bundle.Dockerfile`
 * `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`.
   If unspecified, the bundle will be added to an empty index. Requires `as` to be set.
 * `update_graph`: the update mode to use when adding the bundle to the `base_index`. Can be: `semver`, `semver-skippatch`,
@@ -83,7 +84,7 @@ When `ci-operator` builds at least one operator bundle from a repository, it wil
 index image to package those bundles. Test workloads should consume the bundles via this index image. For bundles that do
 not have a configured name via the `as` field, the index image is named `ci-index`. Bundles with `as` set have an index
 called `ci-index-` appended by the value from `as`. The index can be exposed to test steps via the
-[dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature. 
+[dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
 
 For example - if `operator.bundles` specifies following bundle:
 
