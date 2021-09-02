@@ -74,7 +74,7 @@ $ make TEAM=team OWNERS=user1,user2 new-pool-admins
 
 # ${team}-cluster-pool is assumed to be the namespace name as described above
 # modify manually if you chose another name
-$ cat clusters/hive/pools/team/admins_team-cluster-pool_rbac.yaml 
+$ cat clusters/hive/pools/team/admins_team-cluster-pool_rbac.yaml
 apiVersion: v1
 items:
 - apiVersion: v1
@@ -138,10 +138,12 @@ metadata:
     product: ocp
     owner: dptp-demo
     version: "4.7"
+    version_lower: "4.7.0-0" # optional: lower bound for automatically updated imageset; required if version_upper is set
+    version_upper: "4.8.0-0" # optional: upper bound for automatically updated imageset; required if version_lower is set
 spec:
   baseDomain: dptp-demo.openshift.org # the base domain to install the cluster
   imageSetRef:
-    name: ocp-4.7.0-amd64 # the name of the imageSet which determines the image to install the cluster
+    name: ocp-4.7.0-amd64 # the name of the imageSet which determines the image to install the cluster; will be automatically updated if `version_*` labels are set
   installConfigSecretTemplateRef:
     name: dptp-demo-install-config # the name of the secret with an installation config for the installer
   skipMachinePools: true
