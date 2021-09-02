@@ -242,6 +242,12 @@ or `Namespace` so that other repositories can consume them. Publication to an in
 there is a requirement to quickly identify all images that belong to a version; tags will take the form of `version:component`.
 Publication to a `Namespace` creates tags in the form of `component:version` and may be more familiar to users.
 
+Images are published for each `component` specified in `images[].to` unless explicitly excluded (see examples below).
+
+Images published in this manner are produced when the source repository branch is updated (e.g.
+when a PR merges or the branch is manually updated), not when the images are built as in an
+in-flight PR.
+
 ### Publishing to an Integration Stream
 
 Every image that makes up the OpenShift release payload is incrementally updated in an integration `ImageStream`. This
