@@ -245,9 +245,6 @@ modifications to allow some commonly needed customizations:
 |Field | Description |Presubmit |Postsubmit|Periodic|
 |:---|:---|:---|:---|:---|
 |`.always_run` | 	Set to `false` to disable automated triggers of the job on pull requests.|✓|||
-|`.run_if_changed`|Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).|✓|||
-|`.skip_if_only_changed`|Set a regex to skip triggering the job when all the changes in the pull request match (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).|✓|||
-|`.optional`|Set to `true` to `make` the job not block merges.|✓|||
 |`.skip_report`|Set to `true` to `make` the job not report its result to the pull request.|✓|||
 |`.max_concurrency`|Set to limit how many instances of the job can run simultaneously.|✓|✓|✓|
 |`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/clarketm/kubernetes_test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
