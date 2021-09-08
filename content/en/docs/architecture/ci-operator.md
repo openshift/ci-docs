@@ -473,6 +473,13 @@ tests run before code is submitted (merged) into the target repository. Pre-subm
 a developer on the content of their pull request and to gate merges to the central repository. These tests will fire
 when a pull request is opened, when the contents of a pull request are changed, or on demand when a user requests them.
 
+There are few extra fields that can be configured to control if or when the test should be executed.
+-`run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
+-`skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
+-`optional` Set to `true` to `make` the job not block merges.
+
+**Note:** `run_if_changed` and `skip_if_only_changed` are mutually exclusive.
+
 ### Post-submit Tests
 
 When a repository configures `ci-operator` to build `images` and publish them (by declaring container image builds with
@@ -499,6 +506,9 @@ One important thing to note is that, unlike `presubmit` jobs, the `postsubmit` t
 This means that when the test is being added or modified by a PR in the `openshift/release` repo, the job will not be
 automatically run against the change in the PR. This is done to prevent accidental publication of artifacts by
 rehearsals.
+
+**Note:** `run_if_changed` and `skip_if_only_changed` can be used the same way as in Pre-submit tests, but not `optional`.
+
 
 ### Periodic Tests
 
