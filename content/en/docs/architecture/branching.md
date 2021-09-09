@@ -29,18 +29,27 @@ During feature freeze, the expectation is that merges to the active development 
 |`release-4.x`|nowhere|merges blocked|yes|
 |`release-4.x+1`|`ocp/4.x+1`|merges blocked|yes|
 
+### No-Feature-Freeze Process Pilot
+
+Some teams are participating in a pilot of a different process where Feature Freeze phase does not affect merge criteria on the `master/main` branch. Repositories that belong to these teams merge pull requests to their `master/main` branches if they are labelled with one of the following sets of labels:
+
+- `lgtm`, `approved`, `bugzilla/valid-bug` (for bugfix pull requests)
+- `lgtm`, `approved`, `px-approved`, `docs-approved`, `qe-approved` (for feature pull requests)
+
+These criteria stay the same in both normal development and feature freeze phases (as opposed to standard process where such PRs require `bugzilla/valid-bug` during feature freeze and not during normal development). Pull requests to `release-*` branches are not affected by this process. They use the criteria specified in the respective sections of this document.
+
 ## Code Freeze For 4.x Release
-During code freeze, the active development branch opens to contributions that target the future release. Contributions to the release branch require group lead approval as they’re landing so close to the moment we are publishing the release publicly.
+During code freeze, the active development branch opens to contributions that target the future release. Contributions to the release branch require staff engineer approval as they’re landing so close to the moment we are publishing the release publicly.
 
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
 |`master/main`|`ocp/4.x+1`|`lgtm`, `approved`|no|
 |`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
-|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `group-lead-approved`|no|
+|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `staff-eng-approved`|no|
 |`release-4.x+1`|nowhere|merges blocked|yes|
 
 ## General Availability For 4.x Release
-After a release is generally available, we do not require group lead approval any longer for cherry-picks to that release. The release branch is no different from any others. This is the same as the normal development phase for the 4.x+1 release.
+After a release is generally available, we do not require staff engineer lead approval any longer for cherry-picks to that release. The release branch is no different from any others. This is the same as the normal development phase for the 4.x+1 release.
 
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
