@@ -39,7 +39,7 @@ tests:
 
 In order to use an image from one repository in the tests of another, it is necessary to first publish the image from
 the producer repository and import it in the consumer repository. Generally, a central `ImageStream` is used for
-continuous integration; a repository opts into using an integration stream with the `tag_specification` field in the
+continuous integration; a repository opts into using an integration stream with the `releases.integration` field in the
 `ci-operator` configuration and opts into publishing to the stream with the `promotion` field.
 
 ## Publishing an Image For Reuse
@@ -72,14 +72,14 @@ images:
 ## Consuming an Image
 
 Once a repository is publishing an image for reuse by others, downstream users can configure `ci-operator` to use that
-image in tests by including it as a base_image or as part of the `tag_specification`. In general, `images` will be available
-as part of the `tag_specification` and explicitly including them as a base_image will only be necessary if the promoting
+image in tests by including it as a base_image or as part of the `releases`. In general, `images` will be available
+as part of the `releases` and explicitly including them as a base_image will only be necessary if the promoting
 repository is exposing them to a non-standard `ImageStream`. Regardless of which workflow is used to consume the image,
 the resulting tag will be available under the stable `ImageStream`. The following `ci-operator` configuration imports a
 number of `images`:
 
 * the `stable:custom-scripts` tag, published as `myregistry.com/project/custom-scripts:latest`
-* the `stable:component` and `:repo-{scripts|tests}` tags, by virtue of them being published under `ocp/4.4` and brought in with the `tag_specification`
+* the `stable:component` and `:repo-{scripts|tests}` tags, by virtue of them being published under `ocp/4.4` and brought in with the `releases`
 
 `ci-operator` configuration:
 {{< highlight yaml >}}
@@ -88,13 +88,15 @@ base_images:
     namespace: project
     name: custom-scripts
     tag: latest
-tag_specification:
-  namespace: ocp
-  name: 4.4
+releases:
+  latest:
+    integration:
+      namespace: ocp
+      name: 4.4
 {{< / highlight >}}
 
 Once the image has been configured to be an input for the repository's tests in the `ci-operator` configuration, either
-explicitly as a `base_image` or implicitly as part of the `tag_specification`, it can be used in tests in one of two ways. A
+explicitly as a `base_image` or implicitly as part of the `releases`, it can be used in tests in one of two ways. A
 registry step can be written to execute the shared tests in any `ci-operator` configuration, or a literal test step can be
 added just to one repository's configuration to run the shared tests. Two examples follow which add an execution of
 shared end-to-end tests using these two approaches. Both examples assume that we have the ipi workflow available to use.

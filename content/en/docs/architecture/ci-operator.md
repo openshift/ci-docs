@@ -305,7 +305,7 @@ The main factor in deciding which kind of release to use is whether the tested c
 or not (i.e., if you want to test _"OpenShift itself"_ or _"something on OpenShift"_). Additionally, the decision should
 take into account what expectations you have on the OpenShift cluster reliability.
 
-You should use an [ephemeral release](#testing-with-an-ephemeral-openshift-release) if the component you are testing is
+You should use an [ephemeral release](#testing-with-an-ephemeral-openshift-release) and ensure that the images you build are included in the release if the component you are testing is
 part of OpenShift itself. Ephemeral releases include the tested, CI-built versions of the OpenShift component images
 so that the tested components are involved in full end-to-end test workflow, including installation. Using ephemeral
 releases satisfies the _"test OpenShift itself"_ use case. Ephemeral releases are also a suitable choice if you need to
@@ -322,36 +322,44 @@ Alternatively, a job can [claim a pre-installed cluster](#testing-with-a-cluster
 
 ### Testing With an Ephemeral OpenShift Release
 
-The `tag_specification` configuration option enables a repository to declare which version of OpenShift it is a part of by
-specifying the `images` that will be used to create an ephemeral OpenShift release payload for testing. Most commonly, the
-same integration `ImageStream` is specified for `tag_specification` as is for `promotion`.
+The `releases` configuration option allows specification of a version of OpenShift that a component will be
+tested on. In order to request an ephemeral release to be created at run-time, the `releases["name"].integration` option
+must be used to specify the `images` that will be used to create an ephemeral OpenShift release payload for testing. If
+the images built in the test are to be bundled into the release payload being tested, the `include_built_images` option
+should be set. Most commonly, the same integration `ImageStream` is specified for ephemeral release snapshots as is for `promotion`.
 
 `ci-operator` configuration:
 
 {{< highlight yaml >}}
-tag_specification:
-  namespace: "ocp"
-  name: "4.5"
+releases:
+  initial: # this release will snapshot the current state of the integration stream, useful as an upgrade source
+    namespace: "ocp"
+    name: "4.5"
+  latest: # this release will add built images to the snapshot, allowing tests to verify changes to OCP components
+    namespace: "ocp"
+    name: "4.5"
+    include_built_images: true
 {{< / highlight >}}
 
-When `ci-operator` begins to test a repository, it will snapshot the current state of the integration `ImageStream`,
-importing all tags into the test `Namespace` and making it available as a release named `initial` and exposed by default
-to test code under `${RELEASE_IMAGE_INITIAL}`. Any output image tags built from the repository under test overwrite
-those that are imported from the integration `ImageStream`. An ephemeral release payload is built from the resulting
-`ImageStream`, containing the latest published versions of all components and the proposed version of the component
-under test. The ephemeral release is named `latest` and exposed to test code under `${RELEASE_IMAGE_LATEST}`.
+In the above example, `ci-operator` will snapshot the current state of the integration `ImageStream`,
+import all tags into the test `Namespace` and make it available as a release named `initial` and exposed by default
+to test code under `${RELEASE_IMAGE_INITIAL}`. A similar snapshot begins to populate the images used to create the
+`latest` release. Any output image tags built from the repository under test overwrite those that are imported from
+the integration `ImageStream`. An ephemeral release payload is built from the resulting `ImageStream`, containing the
+latest published versions of all components and the proposed version of the component under test. The ephemeral release
+is named `latest` and exposed to test code under `${RELEASE_IMAGE_LATEST}`.
 
 ### Testing With an Existing OpenShift Release
 
-The `releases` configuration option allows specification of an existing version of OpenShift that a component will be
-tested on. Three types of releases may be referenced: candidate release payloads from a release controller, pre-release
+The `releases` configuration option allows specification of a version of OpenShift that a component will be
+tested on. Three types of existing releases may be referenced: candidate release payloads from a release controller, pre-release
 payloads that have yet to be published to Cincinnati, and official releases as customers would see them.
 
 Releases may be named, with two names holding special meaning. In ordinary end-to-end tests, the latest release
 describes the version that will be installed before tests are run. For upgrade end-to-end tests, the initial release
 describes the version of OpenShift which is initially installed, after which an upgrade is executed to the latest
 release, after which tests are run. The full pull specification for a release payload is provided to test steps with the
-`${RELEASE_IMAGE_<name>}` environment variable. The following example exposes a the following release payload to tests:
+`${RELEASE_IMAGE_<name>}` environment variable. The following example exposes the following release payloads to tests:
 
 * the `release:initial` tag, holding a release candidate for OKD 4.3, exposed as `${RELEASE_IMAGE_INITIAL}`
 * the `release:latest` tag, holding an officially-released payload for OCP 4.4, exposed as `${RELEASE_IMAGE_LATEST}`
@@ -539,7 +547,7 @@ ImageStreams will exist in the `Namespace` executing a test workflow:
 |`ImageStream`|Description|
 |:---|:---|
 |`pipeline`|  Input `images` described with `base_images` and `build_root`, images holding built artifacts (such as `src` or `bin`), output `images` as defined in `images`, and several internal images used by `ci-operator`.|
-|`release`|Tags of this ImageStreams hold OpenShift release payload `images` for installing and upgrading ephemeral OpenShift clusters for testing; a tag will be present for every named release configured in releases. If a `tag_specification` is provided, two tags will be present, `:initial` and `:latest`.|
+|`release`|Tags of this ImageStreams hold OpenShift release payload `images` for installing and upgrading ephemeral OpenShift clusters for testing; a tag will be present for every named release configured in releases.|
 |`stable-<name>`|Images composing the `release:name` release payload, present when `<name>` is configured in `releases`.|
 |`stable`|Same as above, but for the release:latest release payload. Appropriate tags are overridden using the container `images` built during the test.|
 
