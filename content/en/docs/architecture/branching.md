@@ -64,7 +64,7 @@ After a release is generally available, we do not require staff engineer lead ap
 Use [this spreadsheet](https://docs.google.com/spreadsheets/u/1/d/19bRYespPb-AvclkwkoizmJ6NZ54p9iFRn6DGD8Ugv2c/edit#gid=0) to view the planned dates but be advised that they may slip, so keep an eye out on the aos-devel mailing list as well.
 
 ## How do I opt my repository into automated branching?
-Ensure that the promotion stanza in your `ci-operator` configuration is pointing to the latest OCP release. For example:
+Ensure that the promotion stanza in your `ci-operator` configuration for your [default branch][default-branch] is pointing to the latest OCP release. For example:
 
 {{< highlight yaml >}}
 promotion:
@@ -86,3 +86,5 @@ Yes. When final freeze happens for release X.Y, the release branch for that vers
 
 ## Do I need to make sure branched CI Operator configs are up to date for release branches?
 No. When the branch is cut and goes live, the current CI Operator configuration for the development branch is used to seed the configuration for the release branch. These are not DRY intentionally to allow for drift between CI for branches.
+
+[default-branch]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch
