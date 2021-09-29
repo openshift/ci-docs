@@ -284,6 +284,15 @@ $ pod=$(oc --namespace $namespace get pod --sort-by=.metadata.creationTimestamp 
 $ oc --namespace $namespace logs $pod -c hive
 ```
 
+### Rotating Cloud Credentials
+
+If we need to rotate cloud credentials, the best practice is
+
+- Scale down the size of each pool using the credentials to 0 and wait for all `ClusterDeployments` from those pools to go away;
+- Rotate the credentials on the cloud and modify the secret containing the credentials
+- Scale up the pools to their original sizes
+
+If the secret has been updated with the new credentials and the old ones are no longer valid and there are some clusters provisioned with the old credentials, Hive is not able to deprovision those clusters and they consume the pool size. To fix this, the owner of those pool has to manually update the secret of the cloud credentials in the namespace created for those clusters.
 
 ## Existing Cluster Pools
 
