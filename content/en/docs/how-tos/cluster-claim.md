@@ -294,6 +294,19 @@ If we need to rotate cloud credentials, the best practice is
 
 If the secret has been updated with the new credentials and the old ones are no longer valid and there are some clusters provisioned with the old credentials, Hive is not able to deprovision those clusters and they consume the pool size. To fix this, the owner of those pool has to manually update the secret of the cloud credentials in the namespace created for those clusters.
 
+### Configuring Install Attempts Limit
+
+Hive keeps retrying on provisioning a new cluster until it succeeds.
+As a result, the retry could go indefinitely, for example, if there is a bug from the OpenShift installer.
+The ongoing `ClusterDeployment`s are counted in the size of the underlying cluster pool and it could lead
+to the situation where all `ClusterDeployment`s are perma-failing and thus no tests get a cluster via claim.
+
+By configuring [`ClusterPools.spec.installAttemptsLimit`](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#ClusterDeploymentSpec), Hive stops retries after the limit and deletes the failed `ClusterDeployment` and a new `ClusterDeployment` will be created to satisfy the pool's size.
+
+A side effect of this configuration is that the installation logs are gone, with
+the failed `ClusterDeployment`, which are useful e.g., for filing installer bugs.
+
+
 ## Existing Cluster Pools
 
 The following table shows the existing cluster pools that a user can claim a cluster from. Each pool defines a set of
