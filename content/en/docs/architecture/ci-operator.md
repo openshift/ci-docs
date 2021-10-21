@@ -468,9 +468,26 @@ tests:
 {{< / highlight >}}
 
 The second approach to describing tests allows for multiple containers to be chained together and describes a more
-complicated execution flow between them. This multi-stage test approach is best suited for end-to-end test suites that
-require full OpenShift test clusters to be brought up and torn down. Learn more about this type of test at the
-[overview.](/docs/architecture/step-registry/)
+complicated execution flow between them. While this multi-stage test approach is best suited for end-to-end test suites that
+require full OpenShift test clusters to be brought up and torn down, it can be used to run even simple tests. Multi-stage
+tests have more features like parameters, dependencies or automated writable `$HOME` setup, so when your simple test needs
+some of these, it may be useful to specify it as a multi-stage test that contains just a single step:
+
+{{< highlight yaml >}}
+tests:
+- as: "vet"                     # names this test "vet"
+  steps:                        # makes this a multi-stage-test
+    test:                       # specifies `test` phase of the multi-stage job
+    - as: "test"                # names the step in the multi-stage test
+      commands: "go vet ./..."  # declares which commands to run
+      from: "src"               # runs the commands in "pipeline:src"
+      resources:                # sets resource quotas for the step
+        requests:
+          cpu: 100m
+          memory: 200Mi
+{{< / highlight >}}
+
+Learn more about multi-stage tests at the [overview.](/docs/architecture/step-registry/)
 
 ## Types of Tests
 
