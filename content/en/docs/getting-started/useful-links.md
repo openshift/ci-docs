@@ -10,6 +10,7 @@ The clusters that currently comprise CI are:
 * [app.ci](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/): Openshift Dedicated 4.x cluster containing most Prow services.
 * [build01](https://console.build01.ci.openshift.org/): Openshift 4.x cluster in AWS that executes a growing subset of the jobs.
 * [build02](https://console.build02.ci.openshift.org/): Openshift 4.x cluster in GCP that executes a growing subset of the jobs.
+* [build03](https://console-openshift-console.apps.build03.ky4t.p1.openshiftapps.com/): Openshift Dedicated 4.x cluster in AWS that executes a growing subset of the jobs.
 * [hive](https://console-openshift-console.apps.hive.9xw5.p1.openshiftapps.com/dashboards): Openshift Dedicated 4.x cluster containing a Hive control plane.
 * `vsphere`: external cluster used for vSphere tests, not managed by DPTP.
 
