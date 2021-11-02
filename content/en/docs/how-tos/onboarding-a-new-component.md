@@ -155,14 +155,16 @@ tests in the Prow configuration succeed and all posted statuses on the GitHub pu
 tests tested the latest commit in the pull request on top of the latest commit in the branch that the pull request is
 targeting before a pull request is considered for merging.
 
-If you want to configure automatic merges for your component repository, you can either write a new merge criterion for
-the repository or add your repository to one of the existing configurations. Tide’s configuration is documented
-[upstream](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/tide/README.md). The existing Tide
-configuration for our CI system lives in
-[`config.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml) in the
-[openshift/release](https://github.com/openshift/release) repository under the `config.yaml["tide"]["queries"]` key. If
-your repository does not have `OWNERS` files, or if you have not chosen to opt into the `/approve `process, it is
-suggested that you add your repository to the merge criterion that requires only `/lgtm`.
+To enable Tide, place a new `_prowconfig.yaml` file in the
+`/core-services/prow/02_config/$org/$repo` directory and configure Tide under
+the top-level `["tide"]` key. The easiest way to get the correct config is to
+copy it from an existing repo with similar requirements. Tide’s configuration
+options are documented
+[upstream](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/tide/config.md#configuring-tide).
+
+If your repository does not have `OWNERS` files, or if you have not chosen to
+opt into the `/approve `process, it is suggested that you require only the
+`lgtm` label and not `approve` also.
 
 #### Who can `/approve`?
 
