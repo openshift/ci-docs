@@ -61,7 +61,22 @@ plank: # Prow's controller to launch Pods for jobs
       timeout: 6h0m0s
 ```
 
-In special cases, long-running, non-generated jobs can raise the cap with job-specific configuration [like][decoration_config-timeout-example]:
+In special cases, long-running, generated jobs can raise the cap with job-specific configuration [like][https://github.com/openshift/release/pull/22289]:
+
+```yaml
+- as: e2e-aws-ovn-upgrade-rollback
+  interval: 24h
+  steps:
+    cluster_profile: aws-2
+    env:
+      BASE_DOMAIN: aws-2.ci.openshift.org
+      TEST_TYPE: upgrade-conformance
+      TEST_UPGRADE_OPTIONS: abort-at=99
+    workflow: openshift-upgrade-aws-ovn
+  timeout: 6h0m0s
+```
+
+Which results in a `decoration_config.timeout` entry in the generated job.  Non-generated jobs can adjust that property directly [like][decoration_config-timeout-example]:
 
 ```yaml
 decoration_config:
@@ -202,4 +217,5 @@ done
 
 When the amount of work necessary to respond to an interrupt is large, or the work does not depend on specific test process state, it is best to write the work as a `post-` step that will be executed once `ci-operator` begins handling the interrupt. For an example of such a step, see the [`must-gather`](https://steps.ci.openshift.org/reference/gather-must-gather) step in the [`gather`](https://steps.ci.openshift.org/chain/gather) chain, which holds generic steps that gather debugging information from OpenShift clusters under test to help with processing job output after the fact. All `post-` steps that run after `ci-operator` begins handling the interrupt must finish before the configured [grace period](#prow-test-process-timeouts).
 
+[generated-timeout-example]: https://github.com/openshift/release/pull/22289
 [decoration_config-timeout-example]: https://github.com/openshift/release/blob/8708ff67f91fb654f8a06213825d609f92c80135/ci-operator/jobs/infra-periodics.yaml#L366-L367
