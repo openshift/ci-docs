@@ -61,7 +61,7 @@ plank: # Prow's controller to launch Pods for jobs
       timeout: 6h0m0s
 ```
 
-In special cases, long-running, generated jobs can raise the cap with job-specific configuration [like][https://github.com/openshift/release/pull/22289]:
+In special cases, long-running, generated jobs can raise the cap with job-specific configuration [like][generated-timeout-example]:
 
 ```yaml
 - as: e2e-aws-ovn-upgrade-rollback
