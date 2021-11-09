@@ -81,17 +81,23 @@ ref:
     The IPI configure step generates the install-config.yaml file based on the cluster profile and optional input files.
 {{< / highlight >}}
 
-##### Commands
+### Commands
 
 The commands file must contain shell script in a shell language supported by the `shellcheck` program used to validate the commands. However,
 regardless of the shell language used for the commands, the web UI will syntax highlight all commands as bash.
 
 Note: the shell script file must follow the [naming convention](#registry-layout-and-naming-convention) described later in this help page.
 
-### Configuring a Custom shm-size
+### Resources
+
+A step accepts resource `requests` and `limits` for its container's configuration.
+There is more information about resources [here](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
+
+#### Configuring a Custom shm-size
 
 If it is necessary to increase the shared memory size (the default is 64m) of a Multi-Stage test, then the `resources` can be modified to add
-the `ci-operator.openshift.io/shm` resource size.
+the `ci-operator.openshift.io/shm` resource size. Note that this will not be propagated to the container itself,
+but will simply resize the `dshm` volume.
 
 {{< highlight yaml >}}
 resources:
