@@ -88,6 +88,23 @@ regardless of the shell language used for the commands, the web UI will syntax h
 
 Note: the shell script file must follow the [naming convention](#registry-layout-and-naming-convention) described later in this help page.
 
+### Configuring a Custom shm-size
+
+If it is necessary to increase the shared memory size (the default is 64m) of a Multi-Stage test, then the `resources` can be modified to add
+the `ci-operator.openshift.io/shm` resource size.
+
+{{< highlight yaml >}}
+resources:
+  requests:
+    ci-operator.openshift.io/shm: 2G
+  limits:
+    ci-operator.openshift.io/shm: 2G
+{{< / highlight >}}
+
+{{< alert title="Note" color="info" >}}
+The `limits` and `requests` must be set to the *same* amount
+{{< /alert >}}
+
 ### Step Execution Environment
 
 While a step simply defines a set of commands to run in a container image, by virtue of executing within a `ci-operator` workflow, the commands
