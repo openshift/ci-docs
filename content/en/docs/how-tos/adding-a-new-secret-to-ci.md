@@ -17,8 +17,7 @@ one and ideally also add your teammates as members. Important: Secret collection
 The secrets themselves are managed in our Vault instance at [vault.ci.openshift.org](https://vault.ci.openshift.org).
 You need to use the OIDC auth to log in there. After logging in, click on `kv`, then `selfservice` and you should see your secret collection.
 
-To create a new secret, simply click `Create secret` and put your data into it. To actually use it, it needs to be propagated
-into the build clusters. For this, two special keys in the Vault secret itself exist:
+To create a new secret, simply click `Create secret`. Put your data into it and include the special `secretsync` key value pairs listed below. These key value pairs will ensure that the new secret is propagated into the build clusters:
 
 ```yaml
 secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters
