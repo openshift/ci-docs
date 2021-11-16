@@ -10,10 +10,10 @@ We in general have four types of jobs that control the movement of code to produ
 
 1. PR gating - a set of tests that block PR merges across the entire organization.  Each repository may run a different set of gating jobs (such as the installer repo testing multiple platforms).  Almost every repository will run a standard set of consistent tests to prevent regressions (component A breaks component B by changing an API)
 2. PR optional - a set of optional tests that can be invoked on PRs as needed by reviewers or testers to gain additional coverage, but which running all the time would be inefficient or unnecessary.
-3. Release gating - these jobs prevent the publication of a new release payload and are considered the minimum bar of quality before any combination of images is created.  These tests also catch regressions that PR gates do not.
+3. Release gating - these jobs prevent the publication of a new release payload and are considered the minimum bar of quality before any combination of images is created.  These tests also catch regressions that PR gates do not.  Their inclusion is the responsibility of the [technical release team](/docs/release-oversight/the-technical-release-team).
 4. Release informing - these jobs provide signal as to the health of a release and test scenarios or particular feature sets.  Due to the number of possible scenarios, many of these jobs start as periodics, and some are graduated to being executed as optional whenever a new release is created (to provide advance warning of key regressions).  We call jobs triggered on a new release “release-triggered”.
 ### Identifying Which Projects Qualify to Gate a Release
-A project may gate a release once it has reached the following milestones:
+Most commonly a project may gate a release once it has reached the following milestones:
 
 1. Useful: is a project or product that will be widely used on top of OpenShift, or uses OpenShift APIs, or can provide useful feedback via automated testing to OpenShift about whether the project continues to work
 2. Stable: reached a maturity point where the product is expected to have a stable install pattern and is known to “work” (components that are prototypes or still iterating towards an “alpha” would not be gates)
@@ -21,6 +21,7 @@ A project may gate a release once it has reached the following milestones:
 
 Good candidates include:
 
+* Jobs that verify [upgrade success](/docs/release-oversight/the-technical-release-team/#how-we-do-it).
 * Products that will ship on top of OpenShift
 * Projects or internal tools that depend on OpenShift APIs heavily
 * Community projects being evaluated for inclusion into OpenShift or the portfolio
@@ -33,6 +34,11 @@ Poor candidates include:
 {{< alert title="Note" color="info" >}}
 OpenShift CI creates thousands of clusters a week - we can certainly afford to run a few more tests.  However, we want to spread that investment to derive the maximum benefit for everyone, so having OpenShift CI run 30 variations of your exact same tests in slightly different configurations 4 times a day may not be the best way to test.
 {{< /alert >}}
+
+### An Introduction to Aggregated Jobs
+Creating useful, stable and testable release gating jobs has proven to be difficult at scale.  The combinatorial explosion of cloud providers, layered products and unique configurations means most jobs have a _>1% flake rate_.  To "meet the tests where they are" the Technical Release Team has created a new type of job called the [_aggregated job_](/docs/release-oversight/improving-ci-signal#job-aggregation-in-a-little-more-detail).
+
+Aggregated Jobs are powerful because they allow a suite of tests to become blocking in spite of a high flake rate.  This is accomplished by analyzing the output from numerous parallel runs to see if payload quality remains as good or better than the historical mean.  If not, the next course of action is to isolate the changes and revert them.  This allows other non-regressing changes to make their way into a release.  More importantly it avoids the exponentially difficult task of debugging multiple regressions in parallel (eg, it's hard to debug a layered product regression on a platform that no longer installs properly).
 
 ### Identifying Which Jobs Should Not Gate a Release
 Not all test scenarios and test suites are considered release gating.  On a given day we may generate tens of release payloads, but not choose to execute or iterate the full set of suites on those jobs.  Also, some scenarios (such as upgrade rollback) are intended to generate statistical signal (a given rollback may succeed or fail due to factors outside of the test control).  All release informing jobs should start as periodics (as described below) and some may be promoted to be “release-triggered” jobs.
