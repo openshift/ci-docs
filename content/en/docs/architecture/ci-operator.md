@@ -499,9 +499,10 @@ a developer on the content of their pull request and to gate merges to the centr
 when a pull request is opened, when the contents of a pull request are changed, or on demand when a user requests them.
 
 There are few extra fields that can be configured to control if or when the test should be executed.
--`run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
--`skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
--`optional` Set to `true` to `make` the job not block merges.
+
+* `run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
+* `skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
+* `optional` Set to `true` to `make` the job not block merges.
 
 **Note:** `run_if_changed` and `skip_if_only_changed` are mutually exclusive.
 
