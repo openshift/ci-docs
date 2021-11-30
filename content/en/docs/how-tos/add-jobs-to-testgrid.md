@@ -9,7 +9,7 @@ To just understand how a job is added to TestGrid skip to [How do I add a job to
 TestGrid is an aggregator for job results across many runs, allowing us to display test results over time and thus giving an indication of current health, especially in the face of flaky tests. Note that TestGrid exposes job results only from jUnit.
 
 ## How can CI Jobs impact the OpenShift release status?
-* Blocking jobs are those that ensure compliance to our conformance criteria. These are traditionally the core end-to-end test runs on our major platforms and upgrades from previous versions. 
+* Blocking jobs are those that ensure compliance to our conformance criteria. These are traditionally the core end-to-end test runs on our major platforms and upgrades from previous versions.
 * Informing jobs are a broader suite that test the variety of enviroments and configurations our customers expect. 
 * Broken jobs are those that have a known, triaged failure that prevents their function for a sustained period of time (more than a week).
 
@@ -18,6 +18,8 @@ Since release informing jobs get run every time we build a new payload for that 
 1) is reliable enough to provide a useful signal when it fails
 2) covers an important function that determines whether the payload is viable or not, which is not covered by other informing or blocking jobs
 
+## When does a job qualify as a release-blocking job?
+This topic is best handled in [Extending OpenShift Release Gates](/docs/architecture/release-gating/).
 
 ## How do I add a job to TestGrid?
 
