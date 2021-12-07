@@ -1,2 +1,6 @@
-_gen
+# IDE
+.idea/
+
+# Hugo
 public/
+resources/_gen
