@@ -39,6 +39,58 @@ The most common case is to use secrets in a [step](/docs/architecture/step-regis
 defined in `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
 for details.
 
+## Protecting Secrets from Leaking
+
+Unfortunately, secrets can often leak indirectly in various ways. Commonly, a setup step of a CI job uses a secret
+to configure a resource in the cluster, and then later another step collects that resource when capturing artifacts for
+the CI job. Logs and artifacts in OpenShift CI are publicly accessible, so when secrets are included in artifacts, they
+leak and must be rotated. To mitigate this risk, the Prow component that processes and stores all artifacts and logs
+contains a feature that automatically censors all secrets it can detect before uploading them to storage. Although this
+feature is relatively powerful (it detects and censors the content of artifacts that are tar or gzip archives, has
+built-in support for some compound secret formats like pull secrets and INI files, censors base64-encoded forms
+of the secret strings, etc.), it still needs to know what secret strings to search for.
+
+The censoring process takes advantage of the fact that the secret value needs to be provided to the `Pod` running
+the test code. In OpenShift CI, all secrets are provided to CI jobs via populating a namespace with `Secret` resources,
+and therefore the CI job cannot use (and thus, leak) anything that is not present in one of the `Secret` resources
+in the namespace. The censoring code scans all artifacts for all values of all `Secret` resources in the namespace where
+the `Pod` runs and removes all matches it finds.
+
+Therefore, this censoring can only protect a secret from leaking if the secret is present in Vault in a "direct" form.
+It may be convenient to store the secrets in Vault in a better consumable form, such as in a shell script that gets
+sourced by the test code and populates multiple environmental variables at once. This approach is risky because it makes
+**that whole shell script** the censored secret: it will only get stripped if you happen to `cat` it in full by mistake.
+However, if the content of one of the environment variables is the actual password that should not leak, the CI has no
+chance of knowing that. If that password ends up in a resource in the cluster, and that resource will get collected
+as an artifact, the password would leak.
+
+### Good practice
+
+![protected Secret](/secrets-good-practice.png)
+
+In this example, the password is a direct value of a key stored in Vault. When synced to the CI clusters, the password
+will be stored in the `password` key of a `Secret` resource and hence will be censored in all artifacts and logs
+collected from the CI run.
+
+### Risky practice
+
+![unprotected Secret](/secrets-risky-practice.png)
+
+In the example above, the password is an arbitrary substring of the value stored in Vault. When synced to the CI
+cluster, the `secrets.sh` key content will match the one in Vault. The actual secret string `s3cr3t` is unknown to Prow
+and therefore will not be censored from any artifacts or logs. Note that this practice is not limited to the shell
+script form; the same applies for storing secrets inside JSON snippets and other formats.
+
+### Acceptable practice
+
+![protected convenient secret](/secrets-acceptable-practice.png)
+
+With many secrets passed to CI jobs, it can become inconvenient to pass and consume them in individual keys. It can
+therefore be acceptable to pass them for consumption by CI jobs in the "convenient" compound form if, at the same time,
+the actual secret value is present directly in a separate key. Structuring your secrets this way makes them convenient
+to consume while still being protected by the censoring mechanism. Of course, this assumes you never forget to manage
+the secret in two places instead of one.
+
 ## Use A Secret In Non-Step jobs
 
 {{< alert title="Warning" color="warning" >}}
