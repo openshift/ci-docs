@@ -416,6 +416,8 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
     product: ocp
     timeout: 1h0m0s
     version: "4.7"
+    labels:       # optional; more labels to match besides architecture, cloud, owner, product, and version defined above
+      size: "6"
   steps:
     test:
     - as: claim
