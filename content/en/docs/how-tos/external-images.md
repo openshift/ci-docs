@@ -26,6 +26,11 @@ base_images:
     tag: latest
 {{< / highlight >}}
 
+{{< alert title="Warning" color="warning" >}}
+It is not possible to use Red Hat managed namespaces. Therefore, you cannot mirror your image to **any** namespace that
+matches the following regular expression: (^kube.*|^openshift.*|^default$|^redhat.*)
+{{< /alert >}}
+
 ## Mirror Private Images
 
 If the image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and define a new periodic [mirroring job](/docs/how-tos/mirroring-to-quay/) with it.
