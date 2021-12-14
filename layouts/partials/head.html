@@ -90,6 +90,67 @@ function format ( d ) {
             row.child( format(row.data()) ).show();
             tr.addClass('shown');
         }
-    } );
+      } );
+
+      $.ajax({
+          url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
+          dataType: 'jsonp',
+          success: function(res) {
+            $.each(res.data, function(index, item) {
+              description=item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
+              if (item['cluster'] === 'app.ci') {
+                description=description+' containing most Prow services.';
+              } else if (item['cluster'] === 'hive') {
+                description=description+' containing containing a Hive control plane.';
+              } else if (item['cluster'] === 'arm01' || item['cluster'] === 'vsphere') {
+                description=description+' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
+              } else {
+                description=description+' that executes a growing subset of the jobs.'
+              }
+              $("#ul_clusters").append('<li><a href="https://'+item["consoleHost"]+'/">'+item["cluster"]+'</a>: '+ description +'</li>');
+            });
+          }
+      });
+
+      $.fn.dataTable.ext.errMode = 'throw';
+      var table =  $('#table_registries').DataTable({
+        "paging":   false,
+        "ordering": false,
+        "info":     false,
+        "searching": false,
+        "ajax": {
+          "url": "{{ $.Site.Params.api_v1_url }}/api/v1/clusters?skipHive=true",
+          "dataType": "jsonp",
+        },
+       "columns": [
+            { 
+              "data": "cluster",
+              "render": function (data, type, row, meta) {
+                  return '<a href="https://' + row['consoleHost'] +  '/">' + data + '</a>';
+                }
+            },
+            { 
+              "data": "registryHost",
+              "render": function (data, type, row, meta) {
+                  return '<a href="https://' + row['registryHost'] +  '/">' + data + '</a>';
+                }
+            },
+            { 
+              "data": "description",
+              "render": function (data, type, row, meta) {
+                  data="contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only"
+                  if (row['cluster'] === 'app.ci') {
+                    data='the authoritative, central CI registry';
+                  } else if (row['cluster'] === 'hive') {
+                    data='';
+                  } else if (row['cluster'] === 'arm01' || row['cluster'] === 'vsphere') {
+                    data=data+'; only open to ' + row['cluster'].replace(/\d+/g, '').toUpperCase() + ' admins';
+                  }
+                  return data;
+                }
+            },
+        ]
+      });
+
   } );
 </script>

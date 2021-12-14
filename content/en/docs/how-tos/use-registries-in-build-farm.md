@@ -9,15 +9,18 @@ The OpenShift CI system runs on OpenShift clusters; each cluster hosts its own i
 image registries exist in the OpenShift CI ecosystem. The following table shows the public DNS of each registry and has
 some comments on their purpose:
 
-|  Cluster  | Registry URL                                                                                                 | Note                                                                                                                                    |
-|-----------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| [`app.ci`](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/) | [registry.ci.openshift.org](https://registry.ci.openshift.org)                                                       | the authoritative, central CI registry                                                                                                  |
-| `arm01` | [registry.arm-build01.arm-build.devcluster.openshift.com](https://registry.arm-build01.arm-build.devcluster.openshift.com) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to arm admins |
-| [`build01`](https://console.build01.ci.openshift.org/) | [registry.build01.ci.openshift.org](https://registry.build01.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| [`build02`](https://console.build02.ci.openshift.org/) | [registry.build02.ci.openshift.org](https://registry.build02.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| [`build03`](https://console-openshift-console.apps.build03.ky4t.p1.openshiftapps.com/) | [registry.build03.ci.openshift.org](https://registry.build03.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| [`build04`](https://console-openshift-console.apps.build04.34d2.p2.openshiftapps.com/) | [registry.build04.ci.openshift.org](https://registry.build04.ci.openshift.org)                                       | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only                              |
-| `vsphere` | [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org) | contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only; only open to vsphere admins |
+{{< rawhtml >}}
+
+<table id="table_registries" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Cluster</th>
+            <th>Registry URL</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+</table>
+{{< /rawhtml >}}
 
 {{< alert title="Warning" color="warning" >}}
 The previous registry `registry.svc.ci.openshift.org` has been decommissioned. If there is any reference to its image, e.g., in your Dockerfile,
