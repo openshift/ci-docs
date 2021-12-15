@@ -11,7 +11,7 @@ The clusters that currently comprise CI are:
 </ul>
 {{< /rawhtml >}}
 
-Except for `vsphere`, these clusters use Github OAuth authentication: all members of the Openshift organization in Github can log in.
+Except the ones not managed by DPTP, Red Hat SSO is enabled to login onto these clusters. Github OAuth authentication is deprecated: it will be disabled from the clusters soon.
 
 # Services
 
