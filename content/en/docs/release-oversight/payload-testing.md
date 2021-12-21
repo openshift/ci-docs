@@ -8,7 +8,7 @@ The `/payload` command is provided for this purpose.
 
 
 ## Usage
-Any collaborator of the GitHub OpenShift organization can issue the command on any PR to any repository of the organization:
+Any collaborator of the GitHub OpenShift organization can issue the command on a pull request to a branch of a repository of the organization that contributes to OpenShift official images:
 
 > /payload <ocp_version> <ci|nightly> <informing|blocking>
 
