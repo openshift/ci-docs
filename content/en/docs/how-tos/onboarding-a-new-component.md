@@ -20,7 +20,7 @@ in their [JIRA project](https://issues.redhat.com/projects/DPP/summary) with the
 If your component repository is **not** in this organization:
 
 1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as [collaborators](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository) for the repository.
-1. Contact a CI administrator to accept the invitation. Otherwise, This will happen automatically after some time.
+1. Contact a CI administrator to accept the invitation. Otherwise, This will happen automatically via the `	periodic-openshift-release-master-accept-invitations-ci-robot` and `periodic-openshift-release-master-accept-invitations-merge-robot` jobs in _no more_ than 4 hours.
 1. By default, we enable [branch-protection](/docs/architecture/branch-protection) for
 	 all prow-controlled repos. This requires `openshift-merge-robot` to be an admin of the repo. We can disable it in
    prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
