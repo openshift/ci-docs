@@ -399,7 +399,7 @@ releases:
 {{< / highlight >}}
 
 ### Testing with a Cluster from a Cluster Pool
-The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by `openshift-ci`. If the cluster is successfuly claimed from the pool, `ci-operator` executes the specified multi-stage test and provides it the credentials to access the cluster via two environmental variables:
+The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by `openshift-ci`. If the cluster is successfully claimed from the pool, `ci-operator` executes the specified multi-stage test and provides it the credentials to access the cluster via two environmental variables:
 
 -  `${KUBECONFIG}`: Path to `system:admin` credentials.
 -  `${KUBEADMIN_PASSWORD_FILE}`: Path to the `kubeadmin` password file.
@@ -450,6 +450,11 @@ If you are using `cluster_claim` to replace a workflow such as [ipi-aws](https:/
 You can reinstate these steps by introducing a workflow such as [generic-claim](https://steps.ci.openshift.org/workflow/generic-claim).
 
 The pull secret `${CLUSTER_PROFILE_DIR}/pull-secret` does not exist if a test claims a cluster. The same content can be accessed by [adding the `ci-pull-credentials` secret in the `test-credentials` namespace to your test](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials): the key in the secret is `.dockerconfigjson`.
+
+For any test using `cluster_claim`, `ci-operator` creates a release whose name is specified by `cluster_claim.as` which is `latest` by default.
+The payload of the release is the one used to install the ephemeral cluster for the test.
+That means if there is a release in the `releases` stanza with the same name, it is overridden throughout the test.
+To avoid the release overriding, `cluster_claim.as` can be given as a value which does not appear in the `releases` stanza.
 
 ## Declaring Tests
 
