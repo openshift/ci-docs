@@ -66,11 +66,11 @@ At the end, you should have a secret similar to the following in Vault:
 
 2. Create `OWNERS` file in the directory to allow your teammates make and approve changes.
 3. Create a manifest for the namespace that will hold your Hive resources (the namespace name must match the one where
-   you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)) and set up RBACs for the pool
+   you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)) and [set up RBACs](/docs/how-tos/rbac/) for the pool
    owners to debug on the `hive` cluster:
 
 ```console
-$ make TEAM=team OWNERS=user1,user2 new-pool-admins
+$ make TEAM=team new-pool-admins
 
 # ${team}-cluster-pool is assumed to be the namespace name as described above
 # modify manually if you chose another name
@@ -81,13 +81,6 @@ items:
   kind: Namespace
   metadata:
     name: team-cluster-pool
-- apiVersion: user.openshift.io/v1
-  kind: Group
-  metadata:
-    name: team-pool-admins
-  users:
-  - user1
-  - user2
 # hive-cluster-pool-admin contains the permission of accessing all resources created for a pool
 # https://github.com/openshift/hive/blob/master/docs/clusterpools.md#managing-admins-for-cluster-pools
 - apiVersion: rbac.authorization.k8s.io/v1

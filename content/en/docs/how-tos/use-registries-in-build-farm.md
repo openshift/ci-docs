@@ -73,7 +73,7 @@ If you're developing an integration with the central CI registry, an OpenShift `
 pull request to the [`openshift/release`](https://github.com/openshift/release) repository that adds a new directory under
 the `release/clusters/app.ci/registry-access` directory. In this directory, provide an `OWNERS` file to allow your team
 to make changes to your manifests and an `admin_manifest.yaml` file that creates your `ServiceAccount` and associated
-RBAC:
+[RBAC](/docs/how-tos/rbac/):
 
 ```yaml
 # this is the Namespace in which your ServiceAccount will live
@@ -107,18 +107,6 @@ subjects:
   - kind: ServiceAccount
     namespace: my-project
     name: image-puller
----
-# the Group of people who should be able to manage this ServiceAccount
-kind: Group
-apiVersion: v1
-metadata:
-  name: my-project-admins
-users:
-  # these names are GitHub usernames
-  - bob
-  - tracy
-  - jim
-  - emily
 ---
 # this adds the admins to the project.
 kind: RoleBinding
@@ -244,18 +232,6 @@ metadata:
     openshift.io/description: Published Images for MyProject
     openshift.io/display-name: MyProject CI
   name: my-project
----
-# the Group of people who should be able to pull images
-kind: Group
-apiVersion: v1
-metadata:
-  name: my-project-image-pullers
-users:
-  # these names are GitHub usernames
-  - bob
-  - tracy
-  - jim
-  - emily
 ---
 # this grants the right to pull images to the group
 kind: RoleBinding

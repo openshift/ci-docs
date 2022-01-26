@@ -80,12 +80,12 @@ active development cluster and local `$KUBECONFIG`, since this login command wil
 oc login --token=sha256~dMKQv... --server=https://api.build02.gcp.ci.openshift.org:6443
 ```
 
-As the project administrator, you may give access to your project to other members of the GitHub OpenShift organization.
-Afer logging into the project with `oc`, use this command to give other members access to the project running your pull
+As the project administrator, you may give access to your project to other users.
+After logging into the project with `oc`, use this command to give other members access to the project running your pull
 request:
 
 ```bash
-$ oc adm policy add-role-to-user admin <github_user> -n ci-op-xxxxxxx
+$ oc adm policy add-role-to-user admin <username> -n ci-op-xxxxxxx
 ```
 
 {{< alert title="Info" color="info" >}}
