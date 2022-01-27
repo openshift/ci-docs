@@ -9,7 +9,7 @@ repo](https://github.com/openshift/release/tree/master/clusters) are applied aut
 
 ## Rover Groups
 For privacy reasons, we avoid referring to specific usernames in all RBAC manifests stored in the repository.
-As an enforced convention, users are not allowed to be subjects of the RoleBinding and ClusterRoleBinding manifests: every subject is either a `Group` or a `ServiceAccount`. Moreover, each group has to be a [Red Hat Rover group](https://rover.redhat.com/groups/).
+As an enforced convention, users are not allowed to be subjects of the RoleBinding and ClusterRoleBinding manifests: every subject is either a `Group` or a `ServiceAccount`. Moreover, each group has to be a [Red Hat Rover group](https://rover.redhat.com/groups/) or a renamed group from a Rover group via [configuration](/docs/how-tos/rbac/#configuration).
 
 For the same privacy reasons, we disallow maintaining Group manifests directly in the repository. Instead, the users need to use the Red Hat's Rover Groups feature to maintain the list of RH users belonging to a group, and Test Platform tooling will maintain the Group resources on OpenShift CI cluster to contain users corresponding to the Rover group.
 
@@ -42,8 +42,60 @@ No API is provided to create Rover groups. We have to do some manual work on the
 
 ### Existing Groups
 The existing groups defined in the release repo will be removed from the release repo and the clusters. 
-If such a group is used as a subject in a RBAC manifest, then its owner has to ensure the group also exists on Rover. In case that the group name cannot be managed by the owner, e.g., the desired group name is taken by other teams, then the RBAC manifest has to use another Rover group.
+For example, `group/cvp-pool-admins` cannot exist any more in the release repo because it contains usernames.
 
+```yaml
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: cvp-pool-admins
+users:
+- bob
+- jim
+```
+
+When it is removed from the release repo and the cluster, the members of the group lose the corresponding permissions on the clusters.
+To retrieve the permissions, we have to modify RBACs in the release repo and/or
+update [the config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml).
+
+The most common case is that we can use an existing [Rover](https://rover.redhat.com/groups/) group, e.g, `cvp-team` as subjects of RBACs.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cvp-pool-admins
+  namespace: cvp-cluster-pool
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hive-cluster-pool-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: cvp-team ### an existing Rover group
+```
+
+Update [the config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml) with the following stanza because the group is needed only on the `hive` cluster.
+
+```yaml
+groups:
+  cvp-team:
+    clusters:
+    - hive
+```
+
+Optionally the group name on the cluster can be modified by `rename_to`:  If `rename_to` is not set, the group name on the cluster is the same as the Rover group.
+Otherwise, the value of `rename_to` is the group name on the cluster,
+and thus should be used as a `subject` of any `RoleBinding` or `RoleBinding` such as `RoleBinding/cvp-pool-admins` above.
+
+```yaml
+groups:
+  cvp-team:
+    clusters:
+    - hive
+  rename_to: cvp-pool-admins
+```
 
 ### Existing User Subjects
 The user subjects will be removed from the existing RBAC manifests.
