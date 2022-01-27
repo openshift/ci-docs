@@ -22,6 +22,7 @@ Below is a non-exhaustive list of CI services.
 * [ppc64le.ocp.releases.ci.openshift.org](https://ppc64le.ocp.releases.ci.openshift.org/): OCP PowerPC 64 LE release status page.
 * [s390x.ocp.releases.ci.openshift.org](https://s390x.ocp.releases.ci.openshift.org/): OCP S390x release status page.
 * [amd64.origin.releases.ci.openshift.org](https://amd64.origin.releases.ci.openshift.org/): OKD release status page.
+* [multi.ocp.releases.ci.openshift.org](https://multi.ocp.releases.ci.openshift.org/): OCP Multi-arch release status page.
 * [search.ci.openshift.org](https://search.ci.openshift.org/): search tool for error messages in job logs and Bugzilla bugs.
 * [sippy.ci.openshift.org](https://sippy.ci.openshift.org/): CI release health summary.
 * [bugs.ci.openshift.org](https://bugs.ci.openshift.org/): Bugzilla bug overviews, backporting and release viewer.
