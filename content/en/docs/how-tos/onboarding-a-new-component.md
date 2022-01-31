@@ -166,6 +166,10 @@ If your repository does not have `OWNERS` files, or if you have not chosen to
 opt into the `/approve `process, it is suggested that you require only the
 `lgtm` label and not `approve` also.
 
+{{< alert title="Note" color="info" >}}
+Due to github's rate limiting it is possible that the `Tide` check will not appear on any given PR. The PR will still merge with Tide, and this is purely a cosmetic issue.
+{{< /alert >}}
+
 #### Who can `/approve`?
 
 Repo’s `OWNERS` and `OWNERS_ALIASES` define the list. It is a concept of Prow workflow. Those files also define who
