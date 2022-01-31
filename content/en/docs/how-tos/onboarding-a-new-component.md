@@ -166,7 +166,7 @@ If your repository does not have `OWNERS` files, or if you have not chosen to
 opt into the `/approve `process, it is suggested that you require only the
 `lgtm` label and not `approve` also.
 
-{{< alert title="Info" color="info" >}}
+{{< alert title="Note" color="info" >}}
 Due to github's rate limiting it is possible that the `Tide` check will not appear on any given PR. The PR will still merge with Tide, and this is purely a cosmetic issue.
 {{< /alert >}}
 
