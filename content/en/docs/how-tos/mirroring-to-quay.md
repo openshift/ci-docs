@@ -39,9 +39,9 @@ Periodically, `oc image mirror` is used to push a configured set of images to Qu
 repositories already have mirroring pipelines configured; each directory
 [here](https://github.com/openshift/release/tree/master/core-services/image-mirroring) corresponds to a repository.
 These directories contain mapping files that define tags on images in the target repository. New images may be submitted
-to mirror to existing repositories, or new ones.
+to mirror to existing organizations, or new ones.  When naming your new image, please follow the [naming guidelines](https://github.com/openshift/release/blob/master/core-services/image-mirroring/openshift/GUIDELINES.md).
 
-### Existing Repositories
+### Existing Organizations
 
 Submit a pull request adding the image source and target to the appropriate mirroring file. For instance, adding a new
 image tag to the `quay.io/openshift:4.6` image would require a new entry in the
@@ -53,7 +53,7 @@ Images that are mirrored to Quay for the first time are **private** by default a
 will be checking to ensure your image does not contain private or licensed content such as RHEL or internal RHEL packages.
 {{< /alert >}}
 
-## Configuring Mirroring for New Repository
+## Configuring Mirroring for New Organization
 
 Submit a PR adding a new subdirectory
 [here](https://github.com/openshift/release/tree/master/core-services/image-mirroring), with at least a single mapping file
