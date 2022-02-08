@@ -299,6 +299,10 @@ By configuring [`ClusterPools.spec.installAttemptsLimit`](https://pkg.go.dev/git
 A side effect of this configuration is that the installation logs are gone, with
 the failed `ClusterDeployment`, which are useful e.g., for filing installer bugs.
 
+### Configuring Timeout on Awakening a Hibernating Cluster
+
+By configuring [`ClusterPools.spec.hibernationConfig.resumeTimeout`](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#HibernationConfig), Hive stops waiting after the specified time on waking up a hibernating cluster, considers it broken and replaces it. If not set, Hive will keep waiting until it succeeds.
+
 
 ## Existing Cluster Pools
 
