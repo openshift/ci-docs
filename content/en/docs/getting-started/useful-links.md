@@ -11,7 +11,8 @@ The clusters that currently comprise CI are:
 </ul>
 {{< /rawhtml >}}
 
-Except the ones not managed by DPTP, Red Hat SSO is enabled to login onto these clusters. Github OAuth authentication is deprecated: it will be disabled from the clusters soon.
+Except the ones not managed by DPTP, Red Hat SSO is enabled to login onto these clusters.
+GitHub Users in OpenShift organization who have no Red Hat SSO can still use Prow services to do CI tasks but they cannot login into these clusters.
 
 # Services
 

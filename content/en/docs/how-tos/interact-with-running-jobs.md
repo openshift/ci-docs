@@ -48,9 +48,9 @@ simultaneously are also compatible.
 
 ## Access the Namespace on Cluster/Project of the Running CI Job
 
-It is possible to authenticate to CI build farms with GitHub OAuth as well as Red Hat Single-Sign-On: GitHub OAuth requires that you are a member
-of the `OpenShift` organization. Both the authors of a pull request and the corresponding Red Hat kerberos IDs are permitted to accessing the
-`Namespace` that run jobs.
+It is possible to authenticate to CI build farms with Red Hat Single-Sign-On:
+The corresponding Red Hat kerberos ID to the author of a pull request
+is permitted to accessing the `Namespace` that run jobs.
 
 {{< alert title="Info" color="info" >}}
 To access the `Namespace`, it is required that *GITHUB* at *PROFESSIONAL SOCIAL MEDIA* is set up at Rover People.
