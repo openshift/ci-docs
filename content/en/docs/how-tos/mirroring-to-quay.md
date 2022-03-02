@@ -73,7 +73,7 @@ using the following keys in Vault:
 
 {{< highlight yaml >}}
 secretsync/target-namespace: "ci"
-secretsync/target-name: "registry-push-credentials-quay.io-NEW_ORGANIZATION"
+secretsync/target-name: "registry-push-credentials-quay-io-NEW_ORGANIZATION"
 secretsync/target-clusters: "app.ci"
 {{< / highlight >}}
 
@@ -87,5 +87,5 @@ periodics:
     volumes:
     - name: push
       secret:
-        secretName: registry-push-credentials-quay.io-NEW_ORGANIZATION # this matches the secretsync/target-name
+        secretName: registry-push-credentials-quay-io-NEW_ORGANIZATION # this matches the secretsync/target-name
 {{< / highlight >}}
