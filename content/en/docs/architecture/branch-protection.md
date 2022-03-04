@@ -61,7 +61,7 @@ branch-protection:
             << branch >>:
               # Do not protect this branch. This setting can be set
               # for the org, repo or branch. Set it at the highest level
-              # that makes sense. Lower levels can not override it.
+              # that makes sense. Lower levels can override it.
               unmanaged: true
 {{< / highlight >}}
 
