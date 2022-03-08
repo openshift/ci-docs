@@ -235,9 +235,9 @@ for an example of how this type of problem can be solved.
 ### Projected volumes
 
 An additional problem is present when multiple `ConfigMap`s are assembled into a
-single mount, as is done for `ci-operator-configresolver`, stemming from the
-fact that Kubernetes in general operates under an _eventually consistent_
-concurrency model.
+single mount, as is done for [`ci-operator-configresolver`]({{< relref "configresolver" >}}),
+stemming from the fact that Kubernetes in general operates under an _eventually
+consistent_ concurrency model.
 
 This is because there is no guarantee of the order in which the updates to each
 of the constituents of the mount will be perceived.  The `kubelet` update loop,
