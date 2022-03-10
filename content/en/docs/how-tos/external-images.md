@@ -16,8 +16,12 @@ If the source image is open to the public, we can mirror the image by adding it 
 gcr.io/k8s-staging-boskos/boskos:latest registry.ci.openshift.org/ci/boskos:latest
 {{< / highlight >}}
 
-The hourly periodic job `periodic-image-mirroring-supplemental-ci-images` mirrors all the images defined in the mapping files.
+The hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images)
+mirrors all the images defined in the mapping files.  Note that it operates on
+the contents of the `master` branch, so the changes to the files have to be
+merged before the images can be used in jobs and/or pull request rehearsals.
 Once it is mirrored, you can use the image like this:
+
 {{< highlight yaml >}}
 base_images:
   my-external-image:
