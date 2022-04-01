@@ -20,7 +20,7 @@ You need to use the OIDC auth to log in there. After logging in, click on `kv`, 
 To create a new secret, simply click `Create secret`. Put your data into it and include the special `secretsync` key value pairs listed below. These key value pairs will ensure that the new secret is propagated into the build clusters:
 
 ```yaml
-secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters
+secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
 secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
 ```
 
