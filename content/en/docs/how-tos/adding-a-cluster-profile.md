@@ -32,6 +32,36 @@ When adding a new `cluster_profile`, three major steps must be taken: registerin
 
 As `cluster-profile`s are handled as first-class items in the `ci-operator` configuration, a new pull request ([example](https://github.com/openshift/ci-tools/commit/b89a00a9a39acd29d68f7490f49cf93b50cc0d21#diff-2a51a519993c716f3906647228a199e77fad62246de50d88b348a52255837bf9)) must be sent to the `openshift/ci-tools` repository in order to register a new profile.
 
+The next sections detail the requirements for opening this pull request.  All
+changes required in `openshift/ci-tools` are isolated to a single file,
+[`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
+The process of creating a new cluster profile involves adding:
+
+- `ClusterProfile`: a new constant for the name of the profile.
+- `ClusterProfiles()`: a new item in the list of valid test profiles.
+- `ClusterProfile::ClusterType()`: a mapping from the profile to its
+  [cluster type]({{< relref "#cluster-type" >}}).
+- `ClusterProfile::LeaseType()`: a mapping from the profile to its
+  [lease type]({{< relref "#adding-new-leases" >}}).
+- `LeaseTypeFromClusterType()`: a mapping from cluster type to lease type, if
+  a new type is being added (this is only used for legacy template tests).
+- `ClusterProfile::ConfigMap()`: a `switch` label if the profile requires its
+  own `ConfigMap`.
+- `ClusterProfile::Secret()`: a `switch` label if the profile shares
+  [credentials]({{< relref "#providing-credentials" >}}) with another.
+
+### Cluster type
+
+This value is passed to tests via the `CLUSTER_TYPE` environment variable, as
+mentioned in the introduction.  It is used for cloud-provider-specific behavior
+by step registry components such as the OpenShift installer steps
+([e.g.](https://steps.ci.openshift.org/reference/ipi-install-install)).
+
+For profiles created for completely new platforms, this should be a unique value
+and will probably require corresponding changes to the installation steps.
+Profiles which are derivatives of existing ones should likely retain the cluster
+type unless they require special treatment in the installation process.
+
 ### Adding New Leases
 
 In the pull request to `openshift/ci-tools`, the mapping between a `cluster_profile` and the implicit `lease` that will be requested is determined. The standard is to use leases named `<name>-quota-slice`, so the `aws` profile uses `aws-quota-slice`. The resources for leasing must be [registered](/docs/architecture/quota-and-leases/#adding-a-new-type-of-resource) with our leasing server ([example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-5169f2a74d1497f38a44e9adc57f6993269a89c3ddf90ab01f5d1d114ef61e58)).
@@ -44,3 +74,19 @@ The credentials provided to tests that declare a `cluster_profile` are a mix of 
 secretsync/target-namespace: "ci"
 secretsync/target-name: "cluster-secrets-<name>"
 {{< / highlight >}}
+
+The `openshift/ci-tools` pull request should also include instructions on how
+the data provided should be assembled into a volume mount for the test
+containers.  The code is structured so that common cases require few or no
+changes.  These are:
+
+- Credentials are mounted using a simple `Secret` mount.
+  - The convention is for the secret to be named `cluster-secrets-<name>`, in
+    which case no change is required.
+  - In some cases, derivative profiles may want to use the same credentials as
+    the original.  All existing profiles follow the convention of being named
+    after their `CLUSTER_TYPE`, so usually a single new `switch` label is
+    required in this case.
+- A `ConfigMap` is required for the profile.  The convention is for it to be
+  named `cluster-profile-<name>`, in which case a single new `switch` label is
+  required.
