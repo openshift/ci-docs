@@ -17,11 +17,11 @@ The `cluster_profile` is a `ci-operator` concept that bundles together a couple 
 
 When a `cluster_profile` is added to a job or workflow, the following actions occur:
 
- - all steps in the workflow will have [`credentials`](/docs/architecture/step-registry/#injecting-custom-credentials) mounted at `$CLUSTER_PROFILE_DIR` that contains credentials for cloud accounts, image registries, *etc*
- - the test will implicitly ask for a [`lease`](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) and expose it with `$LEASED_RESOURCE`
- - all steps in the test will implicitly declare [`dependencies`](/docs/architecture/ci-operator/#referring-to-images-in-tests) on imported OpenShift release images
- - all steps will have a number of environment variables set, such a `$CLUSTER_TYPE`, `$IMAGE_FORMAT` and `$KUEBCONFIG`
- 
+- all steps in the workflow will have [`credentials`](/docs/architecture/step-registry/#injecting-custom-credentials) mounted at `$CLUSTER_PROFILE_DIR` that contains credentials for cloud accounts, image registries, *etc*
+- the test will implicitly ask for a [`lease`](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) and expose it with `$LEASED_RESOURCE`
+- all steps in the test will implicitly declare [`dependencies`](/docs/architecture/ci-operator/#referring-to-images-in-tests) on imported OpenShift release images
+- all steps will have a number of environment variables set, such a `$CLUSTER_TYPE`, `$IMAGE_FORMAT` and `$KUEBCONFIG`
+
 Generally, the major difference between `cluster_profile`s is the content of the credentials. These credentials are stored in the test platform clusters using naming convention: `cluster-secrets-<name>`; so, the `aws` profile stores credentials in `cluster-secrets-aws`.
 
 ## Adding a New Cluster Profile
