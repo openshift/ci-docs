@@ -46,7 +46,7 @@ make new-repo
 {{< / highlight >}}
 
 This should fully configure your repository, so the changes that it produces are ready to be submitted in a pull
-request. The resulting yaml file called `$org-$repo-$branch.yaml`
+request. The resulting YAML file called `$org-$repo-$branch.yaml`
 will be found in the `ci-operator/config/$org/$repo` directory.
 
 
