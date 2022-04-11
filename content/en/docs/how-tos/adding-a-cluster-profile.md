@@ -4,6 +4,13 @@ description: How to add a cluster profile to the test platform.
 ---
 This document lays out the process of getting a new cluster profile added to the test platform so that jobs can begin using it.
 
+{{< alert title="Info" color="info" >}}
+
+Adding a cluster profile is just one of the steps necessary to enable CI for new platforms. For the high-level information
+about platform enablement process, please see the [OpenShift Infrastructure Provider Onboarding](http://docs.providers.openshift.org/continuous-integration-and-testing/) Guide.
+
+{{< /alert >}}
+
 ## What a Cluster Profile?
 
 The `cluster_profile` is a `ci-operator` concept that bundles together a couple of concepts to make it easier to configure jobs and steps that can operate on different cloud infrastructures.
