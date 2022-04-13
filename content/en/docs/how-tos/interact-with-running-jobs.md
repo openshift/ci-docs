@@ -22,7 +22,7 @@ itself is useful when debugging test failures or to diagnosing and confirming OC
 {{< alert title="Warning" color="warning" >}}
 Once your pull request is no longer a work in progress, you should no longer interact with the CI system as it is possible
 to alter test outcomes in this way. In most cases it's more useful to run tests against a development cluster for which
-you have a `$KUEBCONFIG` from your local system rather than hijacking the PR's running jobs. For this, follow the
+you have a `$KUBECONFIG` from your local system rather than hijacking the PR's running jobs. For this, follow the
 [directions](#how-to-run-the-test-suites-outside-of-ci) on how to run the test suites outside of CI. 
 {{< /alert >}}
 
