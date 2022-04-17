@@ -111,7 +111,7 @@ build_root_image:
 
 Starting `FROM` the image described as the `build_root`, `ci-operator` will clone the repository under test and compile
 artifacts, committing them as image layers that may be referenced in derivative builds. The commands which are run to
-compile artifacts are configured with `binary_build_commands` and are run in the root of the cloned repository. A a
+compile artifacts are configured with `binary_build_commands` and are run in the root of the cloned repository. A
 separate set of commands, `test_binary_build_commands`, can be configured for building artifacts to support test
 execution. The following `ImageStreamTags` are created in the test's `Namespace`
 
