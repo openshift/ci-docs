@@ -36,8 +36,11 @@ secretsync/target-clusters: "one-cluster,another-cluster"
 
 The most common case is to use secrets in a [step](/docs/architecture/step-registry/#step) of a job. In this case, we
 **require** the user to mirror secrets to `test-credentials` namespace. The pod which runs the step can access the secrets
-defined in `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
+defined in the `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
 for details.
+
+The propagation of secret contents is scheduled immediately after they are
+added or modified and should be completed within 30m.
 
 ## Protecting Secrets from Leaking
 
