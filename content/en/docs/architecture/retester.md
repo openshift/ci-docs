@@ -22,11 +22,7 @@ We need to enable repository by adding a flag `--enable-on-repo=<org>/<repo>` to
       command:
       - retester
       args:
-      - --config-path=/etc/config/config.yaml
-      - --supplemental-prow-config-dir=/etc/config
-      - --dry-run=false
-      - --job-config-path=/etc/job-config
-      - --cache-file=/cache/backoff
+      ...
       - --enable-on-repo=openshift/ci-tools       # Enable the retester on repo openshift/ci-tools
 {{< / highlight >}}
 
@@ -36,13 +32,8 @@ We need to enable repository by adding a flag `--enable-on-repo=<org>/<repo>` to
     containers:
     - args:
       - --query=is:pr state:open label:lgtm label:approved status:failure comments:<2500
-        NOT "consistent with ART" -label:do-not-merge -label:do-not-merge/work-in-progress
-        -label:do-not-merge/hold -label:needs-rebase -label:needs-ok-to-test org:openshift
-        org:openshift-priv repo:operator-framework/operator-lifecycle-manager repo:operator-framework/operator-marketplace
-        repo:operator-framework/operator-registry repo:cri-o/cri-o repo:kubevirt-ui/kubevirt-plugin
+        ...
         -repo:openshift/ci-tools                  # Exclude repo openshift/ci-tools
-      - --token=/etc/oauth/oauth
-      - --updated=0
 {{< / highlight >}}
 
 ### Back-off
