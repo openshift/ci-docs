@@ -3,7 +3,7 @@ title: "Retester"
 description: An overview of the retester implementation.
 ---
 ## What Is Retester?
-Retester is a tool that evaluate which pull requests should be retested, and then selected pull requests retest 
+Retester is a tool that evaluate which pull requests should be retested, and then retest 
 by [@openshift-ci-robot](https://github.com/openshift-ci-robot) 's commenting `/retest-required` on the pull requests.
 
 ## How Do We Set up Retester?
@@ -12,7 +12,7 @@ configuration, whatever onboards to Tide, gets onboarded to retester too.
 Retester is aware of Prow and the concept of optional and required jobs. It only triggers retests on PRs 
 where at least one required Prow job is failing.
 
-We need to enable repository on the retester's deployment and remove it from the old retester.
+We need to enable repository by adding a flag `--enable-on-repo=<org>/<repo>` to [the retester's deployment](https://github.com/openshift/release/blob/master/clusters/app.ci/prow/03_deployment/retester.yaml) and exclude it from [the old retester](https://github.com/openshift/release/blob/05dd9a1ab5881e55165a0cc0f40d5513e2e2fd11/ci-operator/jobs/infra-periodics.yaml#L260-L300) by `-repo:<org>/<repo>` in the `query`. The following example shows how to achieve it for repo `openshift/ci-tools`:
 
 {{< highlight yaml >}}
   spec:
@@ -27,7 +27,7 @@ We need to enable repository on the retester's deployment and remove it from the
       - --dry-run=false
       - --job-config-path=/etc/job-config
       - --cache-file=/cache/backoff
-      - --enable-on-repo=openshift/ci-tools       #Add this line in new retester's deployment
+      - --enable-on-repo=openshift/ci-tools       # Enable the retester on repo openshift/ci-tools
 {{< / highlight >}}
 
 {{< highlight yaml >}}
@@ -40,7 +40,7 @@ We need to enable repository on the retester's deployment and remove it from the
         -label:do-not-merge/hold -label:needs-rebase -label:needs-ok-to-test org:openshift
         org:openshift-priv repo:operator-framework/operator-lifecycle-manager repo:operator-framework/operator-marketplace
         repo:operator-framework/operator-registry repo:cri-o/cri-o repo:kubevirt-ui/kubevirt-plugin
-        -repo:openshift/ci-tools                  #Remove this line in old retester
+        -repo:openshift/ci-tools                  # Exclude repo openshift/ci-tools
       - --token=/etc/oauth/oauth
       - --updated=0
 {{< / highlight >}}
