@@ -27,6 +27,7 @@ Below is a non-exhaustive list of CI services.
 * [search.ci.openshift.org](https://search.ci.openshift.org/): search tool for error messages in job logs and Bugzilla bugs.
 * [sippy.dptools.openshift.org](https://sippy.dptools.openshift.org/): CI release health summary.
 * [bugs.ci.openshift.org](https://bugs.ci.openshift.org/): Bugzilla bug overviews, backporting and release viewer.
+* [steps.ci.openshift.org](https://steps.ci.openshift.org/): [Step registry](/docs/architecture/step-registry/) viewer.
 
 # Contact
 

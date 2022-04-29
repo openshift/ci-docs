@@ -8,6 +8,8 @@ These individual steps can be put into a shared registry that other tests can ac
 upgrade as multiple test workflows can share steps and don’t have to each be updated individually to fix bugs or add new features. It also reduces the
 chances of a mistake when copying a feature from one test workflow to another.
 
+The current step registry is available for browsing [here](https://steps.ci.openshift.org/).
+
 To understand how the multistage tests and registry work, we must first talk about the three components of the test registry and how to use those
 components to create a test:
 
