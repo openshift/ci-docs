@@ -25,8 +25,9 @@ Below is a non-exhaustive list of CI services.
 * [multi.ocp.releases.ci.openshift.org](https://multi.ocp.releases.ci.openshift.org/): OCP Multi-arch release status page.
 * [amd64.origin.releases.ci.openshift.org](https://amd64.origin.releases.ci.openshift.org/): OKD release status page.
 * [search.ci.openshift.org](https://search.ci.openshift.org/): search tool for error messages in job logs and Bugzilla bugs.
-* [sippy.ci.openshift.org](https://sippy.ci.openshift.org/): CI release health summary.
+* [sippy.dptools.openshift.org](https://sippy.dptools.openshift.org/): CI release health summary.
 * [bugs.ci.openshift.org](https://bugs.ci.openshift.org/): Bugzilla bug overviews, backporting and release viewer.
+* [steps.ci.openshift.org](https://steps.ci.openshift.org/): [Step registry](/docs/architecture/step-registry/) viewer.
 
 # Contact
 
