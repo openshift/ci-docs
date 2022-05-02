@@ -63,8 +63,7 @@ $ cat ~/.docker/config.json | jq '.auths["registry.ci.openshift.org"]'
 ```
 
 {{< alert title="Info" color="info" >}}
-Today, authentication to the OpenShift cluster is delegated to GitHub and requires that you are a member of the
-`OpenShift` organization.
+Today, authentication to OpenShift CI clusters is [delegated to Red Hat SSO](/docs/how-tos/rbac/).
 {{< /alert >}}
 
 ## How do I get a token for programmatic access to the central CI registry?
