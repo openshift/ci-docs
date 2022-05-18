@@ -90,3 +90,77 @@ changes.  These are:
 - A `ConfigMap` is required for the profile.  The convention is for it to be
   named `cluster-profile-<name>`, in which case a single new `switch` label is
   required.
+
+## VPN connection
+
+For platforms that need access to restricted environments, `ci-operator`
+supports adding a dedicated VPN connection to each test step.  Since this is a
+requirement of specific platforms, it is triggered by special files in the
+[cluster profile(s)]({{< ref "docs/how-tos/adding-a-cluster-profile#what-is-a-cluster-profile" >}})
+associated with those platforms.  This process is transparent to the test
+command: when a VPN connection is requested at the test level, it is set up
+automatically by the test platform with no changes required to individual tests.
+
+{{< alert title="Note" color="info" >}}
+Details of the implementation can be found in the
+<a href="https://docs.google.com/document/d/1mPjrHVS1EvmLdq4kGhRazTpGu6xVZDyGpVAphVZhX4w/edit?resourcekey=0-KA-qXXq1J2bTR7o6Kit9Vw">design document</a>.
+{{< /alert >}}
+
+### Cluster profile
+
+VPN connections are requested by the presence of a special file named `vpn.yaml`
+in the cluster profile, detected when the test steps are about to be executed.
+This file should have the following fields:
+
+- `image`: _pull spec_ of the image to be used for the VPN client container.
+  This image should contain the packages necessary to establish the connection,
+  as well as the `bash` shell to execute the container's entry point script.
+- `commands`: the name of another file in the cluster profile (e.g.
+  `openvpn.sh`) which contains the VPN client's entry point script.  This script
+  is effectively executed as `bash -c "$(<f")"`, where `f` is the value
+  associated with the `commands` key.
+- `wait_timeout`: the maximum amount of time the step script should wait before
+  starting (detailed in the next section).  This ensures the steps are not
+  blocked until the test timeout (several hours) expires if any problems occur
+  with the VPN client.
+
+### Client container
+
+The container should execute the VPN client to establish the connection.  It
+will reside in the same network namespace as the test container, so no special
+provisions are necessary to make the networking changes usable by the test
+program.  When executed, the entry point program will be located in the
+directory where the cluster profile files are mounted, so all secrets will be
+available and can be referenced with a relative path.
+
+In addition to executing the client, the container has also two synchronization
+points:
+
+- When the connection has been established and the test script should start, a
+  file named `/tmp/vpn/up` should be created.  For OpenVPN, for example, the
+  following options can be used:
+
+{{< highlight bash >}}
+openvpn --script-security 2 --route-up '/bin/bash -c "touch /tmp/vpn/up"' …
+{{< / highlight >}}
+
+- The script should watch for the creation of a file indicating that the main
+  test has finished and then exit so that the test can terminate properly.  This
+  marker file is created automatically by the CI infrastructure at
+  `/logs/marker-file.txt`.  The client can perform these actions with a script
+  such as:
+
+{{< highlight bash >}}
+function exit_with_test() {
+    until [[ -f /logs/marker-file.txt ]]; do sleep 1; done
+    while :; do kill 1; sleep 1; done
+}
+
+exit_with_test &
+# run the VPN client
+{{< / highlight >}}
+
+{{< alert title="Note" color="info" >}}
+N.b. both containers start simultaneously, so the test may exit before the VPN
+client starts.
+{{< /alert >}}

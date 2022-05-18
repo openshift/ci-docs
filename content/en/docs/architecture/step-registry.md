@@ -959,3 +959,19 @@ tests:
   steps:
     workflow: openshift-e2e-disruptive
 {{< / highlight >}}
+
+## VPN connection
+
+For platforms that need access to restricted environments, `ci-operator`
+supports adding a dedicated VPN connection to each test step.  Since this is a
+requirement of specific platforms, it is enabled when a
+[cluster profile]({{< ref "docs/how-tos/adding-a-cluster-profile" >}})
+for one of those platforms is used.  This process is transparent to the test
+command: when a VPN connection is requested at the test level, it is set up
+automatically by the test platform, which ensures the connection is available
+throughout the execution of each step.  No changes are required to individual
+tests.
+
+More details about the interaction between the test steps and the VPN client can
+be found in the cluster profile
+[documentation]({{< ref "docs/how-tos/adding-a-cluster-profile#vpn-connection" >}}).
