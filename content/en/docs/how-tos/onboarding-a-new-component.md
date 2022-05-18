@@ -254,20 +254,33 @@ There are two types of component images in the release payloads:
 {{< alert title="Note" color="info" >}}
 Before proceeding, it is important to understand the name you are changing. This remainder of this section describes how to 
 change the component names used within the release payload (i.e. the names listed as a result of running `oc adm release info ...`).
-This procedure will _not_ change the repository to which an image is published on registry.redhat.io (e.g. [registry.redhat.io/openshift4/ose-logging-fluentd...](https://catalog.redhat.com/software/containers/openshift4/ose-logging-fluentd/5cd9744edd19c778293af093?container-tabs=gti)) . 
+This procedure will _not_ change the repository to which an image is published on registry.redhat.io (e.g. [registry.redhat.io/openshift4/ose-cluster-etcd-rhel8-operator...](https://catalog.redhat.com/software/containers/openshift4/ose-cluster-etcd-rhel8-operator/5f6d313f4fcb1bc3f0425fd5?container-tabs=gti)) . 
 To change the registry.redhat.io repository name, create a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443)  
 describing the desired change. The repository on registry.redhat.io is called the "Comet Repo" and has no impact on the 
 content / construction of the release payload.
 {{< /alert >}}
 
 #### Changing the component name of a second level operator
-It is uncommon for other components to directly reference the release payload component name of a second level operator. As such, name changes
-are relatively simple to achieve without risking the creation of nightlies. However, failure to follow all steps can lead 
-to difficult to detect and important disparities between what is tested in CI and what is shipped to customers.
+It is uncommon for other components to directly reference the release payload component name of a second level operator. However,
+if your second level operator is referenced, follow the procedure for changing the component name of an operand. 
+
+{{< alert title="Note" color="info" >}}
+To detect if another component references the component about to be changed via an `image-references` file, you can use `oc` and `--exclude` the
+old name of the component. 
+```shell
+$ oc adm release new --from-release {latest-4.x-nightly-pullspec} --exclude etcd --to-file output.yaml
+.....
+error: unable to create a release: operator "cluster-etcd-operator" contained an invalid image-references file: no input image tag named "etcd"
+```
+In this example, `cluster-etcd-operator` references `etcd`. 
+{{< /alert >}}
+
+Failure to follow all steps can lead to difficult to detect and important disparities between what is tested in CI 
+and what is shipped to customers.
 
 **Steps**:
 1. If a name change was not directly requested by a staff engineer, ensure that a staff engineer agrees on the name change (`@aos-staff-engineers` on Slack).
-2. Open and `/hold` a pull request, PR1, against github.com/openshift/release to change the component's name in CI. In virtually all cases, this will be a PR against the component's ci-config for its main branch. A component's name may be specified in the `images.to:` stanza or overridden in the `promotion.tag:` stanza of a component's CI configuration. The new tag name should match exactly what will appear in `oc adm release info` when the component is listed.  
+2. Open and `/hold` a pull request, PR1, against github.com/openshift/release to change the component's name in CI. In virtually all cases, this will be a PR against the component's ci-config for its main branch. A component's name should be specified in the [`images.to:`](https://github.com/openshift/release/blob/784b1d65e985e19b94fd65bb26c6c5a4fecc2ea8/ci-operator/config/openshift/cluster-etcd-operator/openshift-cluster-etcd-operator-master.yaml#L37-L47) stanza of a component's CI configuration. The new tag name should match exactly what will appear in `oc adm release info` when the component is listed.  
 3. Open and `/hold` a pull request, PR2, against github.com/openshift/ocp-build-data in the openshift-4.x branch of the targeted release(s). Note that ART may have already cut a new release branch, meaning you need to open a PR for openshift-4.x+1 as well. The PR should change the `name` field in the component's metadata. Note that in ART metadata, the desired name should be prefixed with `ose-`. For example, the `cluster-etcd-operator` payload component name is defined [here, for openshift-4.11](https://github.com/openshift/ocp-build-data/blob/129ef9fb8335991d88ce9f41a61057c6ab2bb08e/images/cluster-etcd-operator.yml#L23).  
 4. Submit a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443) to communicate to ART that a component name change is desired. Include the PRs in the Jira ticket.
 5. All PRs should be passing tests and ready to merge. No PRs other than PR1 should be merged in the component's github.com repository during the following process. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
@@ -275,7 +288,7 @@ to difficult to detect and important disparities between what is tested in CI an
    2. Unhold PR1 and allow it to merge.
    3. Once PR1 merges, the release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` followed immediately by `oc -n ocp tag 4.{minor}:{old-component-name} -d` to remove the old component name.
    4. Unhold PR2 and have the release-artist merge it.
-6. Monitor the subsequent CI nightlies on amd64 OpenShift release controller. Continue to do so until you see a CI nightly produced which reports the new component name in `oc adm release info <ci-nightly-release-payload-pullspec>`. If a CI nightly fails to assemble, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
+6. Monitor the subsequent CI payloads on amd64 OpenShift release controller. Continue to do so until you see a CI payload produced which reports the new component name in `oc adm release info <ci-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
 
 #### Changing the component name of an operand
 Release payload operand component names are referenced in second level operator github.com repositories. A change must merge in the second level 
@@ -283,27 +296,27 @@ operator's `image-references` file, or release payloads will fail to assemble af
 
 **Steps**:
 1. If a name change was not directly requested by a staff engineer, ensure that a staff engineer agrees on the name change (`@aos-staff-engineers` on Slack).
-2. Open and `/hold` a pull request, PR1, against github.com/openshift/release to change the operand component's name in CI. In virtually all cases, this will be a PR against the component's ci-config for its main branch. A component's name may be specified in the `images.to:` stanza or overridden in the `promotion.tag:` stanza of a component's CI configuration. The new tag name should match exactly what will appear in `oc adm release info` when the component is listed.  
-3. Open and `/hold` a pull request, PR2, against the repo of the operator which references the old operand component name in its `image-references` file. PR2 should update `image-references` to use the new component name.
+2. Open and `/hold` a pull request, PR1, against github.com/openshift/release to change the operand component's name in CI. In virtually all cases, this will be a PR against the component's ci-config for its main branch. A component's name should be specified in the [`images.to:`](https://github.com/openshift/release/blob/784b1d65e985e19b94fd65bb26c6c5a4fecc2ea8/ci-operator/config/openshift/cluster-etcd-operator/openshift-cluster-etcd-operator-master.yaml#L37-L47) stanza of a component's CI configuration. The new tag name should match exactly what will appear in `oc adm release info` when the component is listed.  
+3. Open and `/hold` a pull request, PR2, against the repo(s) of the operator(s) which references the old operand component name in its `image-references` file. PR2 should update `image-references` to use the new component name.
 4. Open and `/hold` a pull request, PR3, against github.com/openshift/ocp-build-data in the openshift-4.x branch of the targeted release(s). Note that ART may have already cut a new release branch, meaning you need to open a PR for openshift-4.x+1 as well. The PR should change the `name` field in the component's metadata. Note that in ART metadata, the desired name should be prefixed with `ose-`. For example, the `etcd` operand component is name definition [can be seen here, for openshift-4.11](https://github.com/openshift/ocp-build-data/blob/129ef9fb8335991d88ce9f41a61057c6ab2bb08e/images/cluster-etcd-operator.yml#L23).  
 5. Submit a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443) to communicate to ART that a component name change is desired. Include the PRs in the Jira ticket.
 6. PR1 and PR3 should be passing tests and ready to merge (PR2 will be failing at this point). No PRs other than PR1 and PR2 should be merged in their respective github.com repositories during the following process. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
    1. On the central app.ci CI cluster, a release-artist should check the current registry.ci.openshift.org image associated with the component in the `-n ocp is/4.{minor}` release image stream. For example, `oc -n ocp get istag 4.11:{old-component-name} -o=json | jq .tag.from.name` should output a pullspec like `registry.ci.openshift.org/ocp/4.11@sha256:...` for 4.11.
    2. The release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` to establish a tag with the new operand component name.
-   3. Run `/retest` on PR2. Tests should now pass.
+   3. Run `/retest` on PR2(s). Tests should now pass.
    4. Unhold and merge PR1.
-   5. Unhold and merge PR2.
+   5. Unhold and merge PR2(s).
    6. Unhold and have the release-artist merge PR3.
    7. It is not time sensitive, but before the ART Jira ticket is closed, the release-artist must remove the old component name from CI: `oc -n ocp tag 4.{minor}:{old-component-name} -d`.
-7. Monitor the subsequent [CI nightlies on amd64 OpenShift release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.ci). Continue to do so until you see a CI nightly produced which reports the new component name in `oc adm release info <ci-nightly-release-payload-pullspec>`. If a CI nightly fails to assemble, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
-8. During the next working day, check [ART nightlies on the amd64 release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.nightly). Continue to do so until you see an ART nightly produced which reports the new component name in `oc adm release info <art-nightly-release-payload-pullspec>`. If an ART nightly fails to assemble, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible. 
+7. Monitor the subsequent [CI payloads on amd64 OpenShift release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.ci). Continue to do so until you see a CI payload produced which reports the new component name in `oc adm release info <ci-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
+8. During the next working day, check [ART nightlies on the amd64 release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.nightly). Continue to do so until you see an ART nightly produced which reports the new component name in `oc adm release info <art-nightly-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
 
 ### Removing a component from the OpenShift release payload
 
 **Steps**:
 1. Submit a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443) to communicate to ART that a component change is desired. Take care to mention whether the image should also be removed from the 4.x+1 branch of ART's metadata in case it has already been branched.
 2. Open and `/hold` pull request, PR1, removing references to the old component from any second level operator which includes the component in its `image-references` file.
-3. Open and `/hold` a pull request, PR2, to github.com/openshift/release which removes the `promotion:` stanza from the ci-operator configuration for the component & affected release(s).
+3. Open and `/hold` a pull request, PR2, to github.com/openshift/release which, minimally, removes the `promotion:` stanza from the ci-operator configuration for the component & affected release(s). If the component is being completely removed from CI, PR2 can be the complete deletion of the ci-operator configuration file for the component / branch.
 4. Via the ART Jira ticket, have a release-artist prepare a pull request, PR3, which either disables the component build or prevents its inclusion in the release payload. 
 5. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
    1. Unhold and merge PR1.
