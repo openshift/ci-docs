@@ -275,7 +275,7 @@ error: unable to create a release: operator "cluster-etcd-operator" contained an
 In this example, `cluster-etcd-operator` references `etcd`. 
 {{< /alert >}}
 
-Failure to follow all steps can lead to difficult to detect and important disparities between what is tested in CI 
+Failure to follow all steps can lead to important and difficult to detect disparities between what is tested in CI 
 and what is shipped to customers.
 
 **Steps**:
@@ -286,7 +286,7 @@ and what is shipped to customers.
 5. All PRs should be passing tests and ready to merge. No PRs other than PR1 should be merged in the component's github.com repository during the following process. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
    1. On the central app.ci CI cluster, a release-artist should check the current registry.ci.openshift.org image associated with the component in the `-n ocp is/4.{minor}` release image stream. For example, `oc -n ocp get istag 4.11:{old-component-name} -o=json | jq .tag.from.name` should output a pullspec like `registry.ci.openshift.org/ocp/4.11@sha256:...` for 4.11. 
    2. Unhold PR1 and allow it to merge.
-   3. Once PR1 merges, the release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` followed immediately by `oc -n ocp tag 4.{minor}:{old-component-name} -d` to remove the old component name.
+   3. Once PR1 merges, the release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` followed immediately by `oc -n ocp tag 4.{minor}:{old-component-name} -d` to remove the old component name from CI.
    4. Unhold PR2 and have the release-artist merge it.
 6. Monitor the subsequent CI payloads on amd64 OpenShift release controller. Continue to do so until you see a CI payload produced which reports the new component name in `oc adm release info <ci-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
 
@@ -302,14 +302,14 @@ operator's `image-references` file, or release payloads will fail to assemble af
 5. Submit a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443) to communicate to ART that a component name change is desired. Include the PRs in the Jira ticket.
 6. PR1 and PR3 should be passing tests and ready to merge (PR2 will be failing at this point). No PRs other than PR1 and PR2 should be merged in their respective github.com repositories during the following process. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
    1. On the central app.ci CI cluster, a release-artist should check the current registry.ci.openshift.org image associated with the component in the `-n ocp is/4.{minor}` release image stream. For example, `oc -n ocp get istag 4.11:{old-component-name} -o=json | jq .tag.from.name` should output a pullspec like `registry.ci.openshift.org/ocp/4.11@sha256:...` for 4.11.
-   2. The release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` to establish a tag with the new operand component name.
+   2. The release-artist should run `oc -n ocp tag {existing-registry.ci-openshift-org@sha26..} 4.{minor}:{new-component-name}` to establish a tag with the new operand component name for CI.
    3. Run `/retest` on PR2(s). Tests should now pass.
    4. Unhold and merge PR1.
    5. Unhold and merge PR2(s).
-   6. Unhold and have the release-artist merge PR3.
+   6. Unhold and have the release-artist merge PR3. The time between PR2 and PR3 merging should be kept to a minimum to avoid ART nightlies failing to assemble. 
    7. It is not time sensitive, but before the ART Jira ticket is closed, the release-artist must remove the old component name from CI: `oc -n ocp tag 4.{minor}:{old-component-name} -d`.
 7. Monitor the subsequent [CI payloads on amd64 OpenShift release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.ci). Continue to do so until you see a CI payload produced which reports the new component name in `oc adm release info <ci-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
-8. During the next working day, check [ART nightlies on the amd64 release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.nightly). Continue to do so until you see an ART nightly produced which reports the new component name in `oc adm release info <art-nightly-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible.
+8. During the ensuing work day, check [ART nightlies on the s390x release controller](https://s390x.ocp.releases.ci.openshift.org/#4.11.0-0.nightly-s390x). Continue to do so until you see an ART nightly produced which reports the new component name in `oc adm release info <art-s390x-nightly-release-payload-pullspec>`. If steps in this process were missed, following the hyperlink for a payload name in the release controller will simply display an error message stating that the release controller was `unable to create a release` with a few details about the problem's cause. If this error is displayed, immediately report the issue to `@team-technical-release` and `@release-artists` so that the incident can be recovered as quickly as possible. Changes will also eventually be apparent on the [amd64 release controller](https://amd64.ocp.releases.ci.openshift.org/#4.11.0-0.nightly), but, due to differences in acceptance testing, they will be evident in the s390x release controller much sooner.
 
 ### Removing a component from the OpenShift release payload
 
@@ -317,9 +317,9 @@ operator's `image-references` file, or release payloads will fail to assemble af
 1. Submit a copy of [this ART team template](https://issues.redhat.com/browse/ART-1443) to communicate to ART that a component change is desired. Take care to mention whether the image should also be removed from the 4.x+1 branch of ART's metadata in case it has already been branched.
 2. Open and `/hold` pull request, PR1, removing references to the old component from any second level operator which includes the component in its `image-references` file.
 3. Open and `/hold` a pull request, PR2, to github.com/openshift/release which, minimally, removes the `promotion:` stanza from the ci-operator configuration for the component & affected release(s). If the component is being completely removed from CI, PR2 can be the complete deletion of the ci-operator configuration file for the component / branch.
-4. Via the ART Jira ticket, have a release-artist prepare a pull request, PR3, which either disables the component build or prevents its inclusion in the release payload. 
+4. Via the ART Jira ticket, have a release-artist prepare a github.com/openshift/ocp-build-data pull request, PR3, which either removes the component metadata or prevents its inclusion in the release payload (`for_payload: false`). 
 5. In a synchronous chat with an ART team member or release manager (`@release-artists` in `#aos-art` on Slack) the following should be performed:
    1. Unhold and merge PR1.
-   2. Unhold and merge PR3.
+   2. Unhold and merge PR2.
    3. Unhold and have the release-artist merge PR3.
    4. The release-artist should then remove the old component name from CI: `oc -n ocp tag 4.{minor}:{old-component-name} -d`.
