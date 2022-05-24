@@ -49,7 +49,7 @@ image tag to the `quay.io/openshift:4.6` image would require a new entry in the
 file. Adding a new image entirely would require a new `mapping_origin_*` file.
 
 {{< alert title="Warning" color="warning" >}}
-Images that are mirrored to Quay for the first time are **private** by default and need to be made public by an administrator of the Quay organization. For the `openshift` organization, contact Clayton Coleman, Ben Parees, or Justin Pierce about making images public.  They
+Images that are mirrored to Quay for the first time are **private** by default and need to be made public by an administrator of the Quay organization. For the `openshift` organization, contact Doug Hellmann, Ben Parees, or Justin Pierce about making images public.  They
 will be checking to ensure your image does not contain private or licensed content such as RHEL or internal RHEL packages.
 {{< /alert >}}
 
