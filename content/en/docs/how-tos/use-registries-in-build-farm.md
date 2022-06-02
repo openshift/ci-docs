@@ -137,6 +137,7 @@ roleRef:
 subjects:
   - kind: Group
     apiGroup: rbac.authorization.k8s.io
+    # This is a group from Rover https://rover.redhat.com/groups/
     name: my-project-admins
     namespace: my-project
 ```
