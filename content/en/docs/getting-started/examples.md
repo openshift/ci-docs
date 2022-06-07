@@ -1,6 +1,7 @@
 ---
 title: "Examples"
 description: Examples of common tasks in CI configuration.
+weight: 2
 ---
 
 # How do I add a job that runs the OpenShift end-to-end conformance suite on AWS?
