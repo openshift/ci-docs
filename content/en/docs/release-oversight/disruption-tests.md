@@ -1,22 +1,29 @@
 ---
 title: "Disruption Tests"
-description: An look at how disruption tests are architected and implemented.
+description: A look at how disruption tests are architected and implemented.
 ---
 
 ## Summary
 
-Disruption tests are a set of tests that measure an endpoints resilience or an allowed alert duration. As the `e2e tests` are run the results are matched against historical data to determine if the disruption intervals are within expectations.
+Disruption tests are a set of tests that measure an endpoint's resilience or an allowed alert duration. As the `e2e tests` are run the results are matched against historical data to determine if the disruption intervals are within expectations.
 
 ### Resources
 
-> ⚠️ Note! You'll need access to the appropriate groups to work with disruption data, please reach out to the TRT team for access.
+{{% alert title="⚠️ Note!" color="warning" %}}
+You'll need access to the appropriate groups to work with disruption data, please reach out to the TRT team for access.
+{{% /alert %}}
 
 - [Periodic Jobs](https://github.com/openshift/release/tree/master/ci-operator/jobs/openshift/release)
 - [BigQuery](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis)
-- [DCPR Job Aggregation Configs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation)
+- [DPCR Job Aggregation Configs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation)
 - [Origin Synthetic Backend Tests](https://github.com/openshift/origin/tree/master/pkg/synthetictests/allowedbackenddisruption)
 
-## Architecture
+## Disruption Data Architecture
+
+{{% alert color="info" %}}
+The below diagram presents a high level overview on how we use our `periodic jobs`, `job aggregation` and `BigQuery` to generate the disruption historical data.
+It does not cover how the tests themselves are run against a cluster.
+{{% /alert %}}
 
 ### High Level Diagram
 
@@ -28,7 +35,7 @@ Disruption tests are a set of tests that measure an endpoints resilience or an a
 
    Clicking the artifact link on the top right of a prow job and navigating to the `openshift-e2e-test` folder will show you the disruption results. (ex. `.../openshift-e2e-test/artifacts/junit/backend-disruption_[0-9]+-[0-9]+.json`).
 
-1. Job aggregation jobs are run in the DCPR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation).
+1. Job aggregation jobs are run in the DPCR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation).
 
    These jobs fetch and parse out the results from the e2e runs. They are then pushed to the [openshift-ci-data-analysis](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis) table in BigQuery.
 
@@ -36,11 +43,11 @@ Disruption tests are a set of tests that measure an endpoints resilience or an a
 
 ### How To Query The Data
 
-Once you have access to BigQuery in the `openshift-ci-data-analysis` project. You can run the below query to fetch the latest results.
+Once you have access to BigQuery in the `openshift-ci-data-analysis` project, you can run the below query to fetch the latest results.
 
 #### Query
 
-**[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L13-L43)**
+{{% card-code header="[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L13-L43)" %}}
 
 ```sql
 SELECT
@@ -74,10 +81,12 @@ FROM (
         JobRuns.StartTime > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 21 DAY)
 )
 GROUP BY
-    BackendName, Release, FromRelease, Platform, Architecture, Network, Topology
+BackendName, Release, FromRelease, Platform, Architecture, Network, Topology
 ```
 
-[origin/pkg/synthetictests/allowedalerts/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/types.go#L17-L35)
+{{% /card-code %}}
+
+{{% card-code header="[origin/pkg/synthetictests/allowedalerts/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/types.go#L17-L35)" %}}
 
 ```sql
 SELECT * FROM openshift-ci-data-analysis.ci_data.Alerts_Unified_LastWeek_P95
@@ -101,6 +110,8 @@ order by
  AlertName, Release, FromRelease, Topology, Platform, Network
 ```
 
+{{% /card-code %}}
+
 #### Downloading
 
 Once the query is run, you can download the data locally.
@@ -117,7 +128,7 @@ Now that we have a better understanding of how the disruption test data is gener
 
 The [origin/pkg/synthetictests/allowedbackenddisruption/query_results.json](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/query_results.json) file that we updated previously is embedded into the `openshift-tests` binary. At runtime, we ingest the raw data and create a `historicaldata.NewMatcher()` object which implements the `BestMatcher` interface.
 
-**[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L53-L77)**
+{{% card-code header="[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L53-L77)" %}}
 
 ```go
 //go:embed query_results.json
@@ -145,11 +156,13 @@ func getCurrentResults() historicaldata.BestMatcher {
 }
 ```
 
+{{% /card-code %}}
+
 ### Best Guesser
 
 The core logic of the current best matcher will check if we have an exact match in the historical data. An exact match is one that contains the same `Backend Name` and [JobType](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/platformidentification/types.go#L16-L23). When we don't have an exact match, we make a best guess effort by doing a fuzzy match for data we don't have. Fuzzy matching is done by iterating through all the `nextBestGuessers` and stopping at the first match that fits our criteria and checking if it's contained in the data set.
 
-**[origin/pkg/synthetictests/historicaldata/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/types.go#L89-L111)**
+{{% card-code header="[origin/pkg/synthetictests/historicaldata/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/types.go#L89-L111)" %}}
 
 ```go
 	exactMatchKey := DataKey{
@@ -176,9 +189,13 @@ The core logic of the current best matcher will check if we have an exact match 
 	}
 ```
 
+{{% /card-code %}}
+
 ### Default Next Best Guessers
 
-[Next Best Guessers](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L13-L53) are functions that can be chained together and will return either a `true` or `false` if the current `JobType` matches the desired logic. In the code snippet below, we check if `MicroReleaseUpgrade` matches the current `JobType`, if false, we continue down the list. The [combine](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L179-L191) helper function gives you the option to chain and compose a more sophisticated check. In the example below, if we can do a `PreviousReleaseUpgrade` the result of that will be fed into `MicroReleaseUpgrade` and if no function returns `false` during this chain, we have successfully fuzzy matched and can now check the historical data has information for this match.
+[Next Best Guessers](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L13-L53) are functions that can be chained together and will return either a `true` or `false` if the current `JobType` matches the desired logic. In the code snippet below, we check if `MicroReleaseUpgrade` matches the current `JobType`, if false, we continue down the list. The [combine](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L179-L191) helper function gives you the option to chain and compose a more sophisticated check. In the example below, if we can do a [PreviousReleaseUpgrade](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L100-L113) the result of that will be fed into [MicroReleaseUpgrade](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L80-L98) and if no function returns `false` during this chain, we have successfully fuzzy matched and can now check the historical data has information for this match.
+
+{{% card-code header="Ex: `nextBestGuessers` [origin/pkg/synthetictests/historicaldata/next_best_guess.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L13-L53)" %}}
 
 ```go
 var nextBestGuessers = []NextBestKey{
@@ -189,6 +206,31 @@ var nextBestGuessers = []NextBestKey{
     ...
 }
 ```
+
+{{% /card-code %}}
+
+{{% card-code header="Ex: `PreviousReleaseUpgrade` [origin/pkg/synthetictests/historicaldata/next_best_guess.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L100-L113)" %}}
+
+```go
+// PreviousReleaseUpgrade if we don't have data for the current toRelease, perhaps we have data for the congruent test
+// on the prior release.   A 4.11 to 4.11 upgrade will attempt a 4.10 to 4.10 upgrade.  A 4.11 no upgrade, will attempt a 4.10 no upgrade.
+func PreviousReleaseUpgrade(in platformidentification.JobType) (platformidentification.JobType, bool) {
+	toReleaseMajor := getMajor(in.Release)
+	toReleaseMinor := getMinor(in.Release)
+
+	ret := platformidentification.CloneJobType(in)
+	ret.Release = fmt.Sprintf("%d.%d", toReleaseMajor, toReleaseMinor-1)
+	if len(in.FromRelease) > 0 {
+		fromReleaseMinor := getMinor(in.FromRelease)
+		ret.FromRelease = fmt.Sprintf("%d.%d", toReleaseMajor, fromReleaseMinor-1)
+	}
+	return ret, true
+}
+```
+
+{{% /card-code %}}
+
+{{% card-code header="Ex: `MicroReleaseUpgrade` [origin/pkg/synthetictests/historicaldata/next_best_guess.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/historicaldata/next_best_guess.go#L80-L98)" %}}
 
 ```go
 // MicroReleaseUpgrade if we don't have data for the current fromRelease and it's a minor upgrade, perhaps we have data
@@ -211,3 +253,5 @@ func MicroReleaseUpgrade(in platformidentification.JobType) (platformidentificat
 	return ret, true
 }
 ```
+
+{{% /card-code %}}
