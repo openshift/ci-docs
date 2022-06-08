@@ -1,0 +1,10 @@
+<div class="card" style="margin-top:0.5em">
+  {{- with $.Get "header" -}}
+    <div class="card-header">
+      {{- $.Get "header" | markdownify -}}
+    </div>
+  {{end}}
+  <div class="card-body code" style="padding:0.0em 0.85em;">
+      {{ $.Inner }}
+  </div>
+</div>
