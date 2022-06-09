@@ -1,6 +1,7 @@
 # IDE
 .idea/
-
+.vscode/
 # Hugo
 public/
 resources/_gen
+.hugo_build.lock
