@@ -1,126 +1,21 @@
 ---
-title: "Disruption Tests"
-description: A look at how disruption tests are architected and implemented.
+title: "Code Implementation"
+description: An overview for how disruption tests are implemented, the core logic that makes use of the historical data, and how to go about adding a new tests.
 ---
 
-## Summary
+## Overview
 
-Disruption tests are a set of tests that measure an endpoint's resilience or an allowed alert duration. As the `e2e tests` are run the results are matched against historical data to determine if the disruption intervals are within expectations.
-
-### Resources
-
-{{% alert title="⚠️ Note!" color="warning" %}}
-You'll need access to the appropriate groups to work with disruption data, please reach out to the TRT team for access.
+{{% alert title="Note!" color="primary" %}}
+In the examples below we use the `Backend Disruption` tests, but the same will hold true for the alerts durations.
 {{% /alert %}}
 
-- [Periodic Jobs](https://github.com/openshift/release/tree/master/ci-operator/jobs/openshift/release)
-- [BigQuery](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis)
-- [DPCR Job Aggregation Configs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation)
-- [Origin Synthetic Backend Tests](https://github.com/openshift/origin/tree/master/pkg/synthetictests/allowedbackenddisruption)
+To measure our ability to provide upgrades to OCP clusters with minimal
+downtime the Disruption Testing framework monitors select backends and
+records disruptions in the backend service availability.
+This document serves as an overview of the framework used to provide
+disruption testing and how to configure new disruption tests when needed
 
-## Disruption Data Architecture
-
-{{% alert color="info" %}}
-The below diagram presents a high level overview on how we use our `periodic jobs`, `job aggregation` and `BigQuery` to generate the disruption historical data.
-It does not cover how the tests themselves are run against a cluster.
-{{% /alert %}}
-
-### High Level Diagram
-
-{{< inlineSVG file="/static/disruption_test_diagram.svg" >}}
-
-### How The Data Flows
-
-1. Disruption data is gathered from periodic jobs that run e2e tests. When e2e tests are done the results are uploaded to `GCS` and the results can be viewed in the artifacts folder for a particular job run.
-
-   Clicking the artifact link on the top right of a prow job and navigating to the `openshift-e2e-test` folder will show you the disruption results. (ex. `.../openshift-e2e-test/artifacts/junit/backend-disruption_[0-9]+-[0-9]+.json`).
-
-1. Job aggregation jobs are run in the DPCR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation).
-
-   These jobs fetch and parse out the results from the e2e runs. They are then pushed to the [openshift-ci-data-analysis](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis) table in BigQuery.
-
-1. Currently, backend disruption data is queried from BigQuery and downloaded in `json` format. The resulting `json` file is then committed to [origin/pkg/synthetictests/allowedbackenddisruption/query_results.json](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/query_results.json) for **backend disruption** or [origin/pkg/synthetictests/allowedalerts/query_results.json](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/query_results.json) for **alert data** (see [how to query](#how-to-query-the-data))
-
-### How To Query The Data
-
-Once you have access to BigQuery in the `openshift-ci-data-analysis` project, you can run the below query to fetch the latest results.
-
-#### Query
-
-{{% card-code header="[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L13-L43)" %}}
-
-```sql
-SELECT
-    BackendName,
-    Release,
-    FromRelease,
-    Platform,
-    Architecture,
-    Network,
-    Topology,
-    ANY_VALUE(P95) AS P95,
-    ANY_VALUE(P99) AS P99,
-FROM (
-    SELECT
-        Jobs.Release,
-        Jobs.FromRelease,
-        Jobs.Platform,
-        Jobs.Architecture,
-        Jobs.Network,
-        Jobs.Topology,
-        BackendName,
-        PERCENTILE_CONT(BackendDisruption.DisruptionSeconds, 0.95) OVER(PARTITION BY BackendDisruption.BackendName, Jobs.Network, Jobs.Platform, Jobs.Release, Jobs.FromRelease, Jobs.Topology) AS P95,
-        PERCENTILE_CONT(BackendDisruption.DisruptionSeconds, 0.99) OVER(PARTITION BY BackendDisruption.BackendName, Jobs.Network, Jobs.Platform, Jobs.Release, Jobs.FromRelease, Jobs.Topology) AS P99,
-    FROM
-        openshift-ci-data-analysis.ci_data.BackendDisruption as BackendDisruption
-    INNER JOIN
-        openshift-ci-data-analysis.ci_data.BackendDisruption_JobRuns as JobRuns on JobRuns.Name = BackendDisruption.JobRunName
-    INNER JOIN
-        openshift-ci-data-analysis.ci_data.Jobs as Jobs on Jobs.JobName = JobRuns.JobName
-    WHERE
-        JobRuns.StartTime > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 21 DAY)
-)
-GROUP BY
-BackendName, Release, FromRelease, Platform, Architecture, Network, Topology
-```
-
-{{% /card-code %}}
-
-{{% card-code header="[origin/pkg/synthetictests/allowedalerts/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/types.go#L17-L35)" %}}
-
-```sql
-SELECT * FROM openshift-ci-data-analysis.ci_data.Alerts_Unified_LastWeek_P95
-where
-  alertName = "etcdMembersDown" or
-  alertName = "etcdGRPCRequestsSlow" or
-  alertName = "etcdHighNumberOfFailedGRPCRequests" or
-  alertName = "etcdMemberCommunicationSlow" or
-  alertName = "etcdNoLeader" or
-  alertName = "etcdHighFsyncDurations" or
-  alertName = "etcdHighCommitDurations" or
-  alertName = "etcdInsufficientMembers" or
-  alertName = "etcdHighNumberOfLeaderChanges" or
-  alertName = "KubeAPIErrorBudgetBurn" or
-  alertName = "KubeClientErrors" or
-  alertName = "KubePersistentVolumeErrors" or
-  alertName = "MCDDrainError" or
-  alertName = "PrometheusOperatorWatchErrors" or
-  alertName = "VSphereOpenshiftNodeHealthFail"
-order by
- AlertName, Release, FromRelease, Topology, Platform, Network
-```
-
-{{% /card-code %}}
-
-#### Downloading
-
-Once the query is run, you can download the data locally.
-
-![BigQuery Download](/bigquery_download.png)
-
-## Code Implementation
-
-> Note! In the examples below we use the `Backend Disruption` tests, but the same will hold true for the alerts durations,
+## Matcher Code Implementation
 
 Now that we have a better understanding of how the disruption test data is generated and updated, let's discuss how the code makes use of it.
 
@@ -255,3 +150,44 @@ func MicroReleaseUpgrade(in platformidentification.JobType) (platformidentificat
 ```
 
 {{% /card-code %}}
+
+## Adding new disruption tests
+
+Currently disruption tests are focused on disruptions created during upgrades.
+To add a new backend to monitor during the upgrade test
+Add a new [backendDisruptionTest](https://github.com/openshift/origin/blob/master/test/extended/util/disruption/backend_sampler_tester.go)
+via NewBackendDisruptionTest to the e2e [upgrade](https://github.com/openshift/origin/blob/master/test/e2e/upgrade/upgrade.go) AllTests.
+If this is a completely new backend being tested then [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json)
+data will need to be added or, if preferable, NewBackendDisruptionTestWithFixedAllowedDisruption can be used instead of NewBackendDisruptionTest and the allowable disruption hardcoded.
+
+### Updating test data
+
+{{% alert color="primary" %}}
+For information on how to get the historical data please refer to the [Architecture Diagram](../data-architecture)
+{{% /alert %}}
+
+Allowable disruption values can be added / updated in [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json).
+Disruption data can be queried from BigQuery using [p95Query](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/types.go)
+
+## Disruption test framework overview
+
+To check for disruptions while upgrading OCP clusters
+
+- The tests are defined by [AllTests](https://github.com/neisw/origin/blob/46f376386ab74ecfe0091552231d378adf24d5ea/test/e2e/upgrade/upgrade.go#L53)
+- The disruption is defined by [clusterUpgrade](https://github.com/neisw/origin/blob/46f376386ab74ecfe0091552231d378adf24d5ea/test/e2e/upgrade/upgrade.go#L270)
+- These are passed into [disruption.Run](https://github.com/neisw/origin/blob/2a97f51d4981a12f0cadad53db133793406db575/test/extended/util/disruption/disruption.go#L81)
+- Which creates a new [Chaosmonkey](https://github.com/neisw/origin/blob/59599fad87743abf4c84f05952552e6d42728781/vendor/k8s.io/kubernetes/test/e2e/chaosmonkey/chaosmonkey.go#L48) and [executes](https://github.com/neisw/origin/blob/59599fad87743abf4c84f05952552e6d42728781/vendor/k8s.io/kubernetes/test/e2e/chaosmonkey/chaosmonkey.go#L78) the disruption monitoring tests and the disruption
+- The [backendDisruptionTest](https://github.com/neisw/origin/blob/0c50d9d8bedbd2aa0af5c8a583418601891ee9d4/test/extended/util/disruption/backend_sampler_tester.go#L34) is responsible for
+  - Creating the event broadcaster, recorder and monitor
+  - Attempting to query the backend and timing out after the max interval (1 second typically)
+  - Analyzing the disruption events for disruptions that exceed allowable values
+- When the disruption is complete the disruptions tests are validated via Matches / BestMatcher to find periods that exceed allowable thresholds
+  - [Matches](https://github.com/neisw/origin/blob/43d9e9332d5fb148b2e68804200a352a9bc683a5/pkg/synthetictests/allowedbackenddisruption/matches.go#L11) will look for an entry in [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) if an exact match is not found it will utilize [BestMatcher](https://github.com/neisw/origin/blob/4e8f0ba818ed5e89cf09bf2902be857859a2125c/pkg/synthetictests/historicaldata/types.go#L128) to look for data with the closest variants match
+
+### Relationship to test aggregations
+
+TBD
+
+### Testing disruption tests
+
+TBD
