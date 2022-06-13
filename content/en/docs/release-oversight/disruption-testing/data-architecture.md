@@ -1,6 +1,7 @@
 ---
 title: "Architecture Data Flow"
 description: A high level look at how the disruption historical data is gathered and updated.
+weight: 1
 ---
 
 ### Resources
