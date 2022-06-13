@@ -6,6 +6,7 @@ sectionPagesMenu: "main"
 contentDir: "content/en"
 params:
   offlineSearch: true
+  github_branch: master
   github_repo: "https://github.com/openshift/ci-docs"
   api_v1_url: "https://cluster-display.ci.openshift.org"
 enableGitInfo: true

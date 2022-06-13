@@ -1,4 +1,4 @@
-FROM klakegg/hugo:0.75.1-ext-ubuntu as builder
+FROM klakegg/hugo:0.95.0-ext-ubuntu as builder
 
 COPY . /src/
 
