@@ -30,11 +30,12 @@ When adding a new `cluster_profile`, three major steps must be taken: registerin
 
 ### Registering a New Profile
 
-As `cluster-profile`s are handled as first-class items in the `ci-operator` configuration, a new pull request ([example](https://github.com/openshift/ci-tools/commit/b89a00a9a39acd29d68f7490f49cf93b50cc0d21#diff-2a51a519993c716f3906647228a199e77fad62246de50d88b348a52255837bf9)) must be sent to the `openshift/ci-tools` repository in order to register a new profile.
-
-The next sections detail the requirements for opening this pull request.  All
-changes required in `openshift/ci-tools` are isolated to a single file,
-[`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
+As `cluster-profile`s are handled as first-class items in the `ci-operator`
+configuration, a new pull request ([example](https://github.com/openshift/ci-tools/pull/2808))
+must be sent to the `openshift/ci-tools` repository in order to register a new
+profile.  The next sections detail the requirements for opening this pull
+request.  All changes required in `openshift/ci-tools` are isolated to a single
+file, [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
 The process of creating a new cluster profile involves adding:
 
 - `ClusterProfile`: a new constant for the name of the profile.

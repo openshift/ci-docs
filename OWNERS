@@ -1,17 +1,16 @@
 approvers:
-- stevekuznetsov
 - bbguimaraes
 - droslean
 - hongkailiu
-- petr-muller
-- AlexNPavel
-- alvaroaleman
-- emilvberglind
+- jmguzik
 - smg247
+- bear-redhat
+- danilo-gemoli
 reviewers:
 - bbguimaraes
 - droslean
 - hongkailiu
-- petr-muller
-- emilvberglind
+- jmguzik
 - smg247
+- bear-redhat
+- danilo-gemoli

@@ -2,5 +2,5 @@
 command = "make generate"
 
 [context.deploy-preview.environment]
-HUGO_VERSION = "0.80.0"
+HUGO_VERSION = "0.95.0"
 NODE_VERSION = "14.18.0"
