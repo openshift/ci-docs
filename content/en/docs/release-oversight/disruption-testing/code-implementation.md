@@ -155,8 +155,58 @@ func MicroReleaseUpgrade(in platformidentification.JobType) (platformidentificat
 
 Currently disruption tests are focused on disruptions created during upgrades.
 To add a new backend to monitor during the upgrade test
-Add a new [backendDisruptionTest](https://github.com/openshift/origin/blob/master/test/extended/util/disruption/backend_sampler_tester.go)
-via NewBackendDisruptionTest to the e2e [upgrade](https://github.com/openshift/origin/blob/master/test/e2e/upgrade/upgrade.go) AllTests.
+Add a new backendDisruptionTest 
+{{% card-code header="Ex: `NewBackendDisruptionTest` [origin/test/extended/util/disruption/backend_sampler_tester.go](https://github.com/openshift/origin/blob/master/test/extended/util/disruption/backend_sampler_tester.go#L34-L41)" %}}
+```go
+func NewBackendDisruptionTest(testName string, backend BackendSampler) *backendDisruptionTest {
+	ret := &backendDisruptionTest{
+		testName: testName,
+		backend:  backend,
+	}
+	ret.getAllowedDisruption = alwaysAllowOneSecond(ret.historicalP95Disruption)
+	return ret
+}
+
+```
+{{% /card-code %}}
+via NewBackendDisruptionTest to the e2e upgrade AllTests.
+
+{{% card-code header="Ex: `AllTests` [origin/test/e2e/upgrade/upgrade.go](https://github.com/openshift/origin/blob/master/test/e2e/upgrade/upgrade.go#L54-L86)" %}}
+```go
+func AllTests() []upgrades.Test {
+	return []upgrades.Test{
+		&adminack.UpgradeTest{},
+		controlplane.NewKubeAvailableWithNewConnectionsTest(),
+		controlplane.NewOpenShiftAvailableNewConnectionsTest(),
+		controlplane.NewOAuthAvailableNewConnectionsTest(),
+		controlplane.NewKubeAvailableWithConnectionReuseTest(),
+		controlplane.NewOpenShiftAvailableWithConnectionReuseTest(),
+		controlplane.NewOAuthAvailableWithConnectionReuseTest(),
+
+		...
+	}
+
+```
+{{% /card-code %}}
+
+{{% card-code header="Ex: `NewKubeAvailableWithNewConnectionsTest` [origin/test/extended/util/disruption/controlplane/controlplane.go](https://github.com/neisw/origin/blob/ce3a9bb9e3f5662873214cc0d2dd03e9748f3c14/test/extended/util/disruption/controlplane/controlplane.go#L13-L22)" %}}
+```go
+func NewKubeAvailableWithNewConnectionsTest() upgrades.Test {
+	restConfig, err := monitor.GetMonitorRESTConfig()
+	utilruntime.Must(err)
+	backendSampler, err := createKubeAPIMonitoringWithNewConnections(restConfig)
+	utilruntime.Must(err)
+	return disruption.NewBackendDisruptionTest(
+		"[sig-api-machinery] Kubernetes APIs remain available for new connections",
+		backendSampler,
+	)
+}
+
+```
+{{% /card-code %}}
+  
+
+
 If this is a completely new backend being tested then [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json)
 data will need to be added or, if preferable, NewBackendDisruptionTestWithFixedAllowedDisruption can be used instead of NewBackendDisruptionTest and the allowable disruption hardcoded.
 
@@ -171,6 +221,10 @@ Disruption data can be queried from BigQuery using [p95Query](https://github.com
 
 ## Disruption test framework overview
 
+
+{{< inlineSVG file="/static/disruption_test_flow.svg" >}}
+
+
 To check for disruptions while upgrading OCP clusters
 
 - The tests are defined by [AllTests](https://github.com/neisw/origin/blob/46f376386ab74ecfe0091552231d378adf24d5ea/test/e2e/upgrade/upgrade.go#L53)
@@ -182,8 +236,11 @@ To check for disruptions while upgrading OCP clusters
   - [Attempting to query the backend](../backend_queries) and timing out after the max interval (1 second typically)
   - Analyzing the disruption events for disruptions that exceed allowable values
 - When the disruption is complete the disruptions tests are validated via Matches / BestMatcher to find periods that exceed allowable thresholds
-  - [Matches](https://github.com/neisw/origin/blob/43d9e9332d5fb148b2e68804200a352a9bc683a5/pkg/synthetictests/allowedbackenddisruption/matches.go#L11) will look for an entry in [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) if an exact match is not found it will utilize [BestMatcher](https://github.com/neisw/origin/blob/4e8f0ba818ed5e89cf09bf2902be857859a2125c/pkg/synthetictests/historicaldata/types.go#L128) to look for data with the closest variants match
+  - [Matches](https://github.com/neisw/origin/blob/43d9e9332d5fb148b2e68804200a352a9bc683a5/pkg/synthetictests/allowedbackenddisruption/matches.go#L11) will look for an entry in [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) if an exact match is not found it will utilize [BestMatcher](#best-matcher) to look for data with the closest variants match
 
+{{% comment %}}
+
+Remove comment block when we populate these sections
 ### Relationship to test aggregations
 
 TBD
@@ -191,3 +248,5 @@ TBD
 ### Testing disruption tests
 
 TBD
+
+{{% /comment %}}
