@@ -28,17 +28,23 @@ It does not cover how the tests themselves are run against a cluster.
 
 ### How The Data Flows
 
-1. `Disruption uploader` jobs are run in the DPCR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation).
+{{% alert color="info" %}}
+`openshift-tests` run `disruption samplers`, these run `GET` requests against a number of backends in the cluster every second and record the results to determine disruption. (see [Testing Backends For Availability](../backend_queries) for more info)
+{{% /alert %}}
 
-1. We grab a list of the Jobs names that we should gather from the `Jobs` table in `BigQuery`
+1. The `Disruption Uploader` is a `CronJob` that is set to run every `4 hours`. All the `Uploader` jobs are run in the DPCR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/c4f18b4e43a18c14333412d9d146785dac120637/config/clusters/dpcr/services/dpcr-ci-job-aggregation) repo.
 
-1. When e2e tests are done the results are uploaded to `GCS` and the results can be viewed in the artifacts folder for a particular job run. We only pull disruption data for job names specified in the `Jobs` table.
+1. When e2e tests are done the results are uploaded to `GCS` and the results can be viewed in the artifacts folder for a particular job run.
 
    Clicking the artifact link on the top right of a prow job and navigating to the `openshift-e2e-test` folder will show you the disruption results. (ex. `.../openshift-e2e-test/artifacts/junit/backend-disruption_[0-9]+-[0-9]+.json`).
 
+1. We only pull disruption data for job names specified in the `Jobs` table in `BigQuery`. (see [Job Primer](../job-primer) for more information on this process)
+
 1. The disruption uploader will parse out the results from the e2e run backend-disruption json files and push them to the [openshift-ci-data-analysis](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis) table in BigQuery.
 
-1. Currently, backend disruption data is queried from BigQuery and downloaded in `json` format. The resulting `json` file is then committed to [origin/pkg/synthetictests/allowedbackenddisruption/query_results.json](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/query_results.json) for **backend disruption** or [origin/pkg/synthetictests/allowedalerts/query_results.json](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/query_results.json) for **alert data** (see [how to query](#how-to-query-the-data))
+1. Currently, backend disruption data is queried from BigQuery and downloaded in `json` format. The resulting `json` file is then committed to [origin/pkg/synthetictests/allowedbackenddisruption/query_results.json](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) for **backend disruption** or [origin/pkg/synthetictests/allowedalerts/query_results.json](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedalerts/query_results.json) for **alert data** (see [how to query](#how-to-query-the-data))
+
+1. The static `query_results.json` in `openshift/origin` are then used by the the [matchers](../code-implementation#best-matcher) that the `samplers` invoke to find the best match for a given test (typically with "remains available using new/reused connections" or "should be nearly zero single second disruptions") to check if we're seeing noticeably worse disruption during the run.
 
 ### How To Query The Data
 
