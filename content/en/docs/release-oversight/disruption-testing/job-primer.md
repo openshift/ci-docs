@@ -35,7 +35,7 @@ In `Job Primer` a job name is very important. Please make sure that the job name
 
 ### Naming Convention
 
-Please make sure your job names follow the convention defined below. All job names must include addiqute information to allow proper data aggragetion.
+Please make sure your job names follow the convention defined below. All job names must include adequate information to allow proper data aggregation.
 
 {{% pageinfo color="primary" %}}
 
