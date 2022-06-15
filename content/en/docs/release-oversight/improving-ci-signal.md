@@ -31,9 +31,10 @@ Pay special attention to the distinction from previously focus on job success to
 
 #### How are they used?
 Upon detection of a pass rate regression (As observed via attempted payload acceptance):
-* We find the PR that introduced the regression by opening revert PRs for all PRs that went in since the last good payload and running the payload acceptance check against each revert-PR.  The PR that passes the check will tell us which change was the source of the regression.
-* Eventually notification will be automated, but at this point we reach out the team(s) involved directly to see if they have any idea how the change could have increased disruption in the payload.  This usually turns into a multi-hour joint debugging session.
-* If the team impacted does not a have fix readily available, we work with the them to merge the revert PR in order to restore payload health.  The impacted team is responsible for landing the un-revert along w/ their fix.  
+* For OpenShift code we find the PR that introduced the regression by opening revert PRs for all PRs that went in since the last good payload and running the payload acceptance check against each revert-PR.  The PR that passes the check will tell us which change was the source of the regression.  In that case we proceed to revert it and file a bug with the relevant team.
+* In rare cases the problem is not in OpenShift but in our underlying operating system.  In those cases we'll work with the CoreOS team to revert the necessary component or even downgrade the OS version.
+* If we are not able to clearly isolate the problem, we'll instead reach out to other teams as needed.  For non-blocking situations we may use time on weekly architecture calls for this.  More serious situations will result in high severity bugs being filed and at times escalating through management.
+* The team(s) owning the bugs or stories are responsible for landing the un-revert along with the fix.
 * Un-reverts and fixes will need to pass the same payload acceptance checks before being merged.
 
 #### What we're seeing
