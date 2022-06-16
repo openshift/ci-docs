@@ -12,7 +12,12 @@ You'll need access to the appropriate groups to work with disruption data, pleas
 
 - [Periodic Jobs](https://github.com/openshift/release/tree/master/ci-operator/jobs/openshift/release)
 - [BigQuery](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis)
-- [DPCR Job Aggregation Configs](https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation)
+- `DPCR Job Aggregation Configs` (**private repo**)
+
+  ```
+  https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation
+  ```
+
 - [Origin Synthetic Backend Tests](https://github.com/openshift/origin/tree/master/pkg/synthetictests/allowedbackenddisruption)
 
 ## Disruption Data Architecture
@@ -32,7 +37,7 @@ It does not cover how the tests themselves are run against a cluster.
 `openshift-tests` run `disruption samplers`, these run `GET` requests against a number of backends in the cluster every second and record the results to determine disruption. (see [Testing Backends For Availability](../backend_queries) for more info)
 {{% /alert %}}
 
-1. The `Disruption Uploader` is a `CronJob` that is set to run every `4 hours`. All the `Uploader` jobs are run in the DPCR cluster, the current configuration can be found in the [openshift/continuous-release-jobs](https://github.com/openshift/continuous-release-jobs/tree/c4f18b4e43a18c14333412d9d146785dac120637/config/clusters/dpcr/services/dpcr-ci-job-aggregation) repo.
+1. The `Disruption Uploader` is a `CronJob` that is set to run every `4 hours`. All the `Uploader` jobs are run in the DPCR cluster, the current configuration can be found in the `openshift/continuous-release-jobs` private repo under `config/clusters/dpcr/services/dpcr-ci-job-aggregation`.
 
 1. When e2e tests are done the results are uploaded to `GCS` and the results can be viewed in the artifacts folder for a particular job run.
 
