@@ -23,7 +23,7 @@ itself is useful when debugging test failures or to diagnosing and confirming OC
 Once your pull request is no longer a work in progress, you should no longer interact with the CI system as it is possible
 to alter test outcomes in this way. In most cases it's more useful to run tests against a development cluster for which
 you have a `$KUBECONFIG` from your local system rather than hijacking the PR's running jobs. For this, follow the
-[directions](#how-to-run-the-test-suites-outside-of-ci) on how to run the test suites outside of CI. 
+[directions](#how-to-run-the-test-suites-outside-of-ci) on how to run the test suites outside of CI.
 {{< /alert >}}
 
 ## How and Where Do the Tests Run?
@@ -286,3 +286,317 @@ $ openshift-tests run
 ```
 
 See the [openshift-tests README](https://github.com/openshift/origin/blob/master/test/extended/README.md) for more information.
+
+## Running Test Suites On A Manually Provisioned Cluster
+
+There are times when you want to run the `openshift-tests` binary to test or debug a new test without having
+to use Prow/CI.  To achieve this goal, we use the logs from Prow jobs to find out how it runs suites of tests,
+set up minimal local environment, and then run the `openshift-tests` binary locally.  The following sections
+show how to do this.
+
+### Looking at Prow Logs For `openshift-tests`
+
+Prow jobs that run suites of tests using `openshift-test` produce a log called `build-log.txt` that shows
+exactly how the `openshift-tests` binary was executed.  We can use this information to determine how to
+run the test suites against a development cluster (e.g., one created by cluster-bot).
+
+The `build-log.txt` file usually resides in a path similar to:
+
+```bash
+https://<GCSPrefix>/logs/<jobName>/<jobID>/artifacts/<e2eJob>/openshift-e2e-test/build-log.txt
+```
+
+In that log, you can see how `openshift-tests` was run.  For example:
+
+```bash
+openshift-tests run openshift/conformance/serial
+                    --provider '{"type":"aws",...}'
+                    -o /logs/artifacts/e2e.log
+                    --junit-dir /logs/artifacts/junit
+```
+
+Given how prow runs `openshift-tests`, we will mimic this except run it manually.
+
+When `openshift-tests` is run in prow, the paths for `-o` and `--junit-dir` lead to local directories
+residing in a pod where `openshift-tests` is run.  Those contents are then copied to a GCS bucket and
+then end up in a location accessible from a link as shown above. When you look at artifacts in a prow
+job, the links will look similar to this:
+
+```bash
+https://<GCSPrefix>/logs/<jobName>/<jobID>/artifacts/<e2eJob>/openshift-e2e-test/artifacts/e2e.log
+https://<GCSPrefix>/logs/<jobName>/<jobID>/artifacts/<e2eJob>/openshift-e2e-test/artifacts/junit/*
+```
+
+For running `openshift-tests` locally, we will create directories on our local disk and maintain the same
+directory structure and relative placement of files.
+
+
+### Requirements (Minimal Setup)
+
+Before attempting to run `openshift-tests`, ensure these requirements are met:
+
+* Build the `openshift-tests` executable using the [existing documentation](https://github.com/openshift/origin//blob/cdd6e3a94594a56d15e25ea02e9ecd391060d50a/test/extended/README.md#prerequisites) or run `podman` as above to run an already built
+`openshift-tests` binary in a container.
+
+* Create an OpenShift development cluster via any means preferred, but you will need cluster admin level permissions.
+  OpenShift developers can use the slack cluster-bot for this.  For upgrade tests, it might be
+  useful to create a development cluster using a specific version of openshift using slack text like this:
+
+    ```bash
+    /msg @cluster-bot launch 4.11.0-0.nightly-2022-06-14-172335 gcp
+    ```
+
+  or:
+
+    ```bash
+    /msg @cluster-bot launch 4.11 gcp
+    ```
+
+  OpenShift versions (and valid upgrade versions) can be found from the [Release Status](https://amd64.ocp.releases.ci.openshift.org/) page.
+
+* Install the [`oc` command line tool](https://docs.openshift.com/container-platform/4.10/cli_reference/openshift_cli/getting-started-cli.html).
+
+* Download the kubeconfig that cluster-bot generated and set the `KUBECONFIG` environment variable:
+
+  ```bash
+  export KUBECONFIG=/path/to/cluster-bot-2022-06-17-200119.kubeconfig.txt
+  ```
+
+* Create the `artifacts` and `junit` directories.  Below is an example of creating a `./tmp` directory in
+  the current directory and then creating the two directories as used in the `openshift-tests` command
+  above but you can create the two directories anywhere where you have access.
+
+  ```bash
+  mydir=`pwd`/tmp
+  mkdir -p $mydir/logs/artifacts/junit
+  ```
+
+* For aws, do these:
+
+  * determine the region and zone of your cluster so you can use those values in your `--provider` parameter on the `openshift-tests` command:
+
+    ```bash
+    $ oc get node -o json | jq '.items[]|.metadata.labels'|grep topology.kubernetes.io/region|cut -d : -f 2| sort -u
+    "us-west-1",
+
+    $ oc get node -o json | jq '.items[]|.metadata.labels'|grep topology.kubernetes.io/zone|cut -d : -f 2| sort -u
+    "us-west-1a"
+    "us-west-1b"
+    ```
+
+  * Use this for the `--provider` when running the `openshift-tests` command:
+
+    ```bash
+    --provider '{"type":"aws", "region":"us-west-1", "zone":"us-west-1a","multizone":true,"multimaster":true}'
+    ```
+
+
+* For gcp, do these:
+
+  * create a gcp credentials file (if you are using a cluster-bot generated cluster, you can extract the credentials
+    like this):
+
+    ```bash
+    export KUBECONFIG=/path/to/cluster-bot-2022-06-17-200119.kubeconfig.txt
+    oc -n kube-system get secret gcp-credentials -o json|jq -r '.data|to_entries[].value'|base64 -d > /tmp/gcp-cred.json
+    ```
+
+    If you are not using a cluster-bot generated cluster, you'll have to obtain your gcp credentials file by going to
+    the gcp UI or other means.
+
+  * setup the environment variable so openshift-tests can find it:
+
+    ```bash
+    export GOOGLE_APPLICATION_CREDENTIALS=/path/to/<your gce credentials file>
+    ```
+
+  * determine the region of your cluster so you can use it in your `--provider` paramater on the `openshift-tests` command:
+
+    ```bash
+    $ oc get node -o json |jq '.items[]|.metadata.labels'|grep topology.kubernetes.io/region|cut -d : -f 2| sort -u
+    "us-west-1",
+    ```
+
+  * determine your project ID.  For a cluster-bot cluster, the project ID can be obtained like this (using the `/tmp/gcp-cred.json` obtained earlier):
+
+    ```bash
+    project_id=$(cat /tmp/gcp-cred.json |jq .project_id /tmp/gcp-cred.json)
+    ```
+
+  * Use this for the `--provider` when running the `openshift-tests` command:
+
+    ```bash
+    --provider '{"type":"gce", "region":"us-west-1","multizone": true,"multimaster":true,"projectid":"<yourProjectID>"}'
+    ```
+
+* For azure do these:
+
+  * create the azure credentials file by saving this text as `extract_azure.sh` and then running it as shown below:
+
+    ```bash
+    export KUBECONFIG=/path/to/cluster-bot-2022-06-23-175417.kubeconfig.txt ;# set this to the correct file
+    oc -n kube-system get secret azure-credentials -o json > j.json
+
+    echo "{"
+    echo "  \"azure_client_id\": \"$(cat j.json       | jq .data.azure_client_id|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_client_secret\": \"$(cat j.json   | jq .data.azure_client_secret|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_region\": \"$(cat j.json          | jq .data.azure_region|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_resource_prefix\": \"$(cat j.json | jq .data.azure_resource_prefix|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_resourcegroup\": \"$(cat j.json   | jq .data.azure_resourcegroup|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_subscription_id\": \"$(cat j.json | jq .data.azure_subscription_id|sed 's/\"//g'|base64 -d)\","
+    echo "  \"azure_tenant_id\": \"$(cat j.json       | jq .data.azure_tenant_id|sed 's/\"//g'|base64 -d)\""
+    echo "}"
+    ```
+
+    Then run it like this:
+
+    ```bash
+    chmod a+x extract_azure.sh
+    ./exract_azure.sh > /tmp/azure.json
+    ```
+
+  * Set the `AZURE_AUTH_LOCATION` enviroment variable:
+
+    ```bash
+    export AZURE_AUTH_LOCATION=/tmp/azure.json
+    ```
+
+  * Use this for the `--provider` when running the `openshift-tests` command:
+
+  ```
+  --provider azure
+  ```
+
+### Running `openshift-tests`
+
+Once the above requirements are met, run the `openshift-tests` binary for one of these scenarios:
+
+* Running the "openshift/conformance/serial" conformance suite
+
+  Using an aws cluster, here's an example command to run the openshift/conformance/parallel tests:
+
+  ```bash
+  ~/openshift-tests run openshift/conformance/parallel \
+         --provider '{"type":"aws", "region":"us-west-1", "zone":"us-west-1","multizone":true,"multimaster":true}' \
+         -o $mydir/logs/artifacts/e2e.log --junit-dir $mydir/logs/artifacts/junit
+  ```
+
+  Using an aws cluster, here's an example command to run the openshift/conformance/serial tests:
+
+  ```bash
+  ~/openshift-tests run openshift/conformance/serial \
+         --provider '{"type":"aws", "region":"us-west-1", "zone":"us-west-1","multizone":true,"multimaster":true}' \
+         -o $mydir/logs/artifacts/e2e.log --junit-dir $mydir/logs/artifacts/junit
+  ```
+
+* Run the upgrade test:
+
+  Using an aws cluster, here's an example command to run an upgrade tests:
+
+  ```bash
+  ~/openshift-tests run-upgrade all --to-image registry.ci.openshift.org/ocp/release:4.11.0-0.nightly-2022-06-15-161625 \
+         --options '' \
+         --provider '{"type":"aws", "region":"us-west-1", "zone":"us-west-1","multizone":true,"multimaster":true}' \
+         -o $mydir/logs/artifacts/e2e.log --junit-dir $mydir/logs/artifacts/junit
+  ```
+
+  Using an gcp cluster, here's an example command to run an upgrade tests:
+
+  ```bash
+  ~/openshift-tests run-upgrade all --to-image registry.ci.openshift.org/ocp/release:4.11.0-0.nightly-2022-06-15-161625 \
+         --options '' \
+         --provider '{"type":"gce", "region":"us-west-1","multizone": true,"multimaster":true,"projectid":"<yourProjectID>"}' \
+         -o $mydir/logs/artifacts/e2e.log --junit-dir $mydir/logs/artifacts/junit
+  ```
+
+  NOTE: be careful to use `"type":"gce"` and not`"type":"gcp"`; the latter is wrong and will result in errors.
+
+Here are more suites to choose from (including their descriptions):
+
+* [static suites](https://github.com/openshift/origin/blob/cf6d28314f42fdb6724f38e8d7bd82f3a22642ee/cmd/openshift-tests/e2e.go#L75-L428)
+* [upgrade suites](https://github.com/openshift/origin/blob/cf6d28314f42fdb6724f38e8d7bd82f3a22642ee/cmd/openshift-tests/upgrade.go#L20-L72)
+
+When your test run finishes, you will see familiar files (similar to a prow job) in the output directories:
+
+```bash
+$ tree tmp/logs
+ artifacts
+ ├── e2e.log
+ └── junit
+     ├── AdditionalEvents__sig_api_machinery_Kubernetes_APIs_remain_available_for_new_...
+     ├── AdditionalEvents__sig_api_machinery_Kubernetes_APIs_remain_available_with_reused_...
+	 ...
+     ├── AdditionalTest_cluster-upgrade_2022-06-17T08:53:51-04:00.json
+     ├── alerts_20220617-124636.json
+     ├── backend-disruption_20220617-124636.json
+     ├── e2e-events_20220617-124636.json
+     ├── e2e-timelines_e2e-namespaces_20220617-124636.html
+     ├── e2e-timelines_e2e-namespaces_20220617-124636.json
+	 ...
+     ├── junit_e2e_20220617-125422.xml
+     ├── junit_upgrade_1655470431.xml
+     ├── pod-placement-data.json
+     ├── pod-transitions.txt
+     ├── resource-events_20220617-124636.zip
+     └── resource-pods_20220617-124636.zip
+```
+
+### Tips
+
+This section contains tips and notes to keep in mind when running the tests suites.
+
+* Before running your tests, ensure the `artifacts` and `junit` directories are empty; if you don't, you may have a hard time
+  distinguishing what output files belong to what invocation of `openshift-tests`.
+* An upgrade tends to take close to an hour.  To confirm an upgrade is happening and progressing, use these commands:
+
+  ```bash
+  $ export KUBECONFIG=/path/to/cluster-bot...txt
+  $ oc get clusterversion version
+  NAME      VERSION                              AVAILABLE   PROGRESSING   SINCE   STATUS
+  version   4.11.0-0.nightly-2022-06-14-172335   True        True          11m     Working towards 4.11.0-0.nightly-2022-06-15-161625: 126 of 802 done (15% complete)
+  ```
+  You should see the `STATUS` text change as the upgrade progresses.
+
+  You can also add use the `-w` option to see the progress as it happens:
+
+  ```bash
+  $ oc get -w clusterversion version
+  ```
+
+* If you see this message:
+
+  ```bash
+  Jun 23 06:19:31.765: INFO: Warning: gce-zone not specified! Some tests that use the AWS SDK may select the wrong region and fail.
+  ```
+
+  You need to provide the zone in the `--provider option`
+
+* vscode users can insert this into their `launch.json` file so you can run the `openshift-tests` binary in debug mode:
+  ```bash
+  {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "openshift-tests-debug",
+        "type": "go",
+        "request": "launch",
+        "mode": "auto",
+        "program": "cmd/openshift-tests/",
+        "env": {
+          "KUBECONFIG": "/tmp/Downloads/cluster-bot-2022-06-22-120748.kubeconfig.txt"
+        },
+        "args": [ "run-upgrade", "all",
+        "--to-image", "registry.ci.openshift.org/ocp/release:4.11.0-0.nightly-2022-06-21-094850",
+        "-o", "/tmp/logs/artifacts/e2e.log",
+        "--provider", "{\"type\":\"aws\"}",
+        "--junit-dir", "/tmp/logs/artifacts/junit"
+        ],
+        "showGlobalVariables": true
+      }
+    ]
+  }
+  ```
+
+  Change the `KUBECONFIG` value to use your cluster-bot kubeconfig, change the `--to-image` value to a version
+  you want to upgrade to, change the value of the `--provider` parameter to use the correct values (for example,
+  `type`, `region`, `zone`, etc.)
