@@ -278,3 +278,28 @@ An unfortunate side-effect of the architecture for container image registry auth
 errors when your authentication token expired, even if the image you are attempting to pull requires no authentication.
 Authentication tokens expire once a month. All you'll need to do is follow [the directions](#how-do-i-log-in-to-pull-images-that-require-authentication)
 to log in to the registry again.
+
+{{< alert title="Warning" color="warning" >}}
+Note that `podman logout` will not consider or modify `~/.docker/config.json`
+(the default target of `oc registry login`) even though `podman pull` uses that
+file for authentication.  Some versions will print an alert message, others will
+not:
+
+```console
+$ cat ~/.docker/config.json
+{"auths":{"registry.ci.openshift.org":{"auth": "…"}}}
+$ podman --version
+podman version 4.1.1
+$ podman logout registry.ci.openshift.org
+Not logged into registry.ci.openshift.org with current tool. Existing credentials were established via docker login. Please use docker logout instead.
+```
+
+To clear an expired token in order to be able to pull public images again, use
+either `docker logout` or indicate the target file via `--authfile` or
+`$REGISTRY_AUTH_FILE`:
+
+```console
+$ podman logout --authfile ~/.docker/config.json registry.ci.openshift.org
+Removed login credentials for registry.ci.openshift.org
+```
+{{< /alert >}}
