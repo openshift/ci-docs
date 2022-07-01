@@ -43,3 +43,30 @@ DPTP maintains several means of contact:
     * [Story template](https://issues.redhat.com/browse/DPTP-417) for feature requests.
     * [Bug template](https://issues.redhat.com/browse/DPTP-419) for bugs and issues.
     * [Consulting template](https://issues.redhat.com/browse/DPTP-897) for long-term, asynchronous discussion.
+
+## Presentations
+
+The following are public and internal presentations from DPTP:
+
+* [_Dogfooding Openshift with our CI infrastructure_](https://devconfcz2018.sched.com/event/DJX4/dogfooding-openshift-with-our-ci-infrastructure),
+  Michalis Kargakis (2018, [recording](https://www.youtube.com/watch?v=rLLEjodflYw)).
+* [_Intro: Testing SIG_](https://kccna18.sched.com/event/GrbJ/intro-testing-sig-aaron-crickenberger-google-steve-kuznetsov-red-hat),
+  Steve Kuznetsov (2018, [recording](https://www.youtube.com/watch?v=7-_O41W3FRU)).
+* [_CI for OpenShift: Prow, ci-operator and the future_](https://devconfcz2019.sched.com/event/Jcmg/ci-for-openshift-prow-ci-operator-and-the-future),
+  Petr Muller (2019, [recording](https://www.youtube.com/watch?v=ANy-fZIFVlY)).
+* [_Deep Dive: Prow_](https://kccncna19.sched.com/event/UahY/deep-dive-prow-steve-kuznetsov-red-hat-alvaro-aleman-loodse),
+  Alvaro Aleman, Steve Kuznetsov (2019, [recording](https://www.youtube.com/watch?v=_MQdTKn1nfI)).
+* [_CI that CIs itself: Rehearsals in OpenShift CI_](https://devconfcz2020a.sched.com/event/YOuB/ci-that-cis-itself-rehearsals-in-openshift-ci),
+  Petr Muller (2020, [recording](https://www.youtube.com/watch?v=BMB7I2eqMK0)).
+* [_Challenges of OpenShift CI going multi-cluster_](https://devconfcz2022.sched.com/event/siIM/challenges-of-openshift-ci-going-multi-cluster),
+  Hongkai Liu, Petr Muller (2022,
+  [recording](https://www.youtube.com/watch?v=aI7M_jqeQhg),
+  [slides](https://static.sched.com/hosted_files/devconfcz2022/03/%5BDevConf2022%5DChallenges%20of%20OpenShift%20CI%20going%20multi-cluster.pdf)).
+* _`ci-operator` deep dive_, Petr Muller (2022, [recording](https://drive.google.com/file/d/1ye_Xim2oV4iJaQtBQrDUjre3vwDvZKDT/)).
+* _Pod Scaler_, Stephen Goeddel (2022,
+  [recording](https://drive.google.com/file/d/1H8ld2UHvZWwtMzuzjQ610PeT61kvPCQw/),
+  [slides](https://docs.google.com/presentation/d/1lcYT-WtdNsiLGmgvme7srSVWDGqUUZSxbzMuJiFI6Rs/)).
+* _`ci-operator`_, Bruno Barcarol Guimarães (2022,
+  [recording](https://drive.google.com/file/d/1hYgYNBBlVUdSiyFRa9R6aGy5SbDaPLRY/),
+  [slides](https://drive.google.com/file/d/1ql2MOFRIsvPzgg3iMwjJTy6fRS9G7sDG/),
+  [slides (with notes)](https://drive.google.com/file/d/1Jxu9pK3Ujw_ZAgxdd7b1dCVgjAP0JIr_/)).
