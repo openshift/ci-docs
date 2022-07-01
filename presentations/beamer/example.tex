@@ -1,0 +1,94 @@
+\documentclass[10pt]{beamer}
+
+\mode<presentation>
+\usetheme{redhat}
+
+\newcommand{\autotitle}{
+    \frametitle{
+        \secname
+        \ifx \insertsubsection \empty \else { / \subsecname} \fi
+    }
+}
+
+\title{The title}
+\subtitle{The subtitle}
+
+\author{The Author}
+\institute[]{Red Hat}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Lorem ipsum}
+
+\section{Dolor sit}
+\subsection{Amet}
+
+\begin{frame}
+    \autotitle
+    Aliquam faucibus purus in massa tempor.  Et sollicitudin ac orci phasellus.
+    Massa enim nec dui nunc mattis enim ut.
+\end{frame}
+
+\subsection{Consectetur}
+
+\begin{frame}
+    \autotitle
+    Commodo sed egestas egestas fringilla phasellus.
+    \begin{itemize}
+        \item
+            Vitae nunc sed velit dignissim sodales ut eu sem integer.
+            \begin{itemize}
+                \item Urna nunc id cursus metus aliquam eleifend mi in.
+                \item Imperdiet proin fermentum leo vel orci.
+            \end{itemize}
+        \item
+            At lectus urna duis convallis convallis tellus id.
+        \item
+            Ultrices gravida dictum fusce ut placerat orci nulla pellentesque
+            dignissim.
+    \end{itemize}
+\end{frame}
+
+\section{Adipiscing}
+\subsection{Elit}
+
+\begin{frame}
+    \autotitle
+    \begin{quote}
+        Eu turpis egestas pretium aenean pharetra magna ac.
+    \end{quote}
+\end{frame}
+
+\section{Sed do eiusmod}
+\subsection{Tempor incididunt}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+Lacus vel facilisis volutpat est velit. Varius
+morbi enim nunc faucibus.  Lacus viverra vitae
+congue eu consequat ac felis donec. Quis viverra
+nibh cras pulvinar. Scelerisque felis imperdiet
+proin fermentum. Nisi est sit amet facilisis
+magna etiam. Vitae et leo duis ut diam quam nulla.
+    \end{verbatim}
+\end{frame}
+
+\section{Ut labore et dolore}
+\subsection{Magna aliqua}
+
+\begin{frame}
+    \usebeamertemplate{end page}
+\end{frame}
+
+\end{document}

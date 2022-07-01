@@ -1,0 +1,95 @@
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\definecolor{redhat}{RGB}{238,0,0}
+
+\setmainfont{Red Hat Text}
+\setsansfont{Red Hat Text}
+\setmonofont{Red Hat Mono}
+
+\setbeamercolor{title page}{fg=redhat, bg=redhat}
+\setbeamercolor{headline}{fg=redhat, bg=white}
+\setbeamercolor{footline}{fg=redhat, bg=white}
+\setbeamercolor{section in toc}{fg=redhat, bg=white}
+\setbeamercolor{itemize item}{fg=redhat, bg=white}
+\setbeamercolor{itemize subitem}{fg=redhat, bg=white}
+
+\defbeamertemplate*{title page}{redhat}{%
+    \vspace{-1em} % XXX
+    \begin{beamercolorbox}[wd=\paperwidth]{title page}
+        \begin{tikzpicture}[text = white]
+            \fill[above left, color=redhat]
+                (0, 2em)
+                rectangle (\the\paperwidth, \the\paperheight);
+            \node (title)
+                [xshift = -4em, yshift = 2em]
+                at (current page.center)
+                {\huge\bfseries\inserttitle};
+            \node (subtitle)
+                [below = of title.west, anchor = west, yshift = 0.5em]
+                {\large\insertsubtitle};
+            \node (author)
+                [below = of subtitle.west, anchor = west, yshift = -1em]
+                {\scriptsize\insertauthor};
+            \node (logo)
+                [above = of title.west, anchor = west, xshift = -2.25em]
+                {\includegraphics[scale=0.1]{img/logo_white.png}};
+        \end{tikzpicture}
+    \end{beamercolorbox}
+}
+
+\defbeamertemplate*{frametitle}{redhat}{%
+    \tiny
+    \begin{beamercolorbox}[wd=\paperwidth, ht=6em]{headline}%
+        \hspace{2em}
+        \begin{beamercolorbox}[wd=.1\paperwidth, ht=6em]{headline}%
+            \begin{tikzpicture}
+                \draw (0, 6em) -- (0, 0);
+                \node[text width = 2em] (0, 0) {};
+            \end{tikzpicture}
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.92\paperwidth, ht=6em]{headline}%
+            \insertframetitle \vspace{2.5em}
+        \end{beamercolorbox}%
+    \end{beamercolorbox}%
+}
+
+\defbeamertemplate*{footline}{redhat}{%
+    \tiny
+    \hspace{2em}
+    \begin{beamercolorbox}[wd=.8\paperwidth]{footline}%
+        \begin{tikzpicture}[text = black, text centered]
+            \draw (0, 0) -- (0, 3em);
+            \node[text width = 2em, yshift = 4em] (0, 0) {\insertframenumber};
+        \end{tikzpicture}
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.2\paperwidth]{footline}%
+        \includegraphics[scale=.5]{img/logo.png}
+        \vspace{2em}
+    \end{beamercolorbox}
+}
+
+\defbeamertemplate*{subsection in toc}{redhat}{
+    {\usebeamercolor[fg]{itemize item}$\blacktriangleright\;$}
+    \inserttocsubsection \\
+}
+
+\defbeamertemplate*{navigation symbols}{redhat}{}
+
+\defbeamertemplate*{end page}{redhat}{%
+    \vspace{-1em} % XXX
+    \begin{beamercolorbox}[wd=\paperwidth]{title page}
+        \begin{tikzpicture}[text = white]
+            \fill[above left, color=redhat]
+                (0, 2em)
+                rectangle (\the\paperwidth, \the\paperheight);
+            \node (title)
+                [xshift = -4em, yshift = 2em]
+                at (current page.center)
+                {\Huge\bfseries Thank you};
+        \end{tikzpicture}
+    \end{beamercolorbox}
+}
+
+\mode<all>
