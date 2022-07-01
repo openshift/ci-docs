@@ -1,0 +1,65 @@
+\documentclass[10pt]{beamer}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{multicol}
+%\usepackage{showframe}
+
+\mode<presentation>{
+    \usetheme{redhat}
+%    \setbeameroption{show notes on second screen=right}
+}
+
+% https://github.com/josephwright/beamer/issues/337
+%\makeatletter
+%\def\beamer@framenotesbegin{%
+%  \usebeamercolor[fg]{normal text}%
+%  \gdef\beamer@noteitems{}%
+%  \gdef\beamer@notes{}%
+%}
+%\makeatother
+
+\setcounter{tocdepth}{2}
+\newcommand{\autotitle}{
+    \frametitle{
+        \secname
+        \ifx \insertsubsection \empty \else { / \MakeLowercase{\subsecname}} \fi
+    }
+}
+
+\title{\texttt{ci-operator}}
+\subtitle{(not an operator)}
+
+\author{Bruno Barcarol Guimarães}
+\institute[]{Red Hat}
+\date{2022-06-28}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{Overview}
+    \tableofcontents
+\end{frame}
+
+\section{History}
+\input{tex/history.tex}
+\section{Motivation}
+\input{tex/motivation.tex}
+\section{Architecture}
+\subsection{Overview}
+\input{tex/arch/overview.tex}
+\subsection{Initialization}
+\input{tex/arch/initialization.tex}
+\subsection{Example}
+\input{tex/arch/job.tex}
+\subsection{Etc.}
+\input{tex/etc.tex}
+
+\begin{frame}
+    \usebeamertemplate{end page}
+\end{frame}
+
+\end{document}
