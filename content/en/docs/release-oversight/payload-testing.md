@@ -18,3 +18,11 @@ For example, if `/payload 4.10 nightly informing` is issued on a PR, the robot w
 
 The jobs triggered by the command are determined by [OpenShift Release Controllers](/docs/getting-started/useful-links/#services).
 The linked page from [payload-tests portal](https://pr-payload-tests.ci.openshift.org/runs/) at the bottom of the comment shows the status of the payload testing and the details of those jobs.
+
+A particular job or set of jobs can be triggered by `/payload-job`, such as
+
+> /payload-job <periodic_ci_openshift_release_some_job> <periodic_ci_openshift_release_another_job>
+
+A job can be executed more than once by a single `/payload-aggregate` command, e.g, 
+
+> /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
