@@ -1,0 +1,134 @@
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/cmd/ci-operator/main.go}
+        {cmd/ci-operator/main.go}
+    \footnotesize
+    \begin{verbatim}
+steps, postSteps, err := defaults.FromConfig(
+    ctx, o.configSpec, &o.graphConfig, o.jobSpec,
+    o.templates, o.writeParams, o.promote, o.clusterConfig,
+    leaseClient, o.targets.values, o.cloneAuthConfig,
+    o.pullSecret, o.pushSecret, o.censor, o.hiveKubeconfig,
+    o.consoleHost, o.nodeName)
+    \end{verbatim}
+    \note{
+        Moving on to what actually happens when \texttt{ci-operator} is
+        executed, we start with this gigantic function call to turn all input
+        values into a list of steps, still unordered.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/pkg/api/graph.go}
+        {pkg/api/graph.go} (simplified)
+    \begin{verbatim}
+type InputDefinition []string
+
+type Step interface {
+    …
+    Inputs() (InputDefinition, error)
+    …
+}
+    \end{verbatim}
+    \note{
+        Recall that each step has an \texttt{Inputs} method, which returns a
+        list of strings based on the values it depends on --- input image tags,
+        source code revision, etc.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/cmd/ci-operator/main.go}
+        {cmd/ci-operator/main.go} (simplified)
+    \footnotesize
+    \begin{verbatim}
+func (o *options) resolveInputs(steps []api.Step) {
+    var inputs api.InputDefinition
+    for _, step := range steps {
+        inputs = append(inputs, step.Inputs()...)
+    }
+    inputs = append(inputs, string(o.configSpec))
+    inputs = append(inputs, o.extraInputHash.values...)
+    stat := os.Stat(exec.LookPath(os.Args[0]))
+    inputs = append(inputs, fmt.Sprintf(
+        "%d-%d", stat.ModTime().UTC().Unix(), stat.Size()))
+    sort.Strings(inputs)
+    o.inputHash = inputHash(inputs)
+    if len(o.namespace) == 0 {
+        o.namespace = "ci-op-{id}"
+    }
+    o.namespace = strings.Replace(
+        o.namespace, "{id}", o.inputHash, -1)
+}
+    \end{verbatim}
+    \note{
+        These values, along with those derived from the inputs such as the
+        version and configuration file of \texttt{ci-operator}, are combined and
+        hashed, generating a final string which is unique for a given set of
+        inputs.
+
+        This string is then used as a namespace, guaranteeing that:
+        \begin{itemize}
+            \item unrelated jobs are isolated from each other
+            \item related jobs share resources as much as possible
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/cmd/ci-operator/main.go}
+        {cmd/ci-operator/main.go} (simplified)
+    \small
+    \begin{verbatim}
+var encoding = base32
+    .NewEncoding("bcdfghijklmnpqrstvwxyz0123456789")
+    .WithPadding(base32.NoPadding)
+
+func inputHash(inputs api.InputDefinition) string {
+    hash := sha256.New()
+    for _, s := range inputs {
+        hash.Write([]byte(s))
+    }
+    return encoding.EncodeToString(hash.Sum(nil)[:5])
+}
+    \end{verbatim}
+    \note{Here is the (very simple) hash calculation.}
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/cmd/ci-operator/main.go}
+        {cmd/ci-operator/main.go} (\emph{very} simplified)
+    \small
+    \begin{verbatim}
+steps, postSteps := defaults.FromConfig(…)
+o.resolveInputs(steps)
+nodes := api.BuildPartialGraph(steps, o.targets.values)
+stepList := nodes.TopologicalSort()
+logrus.Infof(
+    "Running %s",
+    strings.Join(nodeNames(stepList), ", "))
+o.initializeNamespace()
+steps.Run(ctx, nodes)
+for _, step := range postSteps {
+    runStep(ctx, step)
+}
+    \end{verbatim}
+    \note{
+        Next, the graph is built by creating edges based on the dependency
+        relations between steps (e.g. a test requires its container image to be
+        imported or built).  Then, the test namespace is initialized and,
+        finally, the steps are executed.
+
+        So here is our final approximation of a full \texttt{ci-operator}
+        execution.
+    }
+\end{frame}
