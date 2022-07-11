@@ -12,7 +12,36 @@ each of them.
 The data structure common to all phases is the _step graph_. Each individual
 task in `ci-operator` is called a _step_, and the dependency relations between
 steps are represented by the graph. It determines the execution order and
-concurrency of steps, and allows unneeded steps to be pruned.
+concurrency of steps, and allows unneeded steps to be pruned.  As an example,
+below is an abbreviated version of the `ci-operator` configuration for the
+`openshift/ci-tools` repository and a graphical representation of the resulting
+step graph generated for it (note that some steps are implicit and so not
+literally present in the configuration):
+
+{{< highlight yaml >}}
+base_images:
+  os: # …
+binary_build_commands: # …
+build_root: # …
+images:
+- from: os
+  to: ci-operator
+  # …
+test_binary_build_commands: # …
+tests:
+- as: unit
+  commands: # …
+  container:
+    from: src
+- as: e2e
+  steps:
+    test:
+    - as: e2e
+      from: test-bin
+      # …
+{{< / highlight >}}
+
+![`ci-operator` step graph](/ci-operator_step_graph.png)
 
 The basic types for steps and graphs can be found in
 [`pkg/api/graph.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/graph.go):
