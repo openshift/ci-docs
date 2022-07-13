@@ -92,62 +92,18 @@ interface at https://steps.ci.openshift.org, which contains:
 - A reference of all fields in the `ci-operator` configuration file:
   - https://steps.ci.openshift.org/ci-operator-reference
 
-## Volumes
+## Volume
 
 [Currently](https://github.com/openshift/release/tree/master/clusters/app.ci/ci-operator-configresolver),
 the contents of the `openshift/release` repository are provided to the
-`configresolver` instances via Kubernetes `ConfigMap` volume mounts (as well as
-`Projected` aggregations of `ConfigMap`s, as described below).  The contents of
-a set of `ConfigMap`s are mounted as directories in the pods, as seen in the
-heavily abbreviated deployment configuration below:
+`configresolver` instances via a local `git-sync` container.  The process by
+which the content that is served is updated is:
 
-{{< highlight yaml >}}
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: ci
-  name: ci-operator-configresolver
-spec:
-  template:
-    spec:
-      containers:
-      - args:
-        - -config=/etc/configs
-        - -registry-/etc/registry
-        volumeMounts:
-        - name: registry
-          mountPath: /etc/registry
-          readOnly: true
-        - name: ci-operator-configs
-          mountPath: /etc/configs
-          readOnly: true
-      volumes:
-      - name: registry
-        configMap:
-          name: step-registry
-      - name: ci-operator-configs
-        projected:
-          sources:
-          - configMap:
-              name: ci-operator-master-configs
-          - configMap:
-              name: ci-operator-4.11-configs
-{{< / highlight >}}
-
-The process by which the content that is served is updated is:
-
-0. The general configuration update [process]({{< relref "configuration-updates" >}})
-   takes place in response to a pull request being merged in
-   `openshift/release`.  In particular, the following `updateconfig` mappings
-   are configured:
-   - The `step-registry` `ConfigMap` contains all files under
-     `ci-operator/step-registry`.
-   - Multiple `ci-operator-*-configs` `ConfigMap`s contain the files under
-     `ci-operator/config` (this is done because Kubernetes imposes a limit on
-     the size of `ConfigMap`s, which we reach even with compression).
-1. The `configresolver`, via the [`test-infra` configuration agent
-   package](https://github.com/kubernetes/test-infra/blob/master/prow/config/agent.go),
-   [monitors changes](https://github.com/openshift/ci-tools/blob/master/pkg/load/agents/)
+0. A pull request is merged in `openshift/release`.
+1. [`git-sync`]({{< ref "/docs/architecture/ci-operator-internals/configuration-updates#git-sync" >}})
+   performs its update cycle, notices the new revision, and updates the local
+   clone and the symlink to it.
+1. The `configresolver` [monitors changes](https://github.com/openshift/ci-tools/blob/master/pkg/load/agents/)
    to the volume mount directories using
    [`inotify(7)`](https://www.man7.org/linux/man-pages/man7/inotify.7.html).
 2. The change event from the agent triggers a configuration reload, which reads
@@ -155,4 +111,8 @@ The process by which the content that is served is updated is:
 3. New requests will now serve the new contents.
 
 Note that, as described, this setup suffers from all the issues identified in
-the [configuration updates]({{< relref "configuration-updates" >}}) section.
+the [configuration updates]({{< relref "configuration-updates" >}}) section.  In
+addition, because two independent configuration agents are involved (one for
+the `ci-operator` configuration, another for the step registry), the
+configuration reload is ultimately not atomic, even though the file system
+update is.
