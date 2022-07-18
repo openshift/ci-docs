@@ -36,7 +36,13 @@ DPTP maintains several means of contact:
 
 * Slack
     * `#announce-testplatform`: general announcements and outages. Usage is limited to the DPTP team, please do not post messages there.
-    * `#forum-testplatform`: general queries and discussion for the test platform. For general assistance, ping `@dptp-helpdesk`. For reporting an outage, ping `@dptp-triage`.
+    * `#forum-testplatform`: general queries and discussion for the test platform. Workflows exist within the channel (click on `+` by message box to see them) to interact with the Test Platform team:
+      * `Ask a Question`: general question for the team. Please provide as many details and links as possible to help us answer quickly.
+      * `Report CI Outage`: if there is a systemic outage in the CI use this workflow, and we will look at it ASAP.
+      * `Request PR Review`: if `dptp` is listed as approvers for one or more files in your PR use this to notify us of your request for review.
+      * `Report a Bug`: opens a dialog box to create a detailed Jira bug card.
+      * `Request an Enhancement`: opens a dialog box to create a detailed Jira enhancement card.
+      * `Request a Consultation`: opens a dialog box to create a detailed Jira consultation card.
     * `#4-dev-triage`: queries and discussion for CI issues that are not caused by the test platform.
     * `#forum-release-controller`: queries and discussion for the [release-controller](https://github.com/openshift/release-controller), responsible for generating Openshift release/update payloads and displaying the release status pages.
 * [Jira](https://issues.redhat.com/projects/DPTP)
