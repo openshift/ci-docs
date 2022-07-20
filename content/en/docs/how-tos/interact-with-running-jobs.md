@@ -53,8 +53,9 @@ The corresponding Red Hat kerberos ID to the author of a pull request
 is permitted to accessing the `Namespace` that run jobs.
 
 {{< alert title="Info" color="info" >}}
-To access the `Namespace`, it is required that *GITHUB* at *PROFESSIONAL SOCIAL MEDIA* is set up at Rover People.
-It takes 24 hours to synchronize the modification at Rover People to the build farms.
+To access the `Namespace` it is required that your *GITHUB* user profile is configured in Rover People under 
+*PROFESSIONAL SOCIAL MEDIA* as the last or only github link. It may take up to 24 hours to synchronize the modification 
+at Rover People to the build farms.
 {{< /alert >}}
 
 From a pull request page on GitHub, you can access the build logs from the `Details` link next to each job listed in the
