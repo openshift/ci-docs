@@ -119,11 +119,12 @@ In order to ensure that resources from tests do not leak on the cluster the
 tests are executed on, both hard and soft TTLs are set on the `Namespace` and
 the [`ci-ns-ttl-controller`](https://github.com/openshift/ci-ns-ttl-controller)
 is used to enforce the TTLs and reap namespaces when TTLs have expired.  Both a
-hard and a soft TTL are set on the namespaces; the hard TTL describes how much
-time can pass after the creation of the `Namespace` before it is reaped, the
-soft TTL described how much time can pass without any active `Pod`s in the
-`Namespace` before it is reaped.  Whichever TTL is reached first triggers
-reaping.
+hard and a soft TTL are set on the namespaces; the hard TTL ([`cleanupDuration`,
+currently 12 hours][cleanupDuration]) describes how much time can pass after
+the creation of the `Namespace` before it is reaped, the soft TTL
+([`idleCleanupDuration`, currently 1 hour][idleCleanupDuration]) describes how
+much time can pass without any active `Pod`s in the `Namespace` before it is
+reaped.  Whichever TTL is reached first triggers reaping.
 
 # Build Graph Traversal
 
@@ -153,3 +154,6 @@ deterministic naming.  For instance, the `src` `Build` that creates the
 `Namespace`; other builds of jobs that require this build step will see the
 `Build` running and wait for it to complete or see the `ImageStreamTag` existing
 and consider the build step finished.
+
+[cleanupDuration]: https://github.com/openshift/ci-tools/blame/5e86bf61fc54d27f2dc58a50367a5fe2a05ab369/cmd/ci-operator/main.go#L421
+[idleCleanupDuration]: https://github.com/openshift/ci-tools/blame/5e86bf61fc54d27f2dc58a50367a5fe2a05ab369/cmd/ci-operator/main.go#L420
