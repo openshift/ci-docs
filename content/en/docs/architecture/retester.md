@@ -16,7 +16,7 @@ configuration, whatever onboards to Tide, gets onboarded to retester too.
 Retester is aware of Prow and the concept of optional and required jobs. It only triggers retests on PRs 
 where at least one required Prow job is failing.
 
-We can enable the retester on a repository or for the entire organization in configuration file. Configuration file is added by adding a flag `--config-file=<file>` to [the retester's deployment](https://github.com/openshift/release/blob/master/clusters/app.ci/prow/03_deployment/retester.yaml) and exclude it from [the old retester](https://github.com/openshift/release/blob/05dd9a1ab5881e55165a0cc0f40d5513e2e2fd11/ci-operator/jobs/infra-periodics.yaml#L260-L300) by `-repo:<org>/<repo>` in the `query`. The following example shows how to achieve it for repo `openshift/ci-tools`:
+We can enable the retester on a repository or for the entire organization in a configuration file. Configuration file is added by adding a flag `--config-file=<file>` to [the retester's deployment](https://github.com/openshift/release/blob/master/clusters/app.ci/prow/03_deployment/retester.yaml) and exclude it from [the old retester](https://github.com/openshift/release/blob/05dd9a1ab5881e55165a0cc0f40d5513e2e2fd11/ci-operator/jobs/infra-periodics.yaml#L260-L300) by `-repo:<org>/<repo>` in the `query`. The following example shows how to achieve it for repo `openshift/ci-tools`:
 
 {{< highlight yaml >}}
   # retester-config.yaml
@@ -63,7 +63,7 @@ For attribute `enabled` these rules apply:
 - In level repo `enabled: false` means disabled repo. Nothing can change that.
 - In level org `enabled: true` means enabled org and all its repos. But repo itself can be disabled.
 - In level org `enabled: false` means disabled org and all its repos. But repo itself can be enabled.
-- In level retster `enabled` doesn't do anything.
+- In level retester `enabled` doesn't do anything.
 
 ### Back-off
 Retests are paused after three attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after nine retests of a single PR HEAD.
