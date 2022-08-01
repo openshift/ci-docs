@@ -56,14 +56,19 @@ We can enable the retester on a repository or for the entire organization in a c
 {{< / highlight >}}
 
 ### Config file
-There are 3 levels of policy in the configuration file retester/org/repo. The policy has 3 attributes: `enabled`, `max_retests_for_sha`, `max_retests_for_sha_and_base`.
+There are 3 levels of policy in the configuration file: retester (global), org, repo. The policy has 3 attributes: `enabled`, `max_retests_for_sha`, `max_retests_for_sha_and_base`.
 When merging policies, a 0 value at `max_retests` results in inheriting the parent policy.
 
 For attribute `enabled` these rules apply:
-- In level repo `enabled: false` means disabled repo. Nothing can change that.
-- In level org `enabled: true` means enabled org and all its repos. But repo itself can be disabled.
-- In level org `enabled: false` means disabled org and all its repos. But repo itself can be enabled.
-- In level retester `enabled` doesn't do anything.
+- In repo level `enabled: false` means disabled repo. Nothing can change that.
+- In org level `enabled: true` means enabled org and all its repos. But repo itself can be disabled.
+- In org level `enabled: false` means disabled org and all its repos. But repo itself can be enabled.
+- In global level `enabled: true` enables every org and every repo that is not disabled at the org/repo level.
+- In global level `enabled: false` disables every org and every repo that is not enabled at the org/repo level.
+
+For attribute `max_retests` these rules apply:
+- `max_retests_for_sha_and_base` and `max_retests_for_sha` must not be less than 0.
+- `max_retests_for_sha` cannot be lower than `max_retests_for_sha_and_base`.
 
 ### Back-off
 Retests are paused after three attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after nine retests of a single PR HEAD.
