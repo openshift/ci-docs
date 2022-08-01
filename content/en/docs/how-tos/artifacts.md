@@ -76,7 +76,7 @@ The middle of the page contains the main build log.  Particular error patterns
 are highlighted and the full output is initially folded so that only relevant
 parts are displayed.  For `ci-operator` jobs, this section contains the log
 messages of level `info` and above from its output, described [below]({{< ref
-"#ci-operator-output" >}}).  The "raw build-log.txt" link contains the same
+"#ci-operator-artifacts" >}}).  The "raw build-log.txt" link contains the same
 text, but served as a regular text file, and is also available as
 `build-log.txt` in the artifacts directory.
 
