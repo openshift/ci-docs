@@ -21,6 +21,7 @@ Below is a non-exhaustive list of CI services.
 
 * [prow.ci.openshift.org](https://prow.ci.openshift.org/): main Prow dashboard with information about jobs, pull requests, the merge queue, etc.
 * [amd64.ocp.releases.ci.openshift.org](https://amd64.ocp.releases.ci.openshift.org/): OCP AMD 64 release status page.
+* [arm64.ocp.releases.ci.openshift.org](https://arm64.ocp.releases.ci.openshift.org/): OCP ARM 64 release status page.
 * [ppc64le.ocp.releases.ci.openshift.org](https://ppc64le.ocp.releases.ci.openshift.org/): OCP PowerPC 64 LE release status page.
 * [s390x.ocp.releases.ci.openshift.org](https://s390x.ocp.releases.ci.openshift.org/): OCP S390x release status page.
 * [multi.ocp.releases.ci.openshift.org](https://multi.ocp.releases.ci.openshift.org/): OCP Multi-arch release status page.
