@@ -9,7 +9,7 @@ It utilizes a config containing your team's: kerberos ids, github team names, an
 It then gathers useful information about each PR and sorts them into an easy to analyze digest delivered via Slack daily.
 The tool is currently run under a periodic job titled `periodic-pr-reminder`, and is set to run each weekday at 8 am UTC.
 
-<img src="/pr-reminder.png" width="600">
+<img src="/pr-reminder.png" width="600" alt="example pr-reminder output">
 
 ## How to configure it for your team
 The configuration for `pr-reminder` is located in the `openshift/release` repo under [app.ci/pr-reminder](https://github.com/openshift/release/blob/master/clusters/app.ci/pr-reminder/pr-reminder-config.yaml).
