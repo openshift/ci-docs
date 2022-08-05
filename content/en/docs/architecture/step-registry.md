@@ -231,6 +231,27 @@ tests:
               memory: 200Mi
 {{< /highlight >}}
 
+#### Opting Out of `ServiceAccount` Credentials
+
+By default, the `Pod` in which a step runs will have `ServiceAccount` credentials mounted in order to update the `$SHARED_DIR` and expose the
+`$KUBECONFIG`. If your test does not use either of these features, and the presence of in-cluster configuration is not desired, this may be
+turned off:
+
+{{< highlight yaml >}}
+tests:
+  - as: without-serviceaccount
+    steps:
+      test:
+        - as: no-in-cluster-config
+          commands: test -f /var/run/secrets/kubernetes.io/serviceaccount/token # will fail
+          no_kubeconfig: true # opt out of a service-account and $KUBECONFIG
+          from: os
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+{{< /highlight >}}
+
 ## Chain
 
 A chain is a registry component that specifies multiple registry components to be run. Components are run in the order that they are written.
