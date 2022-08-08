@@ -12,7 +12,7 @@ The tool is currently run under a periodic job titled `periodic-pr-reminder`, an
 <img src="/pr-reminder.png" width="600" alt="example pr-reminder output">
 
 ## How to configure it for your team
-The configuration for `pr-reminder` is located in the `openshift/release` repo under [app.ci/pr-reminder](https://github.com/openshift/release/blob/master/clusters/app.ci/pr-reminder/pr-reminder-config.yaml).
+The configuration for `pr-reminder` is located in the `openshift/release` repo under [clusters/app.ci/pr-reminder](https://github.com/openshift/release/blob/master/clusters/app.ci/pr-reminder/pr-reminder-config.yaml).
 Adding the configuration for a specific team is as simple as adding an entry to the `teams` list for the team:
 ```yaml
 teams:
@@ -34,7 +34,5 @@ A presubmit check exists to verify that all the necessary condtions are met.
 {{< alert title="Warning" color="warning" >}}
 Each configured `teamMember` will need to have
 * A Slack account set up using their Red Hat email in the CoreOS slack space
-* Their github username configured (as the last, or only, github account) in their rover profile under "Professional Social Media"  
+* Their github username configured (as the last, or only, github account) in their rover profile under "Professional Social Media"
 {{< /alert >}}
-
-
