@@ -9,7 +9,17 @@ description: Job Primer ci-tool used to generate job names for Big Query.
 In `Job Primer` a job name is very important. Please make sure that the job names contain correct information. ([see options below](#naming-convention))
 {{% /alert %}}
 
-[JobPrimer](https://github.com/openshift/ci-tools/tree/master/pkg/jobrunaggregator/jobtableprimer) is the `ci-tool` that is used to populate the `BigQuery` `Jobs` table. The `Jobs` table is what dictates the periodic jobs are grabbed during `disruption` data gathering. Currently this tool is ran manually.
+[JobPrimer](https://github.com/openshift/ci-tools/tree/master/pkg/jobrunaggregator/jobtableprimer) is the `ci-tool` that is used to populate the `BigQuery` `Jobs` table. The `Jobs` table dictates which periodic jobs are ingested during `disruption` data gathering.
+
+`JobPrimer` runs periodically in our CI. There are two sub commands described below that run on a cron schedule.
+
+- The configuration for `generate-job-names` can be found [here](https://github.com/openshift/release/blob/1b5cdb332b99ec32316c8c89cf8268204609505b/ci-operator/jobs/infra-periodics.yaml#L2441-L2487). It updates the `generated_job_names.txt` file then opens and merges the PR via the Openshift bot. ([example PR](https://github.com/openshift/ci-tools/pull/2924))
+
+- The configuration for `prime-job-table` which updates the table in big query can be found in the `DPCR Job Aggregation Configs` (**private repo**)
+
+  ```
+  https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation/job-table-updater-cronjob.yaml
+  ```
 
 ## High Level Diagram
 
