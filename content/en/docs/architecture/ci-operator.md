@@ -291,6 +291,30 @@ promotion:
   tag: "4.5"
 {{< / highlight >}}
 
+### Publishing Images Tagged By Commit
+
+For projects that wish to make their components available at every version produced, as well as with a floating version
+that tracks the `latest` or most recent release, add `tag_by_commit: true` to the promotion configuration. This will
+ publish `images` to many integration `ImageStreams`, in one `Namespace`, with more than one tag being updated per push.
+
+ The following `promotion` stanza in the `ci-operator` configuration will publish:
+
+* the `pipeline:src` tag, published as `ocp/repo-scripts:4.5` and `ocp/repo-scripts:<commit-hash>` containing the latest version of the repository
+* the `stable:component` tag, published as `ocp/mycomponent:4.5`  and `ocp/mycomponent:<commit-hash>` containing the output component itself
+
+`ci-operator` configuration:
+
+{{< highlight yaml >}}
+promotion:
+  additional_images:
+    repo-scripts: "src"    # promotes "src" as "repo-scripts"
+  excluded_images:
+  - "mytests" # does not promote the test image
+  namespace: "ocp"
+  tag: "4.5"
+  tag_by_commit: true # publish tags based on the git commit being built
+{{< / highlight >}}
+
 ## Describing OpenShift Releases Involved in Tests {#describing-inclusion-in-an-openshift-release}
 
 `ci-operator` gives first-class support to repositories which need to run end-to-end tests in the context of an OpenShift
