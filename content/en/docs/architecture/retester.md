@@ -16,29 +16,18 @@ configuration, whatever onboards to Tide, gets onboarded to retester too.
 Retester is aware of Prow and the concept of optional and required jobs. It only triggers retests on PRs 
 where at least one required Prow job is failing.
 
-We can enable the retester on a repository by adding a flag `--enable-on-repo=<org>/<repo>` to [the retester's deployment](https://github.com/openshift/release/blob/master/clusters/app.ci/prow/03_deployment/retester.yaml) and exclude it from [the old retester](https://github.com/openshift/release/blob/05dd9a1ab5881e55165a0cc0f40d5513e2e2fd11/ci-operator/jobs/infra-periodics.yaml#L260-L300) by `-repo:<org>/<repo>` in the `query`. The following example shows how to achieve it for repo `openshift/ci-tools`:
+We can enable the retester on a repository or for the entire organization in [its configuration file](https://github.com/openshift/release/blob/master/core-services/retester/_config.yaml) and exclude it from [the old retester](https://github.com/openshift/release/blob/05dd9a1ab5881e55165a0cc0f40d5513e2e2fd11/ci-operator/jobs/infra-periodics.yaml#L260-L300) by `-repo:<org>/<repo>` in the `query`. 
 
-{{< highlight yaml >}}
-  spec:
-    containers:
-    - image: retester:latest
-      name: retester
-      command:
-      - retester
-      args:
-      ...
-      - --enable-on-repo=openshift/ci-tools       # Enable the retester on repo openshift/ci-tools
-{{< / highlight >}}
+### Config file
+There are 3 levels of policy in the configuration file: retester (global), org, repo. If a field of policy is defined at two levels, the value at the more specific level precedes. The values in the more generic level are inherited if they are not defined in the more specific level.
 
-{{< highlight yaml >}}
-  name: periodic-retester
-  spec:
-    containers:
-    - args:
-      - --query=is:pr state:open label:lgtm label:approved status:failure comments:<2500
-        ...
-        -repo:openshift/ci-tools                  # Exclude repo openshift/ci-tools
-{{< / highlight >}}
+```yaml
+`enabled`:
+  - `true`: enable retester
+  - `false`: disable retester
+  - not defined: use the value in the above level
+`max_retests_for_sha_and_base`: the number of retesting for each sha and base
+`max_retests_for_sha`: the number of retesting for each sha
+```
 
-### Back-off
-Retests are paused after three attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after nine retests of a single PR HEAD.
+Retests are paused after `max_retests_for_sha_and_base` attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after `max_retests_for_sha` retests of a single PR HEAD.
