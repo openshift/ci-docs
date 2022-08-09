@@ -29,7 +29,5 @@ There are 3 levels of policy in the configuration file: retester (global), org, 
 `max_retests_for_sha_and_base`: the number of retesting for each sha and base
 `max_retests_for_sha`: the number of retesting for each sha
 ```
-When merging policies, a 0 value at `max_retests` results in inheriting the parent policy.
 
-### Back-off
-Retests are paused after three attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after nine retests of a single PR HEAD.
+Retests are paused after `max_retests_for_sha_and_base` attempts against one base/PR HEAD combination, and the PR is explicitly held (`/hold`) after `max_retests_for_sha` retests of a single PR HEAD.
