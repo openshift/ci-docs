@@ -415,11 +415,18 @@ releases:
       version: "4.5"
       relative: 1         # resolves to the Nth latest payload in this stream
   custom:
-    prerelease:       # references a version that may be published to customers, but is not yet
+    prerelease:       # references a version known to a release controller
       product: ocp
       version_bounds: # bounds the version for the release chosen
         lower: "4.4.0"
         upper: "4.5.0-0"
+  ec:
+    prerelease:       # references a version known to a release controller
+      product: ocp
+      stream: 4-dev-preview
+      version_bounds: # bounds the version for the release chosen
+        lower: "4.1.0"
+        upper: "4.999.0"
 {{< / highlight >}}
 
 ### Testing with a Cluster from a Cluster Pool
