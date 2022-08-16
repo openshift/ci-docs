@@ -16,6 +16,10 @@ If the source image is open to the public, we can mirror the image by adding it 
 gcr.io/k8s-staging-boskos/boskos:latest registry.ci.openshift.org/ci/boskos:latest
 {{< / highlight >}}
 
+{{< alert title="Warning" color="warning" >}}
+We cannot mirror images from `docker.io` due to rate limiting constraints. Please, instead, push up an image to quay and mirror that to the CI registry.
+{{< /alert >}}
+
 The hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images)
 mirrors all the images defined in the mapping files.  Note that it operates on
 the contents of the `master` branch, so the changes to the files have to be
