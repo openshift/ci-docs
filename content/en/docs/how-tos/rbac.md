@@ -36,6 +36,10 @@ groups:
 - Not all clusters: The Rover group `test-platform-ci-monitoring-viewers` is created on `app.ci`, and `cluster_groups/dp-managed` which is composed of `build01` and `build02`.
 
 - `some-invisible-group: {}` implies that the Rover group `some-invisible-group` exists on all clusters, even if it is not used by any manifests.
+  
+{{< alert title="Info" color="info" >}}
+  The group syncing from rover is handled by a couple of periodics that only run once per day. You may have to wait up to 48 hours for your privileges to propagate to the cluster(s).
+{{< /alert >}}
 
 ## Troubleshooting
 No API is provided to create Rover groups. We have to do some manual work on the existing groups and the RBACs with user subjects.
