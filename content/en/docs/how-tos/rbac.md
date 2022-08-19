@@ -38,7 +38,7 @@ groups:
 - `some-invisible-group: {}` implies that the Rover group `some-invisible-group` exists on all clusters, even if it is not used by any manifests.
   
 {{< alert title="Info" color="info" >}}
-  The group syncing from rover is handled by a couple of periodics that only run once per day. You may have to wait up to 24 hours for your privileges to propagate to the cluster(s).
+  The group syncing from rover is handled by a couple of periodics that only run once per day. You may have to wait up to 48 hours for your privileges to propagate to the cluster(s).
 {{< /alert >}}
 
 ## Troubleshooting
