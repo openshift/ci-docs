@@ -1,0 +1,538 @@
+\begin{frame}
+    \sectiontitleframe
+    \note{(we have fancy section title slides now)}
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/release/blob/master/ci-operator/config/openshift/origin/openshift-origin-master.yaml}
+        {ibid}
+    \begin{verbatim}
+- as: verify-deps
+  commands: make verify-deps …
+  container:
+    from: src
+    \end{verbatim}
+    \href
+        {https://github.com/openshift/release/blob/master/ci-operator/config/openshift/origin/openshift-origin-release-3.11.yaml}
+        {\ttfamily\ldots/openshift-origin-release-3.11.yaml}
+    \begin{verbatim}
+- as: e2e-gcp
+  commands: … run-tests
+  openshift_ansible:
+    cluster_profile: gcp
+    \end{verbatim}
+    \note{
+        The \texttt{test} entries in the configuration file have many different
+        forms, although they have many similarities.  \texttt{steps} (or,
+        sometimes, \texttt{literal\_steps}, as in the previous example), denotes
+        a \textit{multi-stage} test.  Other basic test types are:
+        \begin{itemize}
+            \item
+                simple \textit{container} tests, declared with
+                \texttt{container}
+            \item
+                a large variety of \textit{template} tests, declared with fields
+                in the form \texttt{openshift\_*}
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \url{https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go}
+    \vfill
+    \footnotesize
+    \begin{verbatim}
+type TestStepConfiguration struct {
+    As string ` json:"as"`
+    Commands string ` json:"commands,omitempty"`
+    // …
+    // Only one of the following can be not-null.
+    ContainerTestConfiguration                                …
+    MultiStageTestConfiguration                               …
+    MultiStageTestConfigurationLiteral                        …
+    OpenshiftAnsibleClusterTestConfiguration                  …
+    OpenshiftAnsibleSrcClusterTestConfiguration               …
+    OpenshiftAnsibleCustomClusterTestConfiguration            …
+    OpenshiftInstallerClusterTestConfiguration                …
+    OpenshiftInstallerUPIClusterTestConfiguration             …
+    OpenshiftInstallerUPISrcClusterTestConfiguration          …
+    OpenshiftInstallerCustomTestImageClusterTestConfiguration …
+}
+    \end{verbatim}
+    \vfill
+    \note{
+        This is manifested in code in the \texttt{TestStepConfiguration}
+        structure (not to be confused with the \texttt{TestStep} structure, used
+        in multi-stage tests), which uses the common pattern of many (optional)
+        pointers to other structures, only one of which is ever non-null (a
+        \textit{sum type}).
+    }
+\end{frame}
+
+\subsection{Container}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+// Only one of the following can be not-null.
+ContainerTestConfiguration \
+    *ContainerTestConfiguration \
+    ` json:"container,omitempty"`
+// …
+    \end{verbatim}
+    \note{
+        (these identifiers are enormous, so here is what a full line looks like)
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type ContainerTestConfiguration struct {
+    From PipelineImageStreamTagReference
+    MemoryBackedVolume *MemoryBackedVolume
+    Clone *bool
+}
+    \end{verbatim}
+    \note{
+        Starting with container tests, their structure is deceptively simple.
+        It declares its container image plus a couple of other, more esoteric
+        fields.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type TestStepConfiguration struct {
+    As string
+    Commands string
+    Cluster Cluster
+    Secret *Secret
+    Secrets []*Secret
+    Cron *string
+    Interval *string
+    ReleaseController bool
+    Postsubmit bool
+    ClusterClaim *ClusterClaim
+    RunIfChanged string
+    Optional bool
+    SkipIfOnlyChanged string
+    Timeout *prowv1.Duration
+    // …
+    \end{verbatim}
+    \note{
+        This is because most of the fields live in the original structure,
+        previously abbreviated.  The list of fields here is somewhat unruly.  In
+        the past, we had a very relaxed policy for external contributions, so
+        the code base --- and this area in particular --- grew very
+        ``organically'' (to put it favorably).
+
+        Some of these, such as the build cluster, the periodic/post-submit
+        fields, etc. are still useful.  Some are obsolete and kept for
+        compatibility.
+
+        As an aside, the capabilities of container tests are roughly a subset of
+        those of multi-stage, there is a long-term plan to unify their
+        underlying implementation.
+    }
+\end{frame}
+
+\subsection{Template}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+- as: e2e-gcp
+  commands: … run-tests
+  openshift_ansible:
+    cluster_profile: gcp
+    \end{verbatim}
+    \footnotesize
+    \begin{verbatim}
+args:
+- --image-import-pull-secret=/etc/pull-secret/.dockerconfigjson
+- --report-credentials-file=/etc/report/credentials
+- --secret-dir=/usr/local/e2e-gcp-periodic-cluster-profile
+- --target=e2e-gcp-periodic
+- --template=/usr/local/e2e-gcp-periodic
+- --gcs-upload-secret=/secrets/gcs/service-account.json
+command:
+- ci-operator
+    \end{verbatim}
+    \note{
+        The second type of test (also in chronological order) is everyone's
+        favorite: template tests.  This was the first mechanism added to
+        \texttt{ci-operator} to support end-to-end tests, or in general anything
+        more complex than a container test.
+
+        They are mostly a historical curiosity at this point, used only in very
+        old, 3.11 jobs, but they provide some context to some of the more
+        dubious aspects of \texttt{ci-operator}.
+
+        There is no (with one exception due to a failed plan) corresponding test
+        definition in the configuration file for these tests: the entry in
+        \texttt{tests} is used exclusively by \texttt{prowgen}.  Instead, the
+        definition is supplied at runtime via the \texttt{--template} argument.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+      volumeMounts:
+      - mountPath: /usr/local/e2e-gcp-periodic
+        name: job-definition
+        subPath: cluster-launch-e2e.yaml
+    volumes:
+    - configMap:
+        name: prow-job-cluster-launch-e2e
+      name: job-definition
+    \end{verbatim}
+    \note{
+        In our Prow jobs, this is done by mounting the definition via a
+        \texttt{ConfigMap}\ldots
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \url{https://github.com/openshift/release/tree/master/ci-operator/templates}
+    \vfill
+    \footnotesize
+    \begin{verbatim}
+ci-operator/templates/
+    master-sidecar-3.yaml
+    master-sidecar-4.4.yaml
+    openshift/
+        installer/
+            cluster-launch-installer-custom-test-image.yaml
+            cluster-launch-installer-e2e.yaml
+            cluster-launch-installer-libvirt-e2e.yaml
+            cluster-launch-installer-metal-e2e.yaml
+            cluster-launch-installer-openstack-e2e.yaml
+            cluster-launch-installer-openstack-upi-e2e.yaml
+            cluster-launch-installer-src.yaml
+            cluster-launch-installer-upi-e2e.yaml
+        openshift-ansible/
+            cluster-launch-e2e-openshift-ansible.yaml
+            cluster-launch-e2e.yaml
+            cluster-scaleup-e2e-40.yaml
+    \end{verbatim}
+    \vfill
+    \note{
+        \ldots which in turn are populated via \texttt{updateconfig} from the
+        files in the dreaded \texttt{ci-operator/templates} directory in
+        \texttt{openshift/release}.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \href
+        {https://github.com/openshift/release/blob/master/ci-operator/templates/openshift/installer/cluster-launch-installer-e2e.yaml}
+        {\ldots/openshift/installer/cluster-launch-installer-e2e.yaml}
+    \vfill
+    \begin{verbatim}
+kind: Template
+apiVersion: template.openshift.io/v1
+
+parameters:
+- name: JOB_NAME
+  required: true
+- name: JOB_NAME_SAFE
+  required: true
+# …
+    \end{verbatim}
+    \vfill
+    \note{
+        Each of these files is an OpenShift \texttt{Template} object, which
+        consists of a list of parameters (strings, essentially)\ldots
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+objects:
+# We want the cluster to be able to access
+# these images
+- kind: RoleBinding
+  apiVersion: authorization.openshift.io/v1
+  metadata:
+    name: ${JOB_NAME_SAFE}-image-puller
+    namespace: ${NAMESPACE}
+  # …
+    \end{verbatim}
+    \note{
+        \ldots and a list of objects.  \texttt{\$\{\ldots\}} strings are
+        replaced by parameter values when the template is instantiated (and good
+        luck telling what is \texttt{bash} interpolation and what is template
+        substitution in a complex \texttt{Pod} definition).
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+# The e2e pod spins up a cluster, runs e2e tests,
+# and then cleans up the cluster.
+- kind: Pod
+  apiVersion: v1
+  metadata:
+    name: ${JOB_NAME_SAFE}
+    namespace: ${NAMESPACE}
+  # …
+    \end{verbatim}
+    \note{
+        And that is a summary of the entirety of the capabilities provided by
+        template tests.  From there, users would create a \texttt{Pod}
+        definition (n.b.: a single one) to execute their test using colossal,
+        inline shell scripts.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+containers:
+# Once the cluster is up, executes shared tests
+- name: test
+# …
+# Runs an install
+- name: setup
+# …
+# Performs cleanup of all created resources
+- name: teardown
+# …
+    \end{verbatim}
+    \note{
+        In practice, a few templates were developed and used by most tests, all
+        following roughly this structure, later mirrored in multi-stage tests: a
+        \texttt{setup} container performed the cluster installation, a
+        \texttt{test} container executed OpenShift or repository tests, and a
+        \texttt{teardown} container destroyed the temporary cluster.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+parameters:
+# …
+- name: IMAGE_FORMAT
+- name: IMAGE_INSTALLER
+  required: true
+- name: IMAGE_TESTS
+  required: true
+# …
+- name: RELEASE_IMAGE_LATEST
+  required: true
+# …
+    \end{verbatim}
+    \note{
+        Configuration and parameterization was done via these template
+        parameters, some of which are treated especially by
+        \texttt{ci-operator}:
+        \begin{itemize}
+            \item
+                \texttt{IMAGE\_FORMAT} is populated with the public registry
+                \textit{pull spec} for built images.
+            \item
+                \texttt{IMAGE\_*} entries are populated with entries from the
+                input release stream.
+            \item
+                \texttt{RELEASE\_IMAGE\_*} entries are populated with the
+                release payload \textit{pull spec}.
+        \end{itemize}
+        The presence of each of these variables also causes the template step to
+        depend on the step which provides it (the \texttt{Provides} method in
+        each step type).  Environment variables can also be used to initialize
+        or override these values, which is still used in some of our E2E tests,
+        even in multi-stage (e.g. the release controller uses
+        \texttt{RELEASE\_IMAGE\_LATEST} to override the input release payload).
+    }
+\end{frame}
+
+\subsection{Multi-stage}
+
+\begin{frame}
+    \autotitle
+    \begin{multicols}{2}
+        \begin{itemize}
+            \item test definition
+            \item test phases
+                \begin{itemize}
+                    \item pre
+                    \item test
+                    \item post
+                \end{itemize}
+            \item step registry
+                \begin{itemize}
+                    \item references
+                    \item chains
+                    \item workflows
+                    \item observers
+                \end{itemize}
+            \item container image
+            \item parameters
+            \item dependencies
+            \item credentials
+            \item leases
+            \item overriding
+            \item \ldots
+        \end{itemize}
+    \end{multicols}
+    \note{
+        Of course, multi-stage tests are a universe of their own and worth (at
+        least) a presentation in themselves.  Here are some of the capabilities,
+        most of which we will not have time to analyze today.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type MultiStageTestConfiguration struct {
+    ClusterProfile ClusterProfile
+    Pre []TestStep
+    Test []TestStep
+    Post []TestStep
+    Workflow *string
+    Environment TestEnvironment
+    Dependencies TestDependencies
+    DNSConfig *StepDNSConfig
+    Leases []StepLease
+    AllowSkipOnSuccess *bool
+    AllowBestEffortPostSteps *bool
+    Observers *Observers
+    DependencyOverrides DependencyOverrides
+}
+    \end{verbatim}
+    \note{
+        Two structures, which share most of their fields, are involved in the
+        configuration of multi-stage tests.
+        \texttt{MultiStageTestConfiguration} is loaded directly from the
+        \texttt{steps} field.  It represents a user test definition which
+        potentially needs to go through \textit{resolution}, where references to
+        steps, chains, and workflows from the step registry have to be replaced
+        with their defintions.
+
+        The \texttt{--unresolved-config} argument and the
+        \texttt{UNRESOLVED\_CONFIG} variables correspond to this structure.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type MultiStageTestConfigurationLiteral struct {
+    ClusterProfile ClusterProfile
+    Pre []LiteralTestStep
+    Test []LiteralTestStep
+    Post []LiteralTestStep
+    Environment TestEnvironment
+    Dependencies TestDependencies
+    DNSConfig *StepDNSConfig
+    Leases []StepLease
+    AllowSkipOnSuccess *bool
+    AllowBestEffortPostSteps *bool
+    Observers []Observer
+    DependencyOverrides DependencyOverrides
+    Timeout *prowv1.Duration
+}
+    \end{verbatim}
+    \note{
+        Its counterpart is \texttt{MultiStageTestConfigurationLiteral}, which
+        represents a \emph{resolved} configuration, and corresponds to the
+        \texttt{--config} argument and the \texttt{CONFIG\_SPEC} variable.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type LiteralTestStep struct {
+    As string
+    From string
+    FromImage *ImageStreamTagReference
+    Commands string
+    Resources ResourceRequirements
+    Timeout *prowv1.Duration
+    GracePeriod *prowv1.Duration
+    Credentials []CredentialReference
+    Environment []StepParameter
+    Dependencies []StepDependency
+    \end{verbatim}
+    \note{
+        This distinction is also reflected in the \texttt{LiteralTestStep}
+        structure, lists of which compose the input configuration\ldots
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+    DNSConfig *StepDNSConfig
+    Leases []StepLease
+    OptionalOnSuccess *bool
+    BestEffort *bool
+    Cli string
+    Observers []string
+    RunAsScript *bool
+}
+    \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type TestStep struct {
+    *LiteralTestStep
+    Reference *string
+    Chain *string
+}
+    \end{verbatim}
+    \note{
+        \ldots and the \texttt{TestStep} structure, which has the same contents
+        but has also the option of referring to an external definition from the
+        registry.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+tests:
+- as: multi-stage
+  steps: # …
+- as: multi-stage-literal
+  literal_steps: # …
+
+$ JOB_SPEC=… ci-operator
+$ ci-operator --config …
+$ ci-operator --unresolved-config …
+$ CONFIG_SPEC=… ci-operator …
+$ UNRESOLVED_CONFIG=… ci-operator …
+    \end{verbatim}
+    \note{
+        These two types exist to distinguish the two states in code and between
+        services, e.g.:
+        \begin{itemize}
+            \item
+                regular jobs receive a literal configuration from the resolver
+            \item
+                \texttt{pj-rehearse} loads the unresolved configuration and
+                expands it itself based on the PR contents, setting
+                \texttt{\$UNRESOLVED\_CONFIG}
+            \item
+                release jobs provide their own inline configuration via
+                \texttt{\$CONFIG\_SPEC} or \texttt{\$UNRSOLVED\_CONFIG}
+                depending on the case
+            \item etc.
+        \end{itemize}
+    }
+\end{frame}

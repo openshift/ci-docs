@@ -1,0 +1,110 @@
+\begin{frame}
+    \sectiontitleframe
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \scriptsize
+    \begin{center}
+        \begin{tikzpicture}[
+            minimum size = 2em, inner xsep = 1em,
+            font = \ttfamily,
+            cmd/.style = {font = \ttfamily\tiny},
+        ]
+            \node[draw] at (0, 0) (root) {root};
+            \node[draw, above = of root] (base_images) {\$name};
+            \node[draw, right = 1.1 of root] (src) {src};
+            \node[draw, above = of src] (bin) {bin};
+            \node[draw, right = 1.25 of src] (test_bin) {test-bin};
+            \node[draw, above = of test_bin] (rpms) {rpms};
+            \node[draw, right = 2 of rpms] (base_rpm_images) {\$name};
+            \node[draw, below = of base_rpm_images]
+                (base_rpm_images_without) {\$name-without-rpms};
+            \node[draw, below = of test_bin] (images) {\$name};
+            \node[draw, dashed, below = of base_rpm_images_without]
+                (stable) {stable:\$name};
+            \node[draw, below = of src] (src_bundle) {src-bundle};
+            \node[draw, below = 2.5 of root] (bundles) {\$name};
+            \node[draw, below = of src_bundle] (ci_index) {ci-index-*};
+            \node[draw, below = of images]
+                (ci_index_gen) {ci-index-*-gen};
+            \draw[->] (root) -- (src);
+            \draw[->] (src) -- (bin);
+            \draw[->, dotted] (bin) -- node[cmd, pos = 0.15] {cache} (root);
+            \draw[->] (src) -- (test_bin);
+            \draw[->] (src) -- (rpms);
+            \draw[->] (src) -- (images);
+            \draw[->] (bin) -- (rpms);
+            \draw[->] (rpms) -- (base_rpm_images);
+            \draw[->] (base_rpm_images_without) -- (base_rpm_images);
+            \draw[->]
+                (src)
+                -- node[cmd, pos = 0.3] {}
+                (src_bundle);
+            \draw[->] (src_bundle) -- (bundles);
+            \draw[->, dashed]
+                ($ (images.north east)!0.5!(images.east) $) ++(0.9, 0)
+                --
+                node[cmd, above = 0.25] {.from}
+                node[cmd, above] {.inputs}
+                ($ (images.north east)!0.5!(images.east) $);
+            \draw[->]
+                ($ (images.south east)!0.5!(images.east) $)
+                -- ($ (stable.south west)!0.5!(stable.west) $);
+            \draw[->, dashed] (stable.east) -- ++(0.5, 0);
+            \draw[->, dashed]
+                (src_bundle.west) ++(-1.75, 0)
+                -- node[cmd, above] {.substitutions}
+                (src_bundle);
+            \draw[->, dashed]
+                (ci_index_gen.east) ++(2, 0)
+                --
+                node[cmd, above = 0.25] {.base\_index}
+                node[cmd, above] {.operator\_index}
+                (ci_index_gen);
+            \draw[->] (ci_index_gen) -- (ci_index);
+            \node[cmd, above = 0.25 of root] {build\_root};
+            \node[cmd, above = 0 of root] {.use\_build\_cache};
+            \node[cmd, above = 0.25 of src] {\$JOB\_SPEC.refs};
+            \node[cmd, above = 0 of src] {\$JOB\_SPEC.extra\_refs};
+            \node[cmd, above = 0 of bin] {binary\_build\_commands};
+            \node[cmd, above = 0 of test_bin] {test\_binary\_build\_commands};
+            \node[cmd, above = 0 of rpms] {rpm\_build\_commands};
+            \node[cmd, above = 0 of base_rpm_images_without]
+                {base\_rpm\_images};
+            \node[cmd, above = 0.25 of base_images] {base\_images};
+            \node[cmd, above = 0 of base_images] {from\_image};
+            \node[cmd, above = 0 of base_rpm_images] {base\_rpm\_images};
+            \node[cmd, above = 0 of images] {images};
+            \node[cmd, above = 0 of bundles] {operator.bundles};
+            \node[cmd, above = 0 of src_bundle] {operator};
+            \node[cmd, above = 0 of ci_index] {operator.bundles};
+            \node[cmd, above = 0 of ci_index_gen] {operator.bundles};
+        \end{tikzpicture}
+    \end{center}
+    \note{
+        Legend:
+        \begin{itemize}
+            \item
+                Solid boxes are pipeline images (tags, technically), solid lines
+                are dependencies.
+            \item
+                The dashed \texttt{stable} box represents the "internal"
+                promotion to the stable stream prior to the execution of tests.
+            \item
+                Dashed lines represent edges not fully depicted since they are
+                optional and can be added to any image in the pipeline:
+                \begin{itemize}
+                    \item
+                        Each entry in \texttt{operator.substitutions} makes
+                        \texttt{src-bundle} depend on that image.
+                    \item
+                        The \texttt{operator.substitutions} entry, if specified,
+                        makes the \texttt{src-bundle} depend on those images.
+                    \item
+                        The \texttt{operator.base\_index} entry, if specified,
+                        makes all index generator images depend on that image.
+                \end{itemize}
+        \end{itemize}
+    }
+\end{frame}

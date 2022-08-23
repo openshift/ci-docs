@@ -1,0 +1,327 @@
+\begin{frame}
+    \sectiontitleframe
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \url{https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go}
+    \vfill
+    \begin{verbatim}
+type ReleaseBuildConfiguration struct {
+    Metadata Metadata
+    InputConfiguration
+    // …
+}
+
+type InputConfiguration struct {
+    // …
+    Releases map[string]UnresolvedRelease
+}
+    \end{verbatim}
+    \vfill
+    \note{
+        The first major input to E2E tests, seen at the beginning of the output
+        log, are the release streams / payloads.  They are configured in the
+        \texttt{releases} entry in the configuration file.
+
+        Originally, they were specified in \texttt{tag\_specification}, which
+        provides a fixed subset of the same functionality.  That field is now
+        deprecated and will be removed, but can still be found in many
+        configuration files.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type UnresolvedRelease struct {
+    // Integration describes an integration stream
+    // which we can create a payload out of
+    Integration *Integration
+    // Candidate describes a candidate release
+    // payload
+    Candidate *Candidate
+    // Prerelease describes a yet-to-be released
+    // payload
+    Prerelease *Prerelease
+    // Release describes a released payload
+    Release *Release
+}
+    \end{verbatim}
+    \note{
+        The top level keys of the \texttt{releases} field are simply
+        identifiers.  Each value is a structure in the familiar format where
+        only one of the pointers is ever non-null.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+type Candidate struct {
+    Product ReleaseProduct
+    Architecture ReleaseArchitecture
+    Stream ReleaseStream
+    Version string
+    Relative int
+}
+
+type Prerelease struct {
+    Product ReleaseProduct
+    Architecture ReleaseArchitecture
+    VersionBounds VersionBounds
+}
+    \end{verbatim}
+    \note{
+        The \texttt{release}, \texttt{prerelease}, and \texttt{candidate} types
+        all refer to existing payloads: they vary only in their source.
+        \texttt{integration} streams (when not overridden, as described later)
+        use \texttt{ImageStream}s.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+pkg/release/
+    candidate/
+        client.go
+        types.go
+    client.go
+    config/
+        client.go
+        config.go
+    official/
+        client.go
+        types.go
+    prerelease/
+        client.go
+    \end{verbatim}
+    \note{
+        The different sources used for these types can be seen in
+        \texttt{pkg/release} in \texttt{openshift/ci-tools}.
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item \texttt{candidate} / \texttt{prerelease}
+            \begin{itemize}
+                \item \url{https://amd64.ocp.releases.ci.openshift.org}
+                \item release controller
+            \end{itemize}
+        \item \texttt{release}
+            \begin{itemize}
+                \item {\footnotesize\url{https://api.openshift.com/api/upgrades_info/v1/graph}}
+                \item cincinnati
+            \end{itemize}
+    \end{itemize}
+    \note{
+        Both \texttt{candidate} and \texttt{prerelease} types obtain their
+        release payloads from the \texttt{release-controller}, according to the
+        input values.
+
+        The \texttt{release} type obtains official releases from
+        \texttt{cincinnati}.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \setlength{\columnsep}{0pt}
+    \begin{multicols}{2}
+        \vspace*{\fill}
+        \footnotesize
+        \begin{verbatim}
+releases:
+  initial:
+    integration:
+      name: "4.10"
+      namespace: ocp
+  latest:
+    integration:
+      include_built_images: \
+        true
+      name: "4.10"
+      namespace: ocp
+        \end{verbatim}
+        \vfill
+        \columnbreak
+        \normalsize
+        \begin{itemize}
+            \item \texttt{ReleaseImagesTagStep}
+                \begin{itemize}
+                    \item source $\to$ destination \texttt{ImageStream}
+                    \item
+                        \texttt{\$namespace/\$name} $\to$
+                        \texttt{ci-op-*/stable*}
+                \end{itemize}
+            \item \texttt{AssembleReleaseStep}
+                \begin{itemize}
+                    \item
+                        \texttt{ImageStream} $\to$ \\
+                        release payload
+                    \item \texttt{stable*} $\to$ \texttt{release:*}
+                    \item
+                        will wait for built images if
+                        \texttt{include\_built\_images}
+                \end{itemize}
+        \end{itemize}
+    \end{multicols}
+    \note{
+        The two categories (payload vs. stream) determine the steps
+        \texttt{ci-operator} will take to import and process the release in
+        order to make it available to the test.  \texttt{integration} streams,
+        as mentioned previously, come from an \texttt{ImageStream}.  This means
+        two steps are required:
+        \begin{itemize}
+            \item
+                \texttt{ReleaseImagesTagStep} will import (i.e. copy) the tags
+                from the source.
+            \item
+                \texttt{AssembleReleaseStep} will create a release payload from
+                the resulting \texttt{ImageStream}.  If an entry declares
+                \texttt{include\_built\_images}, this will cause this step to
+                wait for all images to be built and tagged into the stream,
+                so that they can be included in the payload.  This is usually
+                the case for \texttt{latest} payloads, so that they can be used
+                to test the resulting release containing images built using the
+                code under test.
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \setlength{\columnsep}{0pt}
+    \begin{multicols}{2}
+        \vspace*{\fill}
+        \begin{verbatim}
+tag_specification:
+  namespace: ocp
+  name: "4.10"
+        \end{verbatim}
+        \vfill
+        \columnbreak
+        \begin{itemize}
+            \item always \texttt{initial} and \texttt{latest}
+            \item \texttt{include\_built\_images} implicitly for \texttt{latest}
+            \item
+                \texttt{ReleaseImagesTagStep} ($\approx$
+                \texttt{ReleaseSnapshotStep})
+            \item \texttt{RELEASE\_IMAGE\_*}
+        \end{itemize}
+    \end{multicols}
+    \note{
+        \texttt{tag\_specification} is the precursor to \texttt{integration}
+        (and \texttt{releases} in general).  It is legacy now but can be found
+        in some old jobs (and sometimes causes problems).  It works roughly like
+        a group of fixed values for integration streams.
+
+        Both \texttt{integration} releases and \texttt{tag\_specification} can
+        have their values overridden by \texttt{RELEASE\_IMAGE\_*} environment
+        variables.  When this happens (e.g. in jobs created by the release
+        controller), the images are treated as input release payloads and
+        processed as described below.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \begin{verbatim}
+$ oc adm release extract \
+    --file image-references \
+    quay.io/openshift/okd:4.10.0-0.okd-2022-07-09-073606 \
+    | yaml
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: 4.10.0-0.okd-2022-07-09-073606
+  creationTimestamp: 2022-07-10T09:12:53Z
+  annotations:
+    release.openshift.io/from-image-stream: >
+      origin/4.10-2022-07-09-073606
+    release.openshift.io/from-release: >
+      registry.ci.openshift.org/origin/release:4.10.0-0.…
+…
+    \end{verbatim}
+    \note{
+        Here is an example of the relevant contents of a release payload image.
+        It contains the name, date of creation, source, \ldots
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \begin{verbatim}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - name: alibaba-cloud-controller-manager
+    annotations:
+      io.openshift.build.commit.id: 0
+      io.openshift.build.commit.ref: release-4.10
+      io.openshift.build.source-location: >
+        https://github.com/openshift/…
+    from:
+      kind: DockerImage
+      name: quay.io/openshift/okd-content@sha256:…
+    generation: null
+    importPolicy:
+    referencePolicy:
+      type: 0
+…
+    \end{verbatim}
+    \note{
+        \ldots and the list of image references which will be used in the
+        cluster installation and configuration.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \setlength{\columnsep}{0pt}
+    \begin{multicols}{2}
+        \small
+        \begin{verbatim}
+releases:
+  latest:
+    release:
+       architecture: amd64
+       channel: stable
+       version: "4.10"
+        \end{verbatim}
+        \columnbreak
+        \normalsize
+        \begin{itemize}
+            \item \texttt{candidate} / \texttt{prerelease}
+            \item \texttt{ImportReleaseStep}
+                \begin{itemize}
+                    \item release payload $\to$ \texttt{ImageStream}
+                    \item \texttt{\$src} $\to$ \texttt{release:*}
+                    \item tags $\to$ \texttt{ImageStream}
+                    \item
+                        \texttt{release:*} $\to$ \\
+                        \texttt{oc \ldots{} extract} $\to$ \\
+                        \texttt{stable*}
+                \end{itemize}
+        \end{itemize}
+    \end{multicols}
+    \note{
+        The other types of releases use a completely different input mechanism.
+        Since these are already published as release payloads,
+        \texttt{ImportReleaseStep} is used instead.  It:
+        \begin{itemize}
+            \item
+                imports the payload directly to the \texttt{release}
+                \texttt{ImageStream} (via OpenShift)
+            \item
+                extracts the images to \texttt{stable*}, so that individual
+                images can be used in the same way as integration streams
+        \end{itemize}
+    }
+\end{frame}
