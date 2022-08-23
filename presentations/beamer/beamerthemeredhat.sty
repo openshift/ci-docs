@@ -29,9 +29,9 @@
                 (0, 2em)
                 rectangle (\the\paperwidth, \the\paperheight);
             \node (title)
-                [xshift = -4em, yshift = 2em]
+                [xshift = -2em, yshift = 2em, text width = 0.75\textwidth]
                 at (current page.center)
-                {\huge\bfseries\inserttitle};
+                {\baselineskip=2em \huge\bfseries\inserttitle\par};
             \node (subtitle)
                 [below = of title.west, anchor = west, yshift = 0.5em]
                 {\large\insertsubtitle};
@@ -39,7 +39,7 @@
                 [below = of subtitle.west, anchor = west, yshift = -1em]
                 {\scriptsize\insertauthor};
             \node (logo)
-                [above = of title.west, anchor = west, xshift = -2.25em]
+                [above = of title.north west, anchor = west, xshift = -2.25em]
                 {\includegraphics[scale=0.1]{img/logo_white.png}};
         \end{tikzpicture}
     \end{beamercolorbox}
