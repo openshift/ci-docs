@@ -16,6 +16,7 @@ For OpenShift 4.10 development our focus has been on creating a form of "quality
 * [A suite of tests that detect service disruption](https://github.com/openshift/origin/tree/master/test/extended/util/disruption): On one level these classes of tests may appear to fail randomly.  The goal of the following tools to is find the source of the disruption.
 * [The test that monitors this suite at upgrade time](https://github.com/openshift/origin/blob/0c86019e378384814e0a66157a3b7a0afd795915/test/e2e/upgrade/upgrade.go#L145): We've learned that, while the overall system is highly resilient to availability "blips", they create noise that makes understanding our CI results extremely difficult and mask regressions.  
 * [The Job Run Aggregator](https://github.com/openshift/ci-tools/tree/master/cmd/job-run-aggregator): A tool we use to run multiple instances of select jobs and aggregrate the disription data.  With the right math confidence intervals can be created to know whether or not a given payload has regressed—even in spite of test flakes.  A detailed explanation of the rationale and math behind its implementation can be found [here](/docs/release-oversight/improving-ci-signal).
+* [Alerting](/docs/release-oversight/alerting) helps teams stay aware of the health of their jobs.
 
 ### Why are regressions happening anyway?  Why not catch them pre-merge?
 We're moving that direction.  Once we catch a regression we're able to work with team on how to use the tooling mentioned above to test the fix pre-merge.
