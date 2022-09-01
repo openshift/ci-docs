@@ -121,7 +121,7 @@ The final set of observers will be: `{ observer-1, observer-2 }`.
 ### Writing from scratch inside Step Registry
 Writing an observer as a step inside the registry looks almost like a regular test.
 
-Observer's definition file must have `-observer.yaml` suffix. This is how the configuration looks like:
+The Observer's definition file must have `-observer.yaml` suffix. The configuration looks like:
 {{< highlight yaml >}}
 observer:
   name: observer
@@ -153,15 +153,15 @@ set -o xtrace
 echo "I'm going to silently observe your test"
 {{< / highlight >}}
 
-The final folder content wuold be, in this case:
+The final folder content would be, in this case:
 - `observer-observer.yaml`
 - `observer-commands.sh`
 
 ## Execution Model
-Observers are started before any test from the `pre:` chain does and they keep staying alive till
+Observers are started before any test from the `pre:` chain starts and they stay alive until
 the last step from the `test:` chain completes.  
 
-When an observer fails, its failure will be reported inside logs and jUnit files but the test
+When an observer fails, its failure will be reported inside logs and jUnit files, but the test
 will keep going without being affected at all.  
 
 When the last test from `test:` chain finishes, observers are going to be deleted by Kubernetes: see [here](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination) for more details on how pods termination works. After the test completes, no 'observer pods' pods will be found inside `ci-op-xxxx` namespace.
