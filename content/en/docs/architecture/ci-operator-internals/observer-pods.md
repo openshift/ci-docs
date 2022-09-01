@@ -212,9 +212,11 @@ at the path specified in `$KUBECONFIG`.
 
 It is safe to check for its existence or not by invoking the following code:
 {{< highlight bash >}}
-if [ -f "$KUBECONFIG" ]; then
-    ...
-fi
+while [ ! -f "${KUBECONFIG}" ]; do
+  printf "%s: waiting for %s\n" "$(date --utc --iso=s)" "${KUBECONFIG}"
+  sleep 10
+done
+printf "%s: acquired %s\n" "$(date --utc --iso=s)" "${KUBECONFIG}"
 {{< / highlight >}}
 
 Kubeconfig is treated differently from `$SHARED_DIR`, so observers could receive it at any time. Please do not make any assumptions about the order of events.
