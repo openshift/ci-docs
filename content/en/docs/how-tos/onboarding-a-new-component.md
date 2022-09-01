@@ -229,27 +229,29 @@ Information on how to publish images to an external registry can be found in a [
 ### Product builds and becoming part of an OpenShift release image
 
 Some images become part of the OpenShift release image because they are core to the platform. To be part of the release
-image, there are additional requirements (beyond those described in the previous section).  All product teams that will
-ship an image to product must ensure their image is built in OSBS at least once and published back to the nightly test
-jobs BEFORE you reference them from another component (via the image-references file), or before you set the image label
-`io.openshift.release.operator` to get automatically included.
-
-1. Ensure you have successfully published your image to the CI integration stream
-1. Follow the [ART instructions](https://mojo.redhat.com/docs/DOC-1179058) to have them build your image
-    * On the [dist-git part of the process](https://mojo.redhat.com/docs/DOC-1168290) it is critical that you ensure your component/image names match as described in the bulleted criteria
-1. Ensure a single successful build is run (sync with ART to confirm)
-1. Open the PR to add your new image to another component (your operator, usually)
-1. Once the PR is merged, verify that the [nightly builds](https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
-
-### Renaming or removing components in the OpenShift release payload
-
-It is occasionally necessary to rename or remove existing components in the OpenShift release payload. This must be done with care. 
-Missteps may cause production and CI automation to be unable to create new release payloads -- impacting the entire 
-organization. Observing the process as it unfolds and maintaining good communication with the ART team is crucial. 
+image, there are additional requirements (beyond those described in the previous section).
 
 There are two types of component images in the release payloads:
 1. Operators managed by the CVO - known as second level operators. If a [Dockerfile contains](https://github.com/openshift/cloud-credential-operator/blob/c2bec26d3734e444666024858e76d4ca80dd31cf/Dockerfile#L12) `LABEL io.openshift.release.operator true`, the component is a second level operator. 
 2. Operands managed by second level operators. These images are pulled into the release payload by virtue of being [specified in an image-references file by a second level operator](https://github.com/openshift/cloud-credential-operator/blob/c2bec26d3734e444666024858e76d4ca80dd31cf/manifests/image-references#L9-L12). 
+
+All product teams that will ship an image to product must ensure their image is built in OSBS at least once and
+published back to the nightly test jobs BEFORE you reference them from another component (via the image-references
+file), or before you set the image label `io.openshift.release.operator` to get automatically included.
+
+1. Ensure you have successfully published your image to the CI integration stream
+1. Follow the [ART instructions](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/guidelines_for_requesting_new_content_managed_by_ocp_art) to have them build your image
+    * On the [dist-git part of the process](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/requesting_a_new_image_or_rpm_to_be_managed_by_art#jive_content_id_Naming) it is critical that you ensure your component/image names match as described in the bulleted criteria
+1. Ensure a single successful build is run (sync with ART to confirm)
+1. Open the PR to add `LABEL io.openshift.release.operator true` or to add your new image to another component (your operator, usually)
+1. Once the PR is merged, verify that the [nightly builds](https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
+
+### Renaming or removing components in the OpenShift release payload
+
+It is occasionally necessary to rename or remove existing components in the OpenShift release payload. This must be done
+with care. Missteps may cause production and CI automation to be unable to create new release payloads -- impacting the
+entire organization. Observing the process as it unfolds and maintaining good communication with the ART team is
+crucial.
 
 {{< alert title="Note" color="info" >}}
 Before proceeding, it is important to understand the name you are changing. This remainder of this section describes how to 
