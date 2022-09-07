@@ -6,6 +6,7 @@ description: Configure open PR review request reminders for yourself and your te
 ## What is pr-reminder?
 [pr-reminder](https://github.com/openshift/ci-tools/tree/master/cmd/pr-reminder) is a tool created to notify contributors of active PR review requests requiring their attention.
 It utilizes a config containing your team's: kerberos ids, github team names, and repositories to find active PR review requests for each team member.
+PRs that either: have a review requested from the user, are assigned to the user, or have a review requested from one of the configured teams are selected.
 It then gathers useful information about each PR and sorts them into an easy to analyze digest delivered via Slack daily.
 The tool is currently run under a periodic job titled `periodic-pr-reminder`, and is set to run each weekday at 8 am UTC.
 
@@ -27,9 +28,10 @@ teams:
   - kubernetes/a-repo
 ```
 ### Configuration details
-A `team` doesn't need to contain more than one member if an individual has different repositories that they care about.
-A `teamMember` can also be configured on more than one team, and their resulting digest will include PRs from each team they are configured under.
-A presubmit check exists to verify that all the necessary condtions are met.
+* A `team` doesn't need to contain more than one member if an individual has different repositories that they care about.
+* A `teamMember` can also be configured on more than one team, and their resulting digest will include PRs from each team they are configured under.
+* Private repos can be added to the configuration as long as the `openshift-ci-robot` is a repo collaborator or an org member in the repo's org.
+* A presubmit check exists to verify that all the necessary conditions are met.
 
 {{< alert title="Warning" color="warning" >}}
 Each configured `teamMember` will need to have
