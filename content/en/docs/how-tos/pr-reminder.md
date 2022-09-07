@@ -6,6 +6,7 @@ description: Configure open PR review request reminders for yourself and your te
 ## What is pr-reminder?
 [pr-reminder](https://github.com/openshift/ci-tools/tree/master/cmd/pr-reminder) is a tool created to notify contributors of active PR review requests requiring their attention.
 It utilizes a config containing your team's: kerberos ids, github team names, and repositories to find active PR review requests for each team member.
+PRs that either: have a review requested from the user, are assigned to the user, or have a review requested from one of the configured teams are selected.
 It then gathers useful information about each PR and sorts them into an easy to analyze digest delivered via Slack daily.
 The tool is currently run under a periodic job titled `periodic-pr-reminder`, and is set to run each weekday at 8 am UTC.
 
