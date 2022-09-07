@@ -27,9 +27,10 @@ teams:
   - kubernetes/a-repo
 ```
 ### Configuration details
-A `team` doesn't need to contain more than one member if an individual has different repositories that they care about.
-A `teamMember` can also be configured on more than one team, and their resulting digest will include PRs from each team they are configured under.
-A presubmit check exists to verify that all the necessary condtions are met.
+* A `team` doesn't need to contain more than one member if an individual has different repositories that they care about.
+* A `teamMember` can also be configured on more than one team, and their resulting digest will include PRs from each team they are configured under.
+* Private repos can be added to the configuration as long as the `openshift-ci-robot` is a repo collaborator or an org member in the repo's org.
+* A presubmit check exists to verify that all the necessary conditions are met.
 
 {{< alert title="Warning" color="warning" >}}
 Each configured `teamMember` will need to have
