@@ -120,7 +120,7 @@ tests are executed on, both hard and soft TTLs are set on the `Namespace` and
 the [`ci-ns-ttl-controller`](https://github.com/openshift/ci-ns-ttl-controller)
 is used to enforce the TTLs and reap namespaces when TTLs have expired.  Both a
 hard and a soft TTL are set on the namespaces; the hard TTL ([`cleanupDuration`,
-currently 12 hours][cleanupDuration]) describes how much time can pass after
+currently 24 hours][cleanupDuration]) describes how much time can pass after
 the creation of the `Namespace` before it is reaped, the soft TTL
 ([`idleCleanupDuration`, currently 1 hour][idleCleanupDuration]) describes how
 much time can pass without any active `Pod`s in the `Namespace` before it is
@@ -155,5 +155,5 @@ deterministic naming.  For instance, the `src` `Build` that creates the
 `Build` running and wait for it to complete or see the `ImageStreamTag` existing
 and consider the build step finished.
 
-[cleanupDuration]: https://github.com/openshift/ci-tools/blame/5e86bf61fc54d27f2dc58a50367a5fe2a05ab369/cmd/ci-operator/main.go#L421
+[cleanupDuration]: https://github.com/openshift/ci-tools/blame/7bc9c8b4ff3fcd323e110dafd39dd0010b7c3462/cmd/ci-operator/main.go#L421
 [idleCleanupDuration]: https://github.com/openshift/ci-tools/blame/5e86bf61fc54d27f2dc58a50367a5fe2a05ab369/cmd/ci-operator/main.go#L420
