@@ -155,5 +155,23 @@ deterministic naming.  For instance, the `src` `Build` that creates the
 `Build` running and wait for it to complete or see the `ImageStreamTag` existing
 and consider the build step finished.
 
+# Image Pipeline
+
+Below is a graph showing the various pipeline images:
+
+![`ci-operator` image pipeline](/ci-operator_pipeline.png)
+
+Solid boxes are images, solid lines are dependencies.  The dashed `stable` box
+represents the "internal" promotion to the stable stream prior to the execution
+of tests.  Dashed lines represent edges not fully depicted since they are
+optional and can be added to any image in the pipeline:
+
+- Each entry in `operator.substitutions` makes `src-bundle` depend on that
+  image.
+- The `operator.substitutions` entry, if specified, makes the `src-bundle`
+  depend on those images.
+- The `operator.base_index` entry, if specified, makes all index generator
+  images depend on that image.
+
 [cleanupDuration]: https://github.com/openshift/ci-tools/blame/7bc9c8b4ff3fcd323e110dafd39dd0010b7c3462/cmd/ci-operator/main.go#L421
 [idleCleanupDuration]: https://github.com/openshift/ci-tools/blame/5e86bf61fc54d27f2dc58a50367a5fe2a05ab369/cmd/ci-operator/main.go#L420
