@@ -63,6 +63,10 @@ Our corpus/history (n) will be well over 250, so use that line.  Our sample size
 
 ### FAQ
 
+#### How can I reduce my risk of introducing payload regressions?
+
+If you are making a large change, and are concerned about breaking job flavors that are not covered by your repository's usual presubmits, consider running [`/payload ...` testing](/docs/release-oversight/payload-testing) before merging your change.
+
 #### Who is watching for payload regressions and opening reverts?
 For now, the [Technical Release Team](/docs/release-oversight/the-technical-release-team) watches payload results on the current release branch.  They will open the revert PRs and engage the involved teams (any team that contributed a PR to the payload that regressed).
 
