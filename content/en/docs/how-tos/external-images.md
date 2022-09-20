@@ -17,7 +17,11 @@ gcr.io/k8s-staging-boskos/boskos:latest registry.ci.openshift.org/ci/boskos:late
 {{< / highlight >}}
 
 {{< alert title="Warning" color="warning" >}}
-We cannot mirror images from `docker.io` due to rate limiting constraints. Please, instead, push up an image to quay and mirror that to the CI registry.
+- We cannot mirror images from `docker.io` due to rate limiting constraints. Please, instead, push up an image to quay and mirror that to the CI registry.
+- It is not possible to use Red Hat managed namespaces. Therefore, you cannot mirror your image to **any** namespace that
+matches the following regular expression: (^kube.*|^openshift.*|^default$|^redhat.*).
+- We cannot mirror images to an imagestream with the tags that are [promoted by ci-operator](/docs/architecture/ci-operator/#publishing-to-an-integration-stream). Otherwise, the target images will be cleaned up by the periodic Prow job `periodic-promoted-image-governor`.
+
 {{< /alert >}}
 
 The hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images)
@@ -33,11 +37,6 @@ base_images:
     name:  boskos
     tag: latest
 {{< / highlight >}}
-
-{{< alert title="Warning" color="warning" >}}
-It is not possible to use Red Hat managed namespaces. Therefore, you cannot mirror your image to **any** namespace that
-matches the following regular expression: (^kube.*|^openshift.*|^default$|^redhat.*)
-{{< /alert >}}
 
 ## Mirror Private Images
 
