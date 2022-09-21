@@ -1,0 +1,78 @@
+\documentclass[10pt]{beamer}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+%\usepackage{showframe}
+
+\mode<presentation>{
+    \usetheme{redhat}
+%    \setbeameroption{show notes on second screen=bottom}
+}
+
+% https://github.com/josephwright/beamer/issues/337
+%\makeatletter
+%\def\beamer@framenotesbegin{%
+%    \usebeamercolor[fg]{normal text}%
+%    \gdef\beamer@noteitems{}%
+%    \gdef\beamer@notes{}%
+%}
+%\makeatother
+
+\setcounter{tocdepth}{1}
+\newcommand{\autotitle}{
+    \frametitle{
+        \secname
+        \ifx \insertsubsection \empty \else { / \MakeLowercase{\subsecname}} \fi
+    }
+}
+
+\newcommand{\sectiontitleframe}{
+    \vspace{-1em} % XXX
+    \begin{beamercolorbox}[wd=\paperwidth]{title page}
+        \begin{tikzpicture}[text = white]
+            \fill[above left, color=redhat]
+                (0, 2em)
+                rectangle (\the\paperwidth, \the\paperheight);
+            \node (title)
+                [xshift = -2em, yshift = 2em, text width = 0.75\textwidth]
+                at (current page.center)
+                {\Large\bfseries\secname};
+        \end{tikzpicture}
+    \end{beamercolorbox}
+}
+
+\title{End-to-End Tests in OpenShift}
+
+\author{Bruno Barcarol Guimarães}
+\institute[]{Red Hat}
+\date{2022-07-14}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\input{tex/intro.tex}
+\section{Test types}
+\input{tex/test_types.tex}
+\section{Releases}
+\input{tex/releases.tex}
+\section{Input images}
+\input{tex/input_images.tex}
+\section{Image pipeline}
+\input{tex/pipeline.tex}
+
+\begin{frame}
+    \usebeamertemplate{end page}
+\end{frame}
+
+\end{document}

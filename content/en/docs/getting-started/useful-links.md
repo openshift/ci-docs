@@ -77,3 +77,8 @@ The following are public and internal presentations from DPTP:
   [recording](https://drive.google.com/file/d/1hYgYNBBlVUdSiyFRa9R6aGy5SbDaPLRY/),
   [slides](https://drive.google.com/file/d/1ql2MOFRIsvPzgg3iMwjJTy6fRS9G7sDG/),
   [slides (with notes)](https://drive.google.com/file/d/1Jxu9pK3Ujw_ZAgxdd7b1dCVgjAP0JIr_/)).
+* _End-to-End Tests in OpenShift_, Bruno Barcarol Guimarães (2022,
+  recordings [0](https://drive.google.com/file/d/1rD384Olyj5kBDjV98NZYLUUgIMhFjAU1/),
+  [1](https://drive.google.com/file/d/1_Vqvjj60u-sEj8h3e-fvECz0s4iWTgKs/),
+  [slides](https://drive.google.com/file/d/1fzingK9srLRr-NDUh3L4nI8OycwpJ76b/),
+  [slides (with notes)](https://drive.google.com/file/d/108-Qn4LQwQwHcrSnW3SzjTXphyzdb0IP/)).

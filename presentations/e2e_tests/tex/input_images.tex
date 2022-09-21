@@ -1,0 +1,273 @@
+\begin{frame}
+    \sectiontitleframe
+\end{frame}
+
+\subsection{Image mirroring}
+
+\begin{frame}
+    \autotitle
+    ``CI cycle''
+    \begin{enumerate}
+        \only<1>{\setcounter{enumi}{-1}}
+        \only<2>{\setcounter{enumi}{-2}\item ?}
+        \item import images / releases
+        \item build images
+        \item execute tests
+        \item promote images
+        \item \texttt{goto 0}
+    \end{enumerate}
+    \note<1>{
+        In the next few sections, we are going to look at what is described as
+        the "CI cycle" or "CI loop": the process by which a release stream goes
+        from version $x$ to version $x + 1$.
+
+        We start with two preexisting sets of images (more on that later) which
+        are imported into the test namespace:
+        \begin{itemize}
+            \item images from the release the particular component is part of
+            \item
+                auxiliary images, used in image builds and in the execution of
+                tests
+        \end{itemize}
+
+        Images are then built and tests are executed to validate them, both by
+        themselves and incorporated into the release stream (this is why you
+        must have image builds / tests if there is a promotion rule).
+
+        Finally, if all checks are satisfied, the images are "promoted", i.e.
+        written to the same release stream which was imported at the beginning,
+        thus generating the $x + 1$ release.  Future executions of this and
+        other pipelines will use the new set of images.
+    }
+    \note<2>{
+        There remains, however, the question of how this process originates:
+        if each pipeline execution is an inductive step, what is the basis?
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \scriptsize
+    \begin{tikzpicture}[minimum size = 2em, inner xsep = 1em]
+        \node[draw] at (4.5, 0) (promotion) {promotion};
+        \draw node[draw, minimum width = 4] at (2.5,  0.75) (images) {images};
+        \node[draw, minimum width = 4] at (2.5, -0.75) (tests) {tests};
+        \node[draw, minimum width = 2]
+            at (0, 0.75) (image_import) {image import};
+        \node[draw, minimum width = 2]
+            at (0, -0.75) (release_import) {release import};
+        \node at (-1.6, -0.75) (releases0) {};
+        \node[draw] at (-3.5,  0.75) (app_ci) {\texttt{app.ci}};
+        \node[draw] at (-3.5, 0) (cincinnati) {\texttt{cincinnati}};
+        \node[draw] at (-3.5, -0.75) (rc) {\texttt{release-controller}};
+        \node at (4.5, -1) {test namespace};
+        \draw[draw, dashed] (-1.3, -1.375) rectangle ++(7, 2.75);
+        \draw[->]
+            ($ (app_ci.north east)!0.5!(app_ci.east) $)
+            -- ($ (image_import.north west)!0.5!(image_import.west) $);
+        \draw
+            ($ (app_ci.south east)!0.5!(app_ci.east) $)
+            -| (releases0.center);
+        \draw (cincinnati) -| (releases0.center);
+        \draw (rc.east) -| (releases0.center);
+        \draw[->] (releases0.center) -- (release_import);
+        \draw[->]
+            ($ (image_import.north east)!0.5!(image_import.east) $)
+            -- ($ (images.north west)!0.5!(images.west) $);
+        \draw[->]
+            ($ (image_import.south east)!0.5!(image_import.east) $)
+            -- ($ (tests.north west)!0.5!(tests.west) $);
+        \draw[->]
+            ($ (release_import.north east)!0.5!(release_import.east) $)
+            -- ($ (images.south west)!0.5!(images.west) $);
+        \draw[->]
+            ($ (release_import.south east)!0.5!(release_import.east) $)
+            -- ($ (tests.south west)!0.5!(tests.west) $);
+        \draw[->] (images) -- ($ (promotion.north west)!0.5!(promotion.west) $);
+        \draw[->] (tests) -- ($ (promotion.south west)!0.5!(promotion.west) $);
+        \draw[->] (promotion) -- ++(0, 1.75) -| (app_ci);
+    \end{tikzpicture}
+    \note{
+        This is the pictorial representation of this process.  Images come from
+        the left: base images come from the central registry in \texttt{app.ci}
+        (more on that also later), release images come from any of the three
+        places, depending on which type of \texttt{releases} field is used.
+
+        The sub-graph which originates in \texttt{app.ci} and returns to it
+        finally after the promotion step is the CI cycle.
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item supplemental images
+            \begin{itemize}
+                \item \url{https://github.com/openshift/release/tree/master/clusters/app.ci/supplemental-ci-images}
+                \item \texttt{BuildConfig}s
+                \item<2> \texttt{registry.ci.openshift.org/ci/ci-tools-build-root}
+            \end{itemize}
+        \item image mirroring
+            \begin{itemize}
+                \item \url{https://github.com/openshift/release/tree/master/core-services/image-mirroring}
+                \item Quay/etc. $\leftrightarrow$ \texttt{app.ci}
+                \item<2> \texttt{registry.ci.openshift.org/coreos/stream9:9}
+            \end{itemize}
+        \item ART / OCP builder images
+            \begin{itemize}
+                \item {\footnotesize\url{https://docs.ci.openshift.org/docs/architecture/images/}}
+                \item \url{https://github.com/openshift/ocp-build-data.git}
+                \item<2> \texttt{registry.ci.openshift.org/ocp/builder:\ldots}
+            \end{itemize}
+    \end{itemize}
+    \note<1>{
+        Base images can come from several places:
+        \begin{itemize}
+            \item
+                Images can be built directly using OpenShift
+                \texttt{BuildConfig}s.
+            \item
+                A mirroring process exists between \texttt{app.ci} and Quay.  It
+                is actually bidirectional, but here we are only interested in
+                images which are imported from Quay.
+            \item
+                \textit{Productized} images, used to build official OpenShift
+                release images, come from ART.
+        \end{itemize}
+    }
+    \note<2>{
+        Note, however, that these images are all located in the \texttt{app.ci}
+        central registry.  Initially, they were simply referenced directly, but
+        that very soon turned out to not scale to the number of jobs we had at
+        the time (which was a small fraction of the current number).
+    }
+\end{frame}
+
+\subsection{\texttt{dptp-controller-manager}}
+
+\begin{frame}
+    \autotitle
+    \ttfamily
+    \texttt{dptp-controller-manager}
+    \begin{itemize}
+        \item \href
+            {https://github.com/openshift/ci-tools/blob/master/cmd/dptp-controller-manager/}
+            {cmd/dptp-controller-manager/}
+        \item \href
+            {https://github.com/openshift/ci-tools/blob/master/pkg/controller/test-images-distributor/}
+            {pkg/controller/test-images-distributor/}
+    \end{itemize}
+    \note{
+        For this reason, there is now a process which imports those images to
+        each build cluster whenever required.  It is one of the processes
+        executed as part of the \texttt{dptp-controller-manager} (famed cluster
+        node assassin) and is named \texttt{test-images-distributor}.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \small
+    \begin{verbatim}
+args:
+…
+- --enable-controller=test_images_distributor
+- --enable-controller=promotionreconciler
+- --enable-controller=serviceaccount_secret_refresher
+- --enable-controller=testimagestreamimportcleaner
+…
+    \end{verbatim}
+    \note{
+        The command line shows the enabled controllers, which perform various
+        functions in the CI clusters.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \small
+    \begin{verbatim}
+…
+- --release-repo-git-sync-path=/var/repo/release
+- --kubeconfig-dir=/var/kubeconfigs
+- --registry-cluster-name=app.ci
+- --testImagesDistributorOptions \
+    .additional-image-stream-tag=ocp/builder:golang-1.10
+…
+- --testImagesDistributorOptions \
+    .additional-image-stream-tag= \
+    ocp/builder:rhel-7-golang-1.11
+…
+- --testImagesDistributorOptions \
+    .additional-image-stream-namespace=ci
+- --testImagesDistributorOptions \
+    .additional-image-stream=rhcos/machine-os-content
+…
+    \end{verbatim}
+    \note{
+        It has a few options to explicitly include image streams and tags\ldots
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \href
+        {https://github.com/openshift/ci-tools/blob/master/pkg/api/helper/imageextraction.go}
+        {pkg/api/helper/imageextraction.go}
+    \begin{itemize}
+        \item \texttt{TestInputImageStreamsFromResolvedConfig}
+        \item \texttt{TestInputImageStreamTagsFromResolvedConfig}
+    \end{itemize}
+    \note{
+        \dots{} but its main function is to inspect every \texttt{ci-operator}
+        configuration file and extract input images to be synchronized, which it
+        does automatically whenever the source streams are changed.
+    }
+\end{frame}
+
+\subsection{Image promotion}
+
+\begin{frame}[fragile]
+    \autotitle
+    \small
+    \url{https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/branch-ci-openshift-ci-tools-master-images/1561993456950185984}
+    \normalsize
+    \begin{verbatim}
+…
+Building src
+Build src succeeded after 4m48s
+Building bin
+Build bin succeeded after 25m54s
+Building determinize-peribolos
+Building ci-secret-generator
+Building ci-operator-config-mirror
+…
+    \end{verbatim}
+    \note{
+        Promotion is a relatively simple matter now that we have looked at the
+        rest of the pipeline.  We start by building all images not explicitly
+        excluded, \ldots
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+…
+Build prcreator succeeded after 14m26s
+Tagging prcreator into stable
+Build private-prow-configs-mirror \
+    succeeded after 15m51s
+Tagging private-prow-configs-mirror into stable
+Promoting tags to ci/${component}:latest: \
+    applyconfig, auto-aggregator-job-names, \
+    auto-config-brancher, auto-peribolos-sync, \
+    auto-sippy-config-generator, …
+Ran for 1h7m10s
+    \end{verbatim}
+    \note{
+        \ldots{} then tag them in the \texttt{stable} \texttt{ImageStream} as
+        usual, and finally transfer them to the central registry in
+        \texttt{app.ci}, where they will be available to future jobs.
+    }
+\end{frame}
