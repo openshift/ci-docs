@@ -270,7 +270,7 @@ modifications to allow some commonly needed customizations:
 |`.skip_report`|Set to `true` to `make` the job not report its result to the pull request.|✓|||
 |`.cluster`|Set to limit the job to a particular CI build cluster.|✓|✓|✓|
 |`.max_concurrency`|Set to limit how many instances of the job can run simultaneously.|✓|✓|✓|
-|`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/clarketm/kubernetes_test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
+|`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
 
 ### Handcrafted Jobs
 
