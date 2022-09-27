@@ -139,6 +139,20 @@ make jobs
 
 This will create all necessary files under `ci-operator/jobs/$org/$repo`, creating a good default set of Prow jobs.
 
+{{< alert title="Note" color="info" >}}
+This will, however, completely regenerate jobs for all configuration files in
+`openshift/release`, which can take a long time due to the size of the
+repository.  Generating jobs for one or a few repositories is fast, and can be
+done by specifying a subdirectory of `ci-operator/config` using the `WHAT`
+parameter:
+
+{{< highlight bash >}}
+make jobs WHAT=openshift
+# or
+make jobs WHAT=openshift/release
+{{< / highlight >}}
+{{< /alert >}}
+
 #### Setting up team ownership of ci-operator and Prow config files
 
 While the initial PR to [`openshift/release`](https://github.com/openshift/release) will need to be reviewed and
