@@ -114,8 +114,6 @@ in the cluster profile, detected when the test steps are about to be executed.
 This file should have the following fields:
 
 - `image`: _pull spec_ of the image to be used for the VPN client container.
-  This image should contain the packages necessary to establish the connection,
-  as well as the `bash` shell to execute the container's entry point script.
 - `commands`: the name of another file in the cluster profile (e.g.
   `openvpn.sh`) which contains the VPN client's entry point script.  This script
   is effectively executed as `bash -c "$(<f")"`, where `f` is the value
@@ -124,6 +122,27 @@ This file should have the following fields:
   starting (detailed in the next section).  This ensures the steps are not
   blocked until the test timeout (several hours) expires if any problems occur
   with the VPN client.
+
+### Image
+
+The image used for the VPN client should contain the packages necessary to
+establish the connection, as well as the `bash` shell to execute the container's
+entry point script.
+
+The _pull spec_ placed in the cluster profile can point to images stored
+anywhere, but the simplest setup is to build and store them in the central CI
+cluster.  Builds are configured in [`openshift/release`][openshift_release] in
+the [supplemental images][supplemental_images] directory (see for example the
+[OpenVPN image build][openvpn_build]).
+
+Once the `BuildConfig` is merged into `master` and the image is built and
+tagged, the cluster profile can reference the public _pull spec_.  For the
+OpenVPN image stream from the example above, that would be:
+
+{{< highlight yaml >}}
+image: registry.ci.openshift.org/ci/openvpn:latest
+# …
+{{< / highlight >}}
 
 ### Client container
 
@@ -165,3 +184,7 @@ exit_with_test &
 N.b. both containers start simultaneously, so the test may exit before the VPN
 client starts.
 {{< /alert >}}
+
+[openshift_release]: https://github.com/openshift/release.git
+[openvpn_build]: https://github.com/openshift/release/blob/master/clusters/app.ci/supplemental-ci-images/openvpn.yaml
+[supplemental_images]: https://github.com/openshift/release/blob/master/clusters/app.ci/supplemental-ci-images/
