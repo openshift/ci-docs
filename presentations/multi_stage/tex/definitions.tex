@@ -1,0 +1,418 @@
+\begin{frame}
+    \sectiontitleframe
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item regular \texttt{ci-operator} test
+            \begin{itemize}
+                \item images
+                \item release images
+                \item artifacts
+                \item cluster profiles
+                \item \ldots
+            \end{itemize}
+    \end{itemize}
+    \note{
+        The first thing to note about multi-stage tests is that they are just
+        another type of test, just as container tests are.  This
+        makes all other parts of \texttt{ci-operator} easily and naturally
+        available to them.
+
+        On the implementation side, they are just another type of
+        \texttt{ci-operator} step and are fully defined by the configuration
+        file (and registry).  Parsing and interpreting a multi-stage test does
+        not require any of the arcane techniques used in the implementation of
+        template tests.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://github.com/openshift/release/blob/master/ci-operator/config/openshift/ci-tools/openshift-ci-tools-master.yaml}
+    \normalsize
+    \begin{verbatim}
+tests:
+- as: e2e
+  steps:
+    test:
+    - as: e2e
+      commands: … make e2e
+      from: test-bin
+      # …
+    \end{verbatim}
+    \note{
+        Multi-stage tests are defined in the configuration file just like any
+        other type of test.  A multi-stage test is distinguished by the
+        \texttt{steps} entry.  Definitions can be complex, but \texttt{e2e} in
+        \texttt{ci-tools} is a good example of a minimal test.
+
+        (the actual test also has a \texttt{credentials} section, which is not
+        revelant for this example and will be explained later)
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \small
+    \begin{multicols}{2}
+        \begin{verbatim}
+tests:
+- as: e2e
+  steps:
+    test:
+    - as: e2e
+      commands: … make e2e
+      from: test-bin
+      # …
+        \end{verbatim}
+        \columnbreak
+        \begin{verbatim}
+tests:
+- as: e2e
+  commands: … make e2e
+  container:
+    from: test-bin
+    # …
+        \end{verbatim}
+    \end{multicols}
+    \note{
+        With this format, it is equivalent to the \texttt{container} test type
+        (unifying their implementation is a long-term goal).  These tests will
+        have slightly different executions, but will have the same overall
+        effect.
+    }
+\end{frame}
+
+\subsection{Phases}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item pre/test/post
+        \item serial execution
+            \begin{itemize}
+                \item ``short-circuit'' execution for pre/test
+                \item post steps always executed
+            \end{itemize}
+        \item each step corresponds to a \texttt{Pod}
+            \begin{itemize}
+                \item shared data can be placed in a special directory
+            \end{itemize}
+    \end{itemize}
+    \note{
+        What differentiates multi-stage tests from simple container tests (or
+        from templates, for that matter) are the \textit{execution phases}:
+        \texttt{pre}, \texttt{test}, and \texttt{post}.  Superficially, they are
+        simple sequences of steps (isolated test scripts) executed in serial,
+        but each phase has distinct semantic characteristics.
+        \begin{description}
+            \item[\texttt{pre}]
+                is a sequence of preparatory steps.  It should perform the setup
+                necessary for the test to be executed (e.g. creating an
+                ephemeral cluster).  If any of the steps fail, it is assumed
+                that the test cannot continue and the rest of the \texttt{pre}
+                steps as well as all of the \texttt{test} steps are not
+                executed.
+            \item[\texttt{test}]
+                is a sequence of one or more steps which execute the actual test
+                code.  If any of the steps fail, the rest of the steps are not
+                executed.
+            \item[\texttt{post}]
+                is a sequence of steps which releases any resources acquired by
+                the previous phases.  It is always executed and, unlike the
+                others, always executed in its entirety, even if some of its
+                steps fail.
+        \end{description}
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \texttt{\$SHARED\_DIR}
+    \begin{itemize}
+        \item Small storage space for inter-step data.
+        \item Implemented using a Kubernetes \texttt{Secret}.
+        \item Hard 1MB limit, no directories.
+        \item
+            Completely rewritten by the contents of the directory in the pod
+            after the step script is executed.
+        \item
+            State in the ephemeral cluster can be used for higher-bandwidth
+            communication between steps.
+        \item \texttt{kubeconfig} is treated especially.
+        \item
+            Data intended for debugging tests should be placed in the artifacts
+            directory.
+    \end{itemize}
+    \note{
+        Unlike template tests:
+
+        \begin{itemize}
+            \item Each step is executed in its own isolated pod.
+            \item
+                Execution is serial: a step is executed only after the previous
+                step ends.
+            \item
+                \texttt{ci-operator} manages the execution of individual steps.
+        \end{itemize}
+
+        For data which has to be passed between steps, a small storage space is
+        provided, which is mounted in every pod.  It is implemented using
+        Kubernetes \texttt{Secret}s, so it has limitations.  However, most tests
+        can use external means (such as the ephemeral OpenShift cluster) for
+        larger data.  The artifacts directory is also available, just like in
+        other types of tests.
+
+        Because \texttt{ci-operator} is optimized for OpenShift E2E tests, some
+        files in the shared directory (such as the \texttt{kubeconfig} for
+        ephemeral clusters) are treated specially.
+    }
+\end{frame}
+
+\subsection{Images}
+
+\begin{frame}[fragile]
+    \autotitle
+    Images
+    \begin{itemize}
+        \item \texttt{from}
+            \begin{itemize}
+                \item pipeline images
+                    \begin{itemize}
+                        \item \texttt{root}, \texttt{src}, \texttt{bin}, \ldots
+                        \item \texttt{base\_images}
+                        \item \texttt{images}
+                    \end{itemize}
+                \item ``stable'' images
+                    \begin{itemize}
+                        \item \texttt{releases}
+                        \item \texttt{tag\_specification}
+                    \end{itemize}
+            \end{itemize}
+        \item \texttt{from\_image}
+            \begin{itemize}
+                \item $\approx \texttt{base\_images}$
+                \item
+                    \begin{verbatim}
+from_image:
+  namespace: ocp
+  name: upi-installer
+  tag: 4.12
+                    \end{verbatim}
+            \end{itemize}
+    \end{itemize}
+    \note{
+        Unlike container tests, steps can be executed using any
+        \texttt{ci-operator} image.  Pipeline images, which are either imported
+        or built, can be used, as well as images from release streams or
+        payloads.
+
+        A mechanism (\texttt{from\_image}) exists for using imported
+        images in shared test definitions.  Here, we will just note its mode of
+        operation is equivalent to \texttt{base\_images}; shared definitions
+        will be explained in the step registry section.
+    }
+\end{frame}
+
+\subsection{Credentials}
+
+\begin{frame}[fragile]
+    \autotitle
+    Credentials
+    \begin{itemize}
+        \item Vault $\to$ build cluster $\to$ test namespace $\to$ test pod
+        \item \texttt{ci-operator} must have access to the source namespace.
+        \item
+            The \texttt{test-credentials} namespace is pre-configured for
+            regular users.
+        \item Supplanted old methods.
+            \begin{itemize}
+                \item \texttt{secret}
+                \item \texttt{secrets}
+                \item \texttt{--secret-dir}
+                \item etc.
+            \end{itemize}
+        \item
+            \begin{verbatim}
+credentials:
+- namespace: ns
+  name: name
+  mount_path: /path
+            \end{verbatim}
+    \end{itemize}
+    \note{
+        Another major improvement over other test types is the
+        \texttt{credentials} section available in steps.  The \texttt{Secret}
+        objects listed therein will be imported into the test namespace and
+        mounted in the corresponding pods.
+
+        The \texttt{Secret} must already exist and be accessible, but no other
+        setup is necessary.  For regular users, the current flow is to create a
+        secret collection in Vault and synchronize it to the build clusters
+        using special values in the credentials.  A \texttt{test-credentials}
+        namespace is preconfigured in each cluster for this purpose.
+    }
+\end{frame}
+
+\subsection{Parameters}
+
+\begin{frame}[fragile]
+    \autotitle
+    Parameters
+    \begin{itemize}
+        \item Key/value data declared in a step.
+        \item Ultimately become environmental variables.
+        \item Can be overridden (coming soon).
+    \end{itemize}
+    \small
+    \begin{verbatim}
+as: openshift-e2e-test
+from: tests
+commands: openshift-e2e-test-commands.sh
+env:
+- name: TEST_SUITE
+  default: openshift/conformance/parallel
+  documentation: |
+    The test suite to run.  Use 'openshift-test
+    run --help' to list available suites.
+# …
+    \end{verbatim}
+    \note{
+        Parameters are a way of generating slight test variations without
+        needing a completely new step definition.  Ultimately, they are
+        key/value data which become simple environmental variables set in the
+        corresponding pods.  One or more steps can declare a parameter,
+        optionally with a default value --- all parameters must be declared and
+        be given a value in a test definition.
+
+        The hierarchical relation between registry components (explained in a
+        later section) allows great freedom in how parameters can be given
+        values and how tests can be composed.
+    }
+\end{frame}
+
+\subsection{Dependencies}
+
+\begin{frame}[fragile]
+    \autotitle
+    Dependencies
+    \begin{itemize}
+        \item \texttt{ci-operator} image \textit{pull spec} $\to$ test pod
+        \item Establishes images $\to$ test dependency.
+        \item
+            \begin{verbatim}
+as: test-step
+dependencies:
+- name: pipeline:bin
+  env: BIN_IMG
+- name: release:4.12
+  env: RELEASE_4_12\end{verbatim}
+        \item
+            \begin{verbatim}
+#!/bin/bash
+use "$BIN_IMG"
+use "$RELEASE_4_12"
+        \end{verbatim}
+    \end{itemize}
+    \note{
+        Tests sometimes need to refer to imported or built images, not as their
+        execution image, but as a general \textit{pull spec}.  For this, the
+        \texttt{dependencies} section can be used.  \texttt{name} references
+        either a pipeline or release image: the \textit{pull spec} referring to
+        the image in the temporary namespace will be  available to the
+        corresponding pod as an environmental variable.
+
+        This also establishes the dependencies between the required
+        (\texttt{ci-operator}) steps and the test so that the latter is only
+        executed when the images are available.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \small
+    \begin{verbatim}
+# openshift-e2e-tests-ref.yaml
+dependencies:
+- name: "release:latest"
+  env: OPENSHIFT_UPGRADE_RELEASE_IMAGE_OVERRIDE
+    \end{verbatim}
+    \begin{verbatim}
+# openshift-e2e-tests-commands.sh
+openshift-tests run-upgrade \
+    "${TEST_UPGRADE_SUITE}" \
+    --to-image \
+        "${OPENSHIFT_UPGRADE_RELEASE_IMAGE_OVERRIDE}" \
+    --options "${TEST_UPGRADE_OPTIONS-}" \
+    --provider "${TEST_PROVIDER}" \
+    -o "${ARTIFACT_DIR}/e2e.log" \
+    --junit-dir "${ARTIFACT_DIR}/junit"
+    \end{verbatim}
+    \note{
+        One (simplified) example is shown here, where the upgrade test
+        references whatever the \texttt{latest} release payload is in a
+        particular test namespace.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    Leases
+    \begin{itemize}
+        \item \texttt{ci-operator} $\to$ Boskos $\to$ test pod
+        \item Generalization of implicit lease added by cluster profiles
+        \item
+            Leased resource name is available to the test script via
+            environmental variable.
+        \item
+            \begin{verbatim}
+leases:
+- env: OVIRT_UPGRADE_LEASED_RESOURCE
+  resource_type: ovirt-upgrade-quota-slice
+  count: 42
+            \end{verbatim}
+    \end{itemize}
+    \note{
+        \texttt{ci-operator} has an integration with the Boskos leasing server,
+        which allows \textit{resources} of limited capacity to be declared.
+        \texttt{ci-operator} will request these resources before starting the
+        execution of the test, periodically renew them, and release them when
+        the test ends.
+
+        Initially (even in the template days, but also currently), this was
+        triggered by cluster profiles.  Each profile is declared in
+        \texttt{ci-tools} and has a resource type associated with it.
+
+        \texttt{leases} are a generalization of this concept.  Instead of a
+        cluster profile, or in addition to it, a test or registry component can
+        declare additional resources which it requires before it is allowed to
+        start.  The name of the resource is available as an environmental
+        variable, which is often used to pass some information to the test step.
+    }
+\end{frame}
+
+\subsection{etc.}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item best-effort steps
+        \item catalogues / optional operators
+        \item \texttt{KUBECONFIG}
+        \item cluster profiles
+        \item \texttt{oc} CLI injection
+        \item no \texttt{ServiceAccount} credentials
+        \item cluster claims
+        \item VPN connection
+        \item \ldots
+    \end{itemize}
+    \note{
+        This is an abbreviated list of aspects of multi-stage tests which cannot
+        be covered today due to time constraints.  Contrary to template tests,
+        most of the implementation is properly documented, so consult the pages
+        linked at the beginning of the presentation.
+    }
+\end{frame}

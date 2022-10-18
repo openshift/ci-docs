@@ -1,0 +1,530 @@
+\begin{frame}
+    \sectiontitleframe
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    Goals
+    \begin{itemize}
+        \item discoverable
+        \item referenceable
+        \item verifiable
+        \item reusable
+    \end{itemize}
+    \note{
+        Beyond improving the implementation of tests, the design of multi-stage
+        tests also had the major goal of improving the \emph{process} of
+        creating tests.  It identified several attributes which the new format
+        should have, discussed in the next sections.
+    }
+\end{frame}
+
+\subsection{Discoverable}
+
+\begin{frame}
+    \autotitle
+    \small
+    \begin{itemize}
+        \item \url{https://steps.ci.openshift.org}
+        \item \url{https://steps.ci.openshift.org/workflow/ipi-aws}
+        \item \url{https://steps.ci.openshift.org/chain/ipi-aws-pre}
+        \item \url{https://steps.ci.openshift.org/reference/ipi-install-install}
+    \end{itemize}
+    \note{
+        Each component of a test definition is easily discoverable.  There is no
+        longer the need to excavate giant \texttt{bash} scripts embedded in YAML
+        definitions.  \texttt{steps.ci.openshift.org} is a web interface for
+        test definitions which is heavily cross-linked.  All jobs, tests, and
+        registry components are listed, in a manner which makes it easy to
+        discover exactly how a test is or can be defined.
+    }
+\end{frame}
+
+\subsection{Referenceable}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/periodic-ci-openshift-release-master-okd-4.10-e2e-vsphere/1579723667426775040}
+    \vspace{\baselineskip}
+    \begin{verbatim}
+Running step e2e-vsphere-ipi-install-install.
+Logs for container test in pod e2e-vsphere-ipi-install-install:
+…
+Step e2e-vsphere-ipi-install-install failed after 23m20s.
+Step phase pre failed after 40m10s.
+…
+Link to step on registry info site: …
+Link to job on registry info site: …
+    \end{verbatim}
+    \note{
+        When a job fails, the \texttt{ci-operator} output includes links to the
+        definitions of the steps which failed.
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \footnotesize
+    \url{https://steps.ci.openshift.org/workflow/ipi-aws\#approvers}
+    \normalsize
+    \begin{itemize}
+        \item wking
+        \item vrutkovs
+        \item abhinavdahiya
+        \item deads2k
+        \item staebler
+        \item technical-release-team-approvers
+        \item jianlinliu
+        \item yunjiang29
+    \end{itemize}
+    \note{
+        Each of those pages also has links to the definition in GitHub, as well
+        as a list of its \texttt{OWNERS} (reviewers and approvers).  This way,
+        the error output has (in principle) the information required to go from
+        a failure to the possible cause and to those who may be able to assist.
+    }
+\end{frame}
+
+\subsection{Verifiable}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \begin{itemize}
+        \item \texttt{pull-ci-openshift-release-master-step-registry-shellcheck}
+        \item \url{https://www.shellcheck.net}
+        \item
+            \begin{verbatim}
+find ci-operator/step-registry -name '*.sh' -print0 \
+    | xargs -0 -n1 shellcheck -S warning
+            \end{verbatim}
+    \end{itemize}
+    \note{
+        The quality of scripts in the step registry is verified using
+        \texttt{shellcheck}, a (Haskell) program which identifies problems in
+        \texttt{bash} source code (syntax errors, unquoted variables, etc.).  It
+        is executed as a blocking pre-submit job which verifies every shell
+        script in the registry directory.
+    }
+\end{frame}
+
+\subsection{Reusable}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item reference
+        \item chain
+        \item workflow
+    \end{itemize}
+    \note{
+        The step registry is a central place where parts of test definitions are
+        stored.  Several types of registry \textit{components} can be combined
+        and used by a large number of tests.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://steps.ci.openshift.org/reference/ipi-install-install}
+    \vspace{\baselineskip}
+    \begin{verbatim}
+ref:
+  as: ipi-install-install
+  from: installer
+  grace_period: 10m
+  commands: ipi-install-install-commands.sh
+  cli: latest
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    \end{verbatim}
+    (cont.)
+    \note{
+        A \textit{reference} is the lowest level of step definition.  It
+        corresponds directly to the step definition inline in a test shown in
+        previous examples.  In this way, sharing code between tests can be as
+        simple as moving a step definition virtually unchanged to the registry
+        and referencing it.
+
+        In this example, the installation step which creates ephemeral clusters
+        is defined once in the registry and used everywhere it is needed with a
+        simple \texttt{ref: ipi-install-install}.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    (cont.)
+    \begin{verbatim}
+  credentials:
+  - namespace: test-credentials
+    name: loki-stage-collector-test-secret
+    mount_path: /var/run/loki-secret
+  # …
+  env:
+  - name: OPENSHIFT_INSTALL_EXPERIMENTAL_DUAL_STACK
+    default: "false"
+    documentation: Using experimental Azure dual-stack support
+  # …
+  dependencies:
+  - name: "release:latest"
+    env: OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE
+  # …
+  documentation: |-
+    The IPI install step runs the OpenShift Installer …
+    \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://steps.ci.openshift.org/chain/ipi-aws-pre}
+    \vspace{\baselineskip}
+    \begin{verbatim}
+chain:
+  as: ipi-aws-pre
+  steps:
+  - chain: ipi-conf-aws
+  - chain: ipi-install
+  documentation: |-
+    The IPI setup step contains all steps that provision an
+    OpenShift cluster with a default configuration on AWS.
+    \end{verbatim}
+    \note{
+        Sequences of steps can be combined into \textit{chains}, which are
+        analogous to the phases of a multi-stage test.  Chains are the main
+        method of code reuse in the registry.  Beyond simply grouping steps,
+        they can also contain definitions for step parameters and other options,
+        as explained later.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://steps.ci.openshift.org/workflow/ipi-aws}
+    \vspace{\baselineskip}
+    \begin{verbatim}
+workflow:
+  as: ipi-aws
+  steps:
+    pre:
+    - chain: ipi-aws-pre
+    post:
+    - chain: ipi-aws-post
+  documentation: |-
+    The IPI workflow provides pre- and post- steps that
+    provision and deprovision an OpenShift cluster with a
+    default configuration on AWS, allowing job authors to
+    inject their own end-to-end test logic.
+
+    All modifications to this workflow should be done by
+    modifying the `ipi-aws-{pre,post}` chains to allow other
+    workflows to mimic and extend this base workflow without
+    a need to backport changes.
+    \end{verbatim}
+    \note{
+        Finally, a complete test definition can be grouped into a
+        \textit{workflow}.  A workflow definition is exactly the same as a test
+        definition, and usually encapsulates a test flow from beginning to end.
+
+        With a workflow, a shared test definition can be as simple as a few
+        lines.  If necessary, each phase (i.e. \texttt{pre}, \texttt{test},
+        \texttt{post}) can still be redefined in the test which includes the
+        workflow.  This will replace the entire sequence of steps for that
+        particular phase.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{multicols}{2}
+        \begin{verbatim}
+as: e2e-aws
+steps:
+  pre:
+  - as: conf-this
+    commands: # …
+  - as: conf-that
+    commands: # …
+  - as: install
+    commands: # …
+  - as: rbacs
+    commands: # …
+        \end{verbatim}
+        \columnbreak
+        \begin{verbatim}
+  test:
+  - as: test
+    commands: # …
+  post:
+  - as: gather-this
+    commands: # …
+  - as: gather-that
+    commands: # …
+  - as: uninstall
+    commands: # …
+        \end{verbatim}
+    \end{multicols}
+    \note{
+        The next few examples will demonstrate the process of going from a
+        completely idiosyncratic test to one that can be shared by multiple
+        definitions in a few lines of YAML.
+
+        This definition shows a typical OpenShift E2E test: a cluster is created
+        based on some configuration steps, the tests are executed, and the
+        cluster is destroyed.  Here, \texttt{commands\ldots} in each definition
+        stands for the particular entries which would be declared in each step,
+        which can anywhere from several lines to several pages long.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{multicols}{2}
+        \begin{verbatim}
+as: e2e-aws
+steps:
+  pre:
+  - ref: conf-this
+  - ref: conf-that
+  - ref: install
+  - ref: rbacs
+  # …
+        \end{verbatim}
+        \columnbreak
+        \begin{verbatim}
+ref:
+  as: conf-this
+  commands: # …
+        \end{verbatim}
+        \begin{verbatim}
+ref:
+  as: conf-that
+  commands: # …
+        \end{verbatim}
+        \ldots
+    \end{multicols}
+    \note{
+        The first\ldots{} step in the process would be to move individual step
+        definitions to the registry and replace the original ones with
+        references.  This allows any number of tests to use the shared
+        definition and is already an enormous improvement over template tests.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{multicols}{2}
+        \begin{verbatim}
+as: e2e-aws
+steps:
+  pre:
+  - chain: aws-pre
+  test: # …
+  post:
+  - chain: aws-post
+        \end{verbatim}
+        \columnbreak
+        \begin{verbatim}
+chain:
+as: aws-pre
+  steps:
+  - ref: conf-this
+  - ref: conf-that
+  - ref: install
+  - ref: rbacs
+        \end{verbatim}
+        \begin{verbatim}
+chain:
+as: aws-post
+steps:
+# …
+        \end{verbatim}
+    \end{multicols}
+    \note{
+        Next, a sequence of steps from the registry can be placed in one or more
+        chains.  This allows the sequence (and/or its configuration) to be
+        changed without the need to modify every test definition.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{multicols}{2}
+        \begin{verbatim}
+as: e2e-aws
+steps:
+  workflow: aws-ipi
+  test: # …
+        \end{verbatim}
+        \columnbreak
+        \begin{verbatim}
+workflow:
+  as: aws-ipi
+  pre:
+  - chain: aws-pre
+  post:
+  - chain: aws-post
+        \end{verbatim}
+    \end{multicols}
+    \note{
+        A complete test pattern (e.g. ``E2E test on AWS'') can then be put into
+        a workflow.  This abstracts the setup and cleanup phases so that the
+        test definition contains only a reference to the workflow and the actual
+        test steps which are to be executed.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{columns}[t]
+        \column{0.4\textwidth}
+        \begin{verbatim}
+as: e2e-aws
+steps:
+  workflow: aws-ipi
+        \end{verbatim}
+        \column{0.55\textwidth}
+        \begin{verbatim}
+workflow:
+  as: openshift-e2e-aws
+  pre:
+  - chain: aws-pre
+  test:
+  - ref: openshift-e2e-test
+  post:
+  - chain: aws-post
+        \end{verbatim}
+    \end{columns}
+    \note{
+        Going even further, an entire test suite can be shared among several
+        repositories.  In this case, the ``OpenShift on AWS E2E'' test suite is
+        put into its own workflow (n.b.: which shares the pre/post chains with
+        other workflows).  Repositories can include this entire suite by simply
+        declaring a test which references the workflow.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \begin{verbatim}
+$ find ci-operator/step-registry/ -name 'ipi-conf-*-ref.yaml' \
+    | wc -l
+75
+$ find ci-operator/step-registry/ -name 'ipi-conf-*-ref.yaml' \
+    | sed 's,.*/,,; s/-ref\.yaml//' | shuf | head -15 | sort
+ipi-conf-additional-enabled-capabilities
+ipi-conf-alibabacloud
+ipi-conf-azure-provisioned-des
+ipi-conf-azurestack-creds
+ipi-conf-azure-vmgenv1
+ipi-conf-azure-workers-marketimage
+ipi-conf-etcd-on-ramfs
+ipi-conf-libvirt
+ipi-conf-openstack-enable-octavia
+ipi-conf-ovirt-generate-csi-test-manifest
+ipi-conf-ovirt-generate-csi-test-manifest-release-4.6-4.8
+ipi-conf-ovirt-generate-install-config
+ipi-conf-ovirt-generate-install-config-params
+ipi-conf-ovirt-generate-ovirt-config
+ipi-conf-vsphere-zones
+    \end{verbatim}
+    \note{
+        Since the configuration and installation steps have their own chains in
+        the registry, it is very easy to combine one or more configuration steps
+        to create a specific test scenario, then include all of the other
+        registry components which implement the machinery behind the test
+        (cluster installation, artifact gathering, etc.).
+
+        A quick look at the registry shows there is a large number of
+        configuration steps, many of which can be combined (e.g. to create a
+        test on a cluster with "additional capabilities" and "\texttt{etcd} on
+        \texttt{ramfs} using \texttt{libvirt}).
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \footnotesize
+    \url{https://docs.ci.openshift.org/docs/architecture/step-registry/#hierarchical-propagation}
+    \vspace{\baselineskip}
+    \normalsize
+    \begin{verbatim}
+as: openshift-e2e-test
+env:
+- name: TEST_SUITE
+# …
+    \end{verbatim}
+    \note{
+        One last, more advanced method of reuse is what is called
+        \textit{hierarchical propagation}.  Registry components used by a test
+        are arranged as a tree: the test can include a workflow, which can
+        include any number of chains, which can themselves include chains
+        recursively, which ultimately include steps.
+
+        When all of these definitions are assembled to generate the final step
+        list executed by the test, several configuration options are propagated
+        from the root of the tree to the leaves (namely: parameters,
+        dependencies, leases).  This means definitions in tests override those
+        in workflows, which in turn override those in chains, which in turn
+        override those in steps.  These definitions are strictly checked such
+        that every option declared in a parent component has to be declared in a
+        subcomponent and has to have a resulting value after this process
+        completes.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+tests:
+- as: e2e
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/conformance/parallel
+    \end{verbatim}
+    \note{
+        In this example, a test includes the step shown in the previous slide
+        and specifies a value for its parameter.  It must do so, since the
+        parameter does not have a default.  Similarly, giving the parameter a
+        value without including a step which declares it would be an error.
+    }
+\end{frame}
+
+\begin{frame}[fragile]
+    \autotitle
+    \begin{verbatim}
+workflow:
+  as: openshift-e2e-serial
+  steps:
+    test:
+    - ref: openshift-e2e-test
+    env:
+      TEST_SUITE: openshift/conformance/serial
+    \end{verbatim}
+    \begin{verbatim}
+tests:
+- as: e2e
+  steps:
+    workflow: openshift-e2e-serial
+    \end{verbatim}
+    \note{
+        Hierarchical propagation allows the parameter value to be defined in a
+        workflow (or a chain).  This way, any test which includes the workflow
+        will use that value for the parameter, since it would propagate down
+        from the workflow to the step.
+
+        While nonsensical in this case, the test could also give the parameter a
+        value, which would override the value in the workflow, since tests are
+        the root of the resolution tree.
+    }
+\end{frame}

@@ -1,0 +1,91 @@
+\documentclass[10pt]{beamer}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+%\usepackage{showframe}
+
+\mode<presentation>{
+    \usetheme{redhat}
+%    \setbeameroption{show notes on second screen=right}
+}
+
+% https://github.com/josephwright/beamer/issues/337
+%\makeatletter
+%\def\beamer@framenotesbegin{%
+%    \usebeamercolor[fg]{normal text}%
+%    \gdef\beamer@noteitems{}%
+%    \gdef\beamer@notes{}%
+%}
+%\makeatother
+
+\setcounter{tocdepth}{2}
+\newcommand{\autotitle}{
+    \frametitle{
+        \secname
+        \ifx \insertsubsection \empty \else { / \MakeLowercase{\subsecname}} \fi
+    }
+}
+
+\newcommand{\sectiontitleframe}{
+    \vspace{-1em} % XXX
+    \begin{beamercolorbox}[wd=\paperwidth]{title page}
+        \begin{tikzpicture}[text = white]
+            \fill[above left, color=redhat]
+                (0, 2em)
+                rectangle (\the\paperwidth, \the\paperheight);
+            \node (title)
+                [xshift = -2em, yshift = 2em, text width = 0.75\textwidth]
+                at (current page.center)
+                {\Large\bfseries\secname};
+        \end{tikzpicture}
+    \end{beamercolorbox}
+}
+
+\title{\texttt{ci-operator} \\ multi-stage tests}
+
+\author{Bruno Barcarol Guimarães}
+\institute[]{Red Hat}
+\date{2022-10-11}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \frametitle{Overview}
+    \tableofcontents
+    \note{
+        This presentation can be viewed independentely, but is also a
+        continuation of the previous two, which can be found in the
+        \href
+            {https://docs.ci.openshift.org/docs/getting-started/useful-links\#presentations}
+            {\texttt{ci-docs} page}:
+        \begin{itemize}
+            \item
+                The initial \texttt{ci-operator} presentation has more details
+                about the overall architecture and details and can help connect
+                the topics presented here.
+            \item
+                The E2E test presentation has some extra historical context and
+                shows in more detail how multi-stage tests are used in the
+                OpenShift CI system.
+        \end{itemize}
+    }
+\end{frame}
+
+\section{Introduction}
+\input{tex/intro.tex}
+\section{Test definitions}
+\input{tex/definitions.tex}
+\section{Step registry}
+\input{tex/registry.tex}
+
+\begin{frame}
+    \usebeamertemplate{end page}
+\end{frame}
+
+\end{document}

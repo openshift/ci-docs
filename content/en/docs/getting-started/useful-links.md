@@ -82,3 +82,6 @@ The following are public and internal presentations from DPTP:
   [1](https://drive.google.com/file/d/1AvWkn5-1HM5KRnzpxmng0DlNVhfgwQ_Y/),
   [slides](https://drive.google.com/file/d/1fzingK9srLRr-NDUh3L4nI8OycwpJ76b/),
   [slides (with notes)](https://drive.google.com/file/d/108-Qn4LQwQwHcrSnW3SzjTXphyzdb0IP/)).
+* _`ci-operator` multi-stage tests`_, Bruno Barcarol Guimarães (2022,
+  [slides](https://drive.google.com/file/d/1NE-HxLwkmbi1ngdIMFnsMpa-XwCH-I5K/),
+  [slides (with notes)](https://drive.google.com/file/d/12CznfKpXJ0E0ZssneOAWDQpeEn5CAm1-/)).

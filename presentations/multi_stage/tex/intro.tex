@@ -1,0 +1,146 @@
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item \url{https://docs.google.com/document/d/1md-1BMf4_7mtKgGVoeZ3jOh4zSIBSjwl6vTTAYESwIM}
+            \begin{itemize}
+                \item
+                    \normalsize
+                    \textit{Multi-Stage Tests Design Document}
+            \end{itemize}
+        \item \url{https://docs.ci.openshift.org}
+            \begin{itemize}
+                \item \href
+                    {https://docs.ci.openshift.org/docs/architecture/step-registry/}
+                    {\texttt{docs/architecture/step-registry}}
+                \item \href
+                    {https://docs.ci.openshift.org/docs/architecture/ci-operator/}
+                    {\texttt{docs/architecture/ci-operator}}
+            \end{itemize}
+    \end{itemize}
+    \note{
+        Documentation for the topics covered today is somewhat scattered among
+        several pages.  The main content is in the dedicated step registry page,
+        but some descriptions and examples can also be found in more general
+        pages such as \texttt{ci-operator} and others.
+
+        The original design document is also a good source of information about
+        the basic architecture.  It also describes very well the historical
+        context in which multi-stage tests and the step registry were developed
+        and added to \texttt{ci-operator} and the OpenShift CI.
+    }
+\end{frame}
+
+\subsection{Motivation}
+
+\begin{frame}
+    \autotitle
+    ca. Aug 2019
+    \begin{itemize}
+        \item Two test types.
+            \begin{itemize}
+                \item container
+                \item template
+            \end{itemize}
+        \item Desire to create tests for increasingly varied scenarios.
+        \item Existing tests already complex and barely maintained.
+    \end{itemize}
+    \note{
+        That context in summary is this: \texttt{ci-operator} started its life
+        supporting only simple \textit{container} tests.  These are fairly
+        self-contained tests which execute a single command using a container
+        image.
+
+        Then (likely on a Sunday), \textit{template} tests were added.  These
+        were amorphous tests which bypassed most of the configuration format and
+        instead injected a new test definition at runtime.  Creating and
+        maintaining a template test was unnecessarily difficult, so practically
+        only a few people had the knowledge and the stomach to do it.
+
+        At the same time, the OpenShift CI was growing, being used both by more
+        components and for more varied types of tests.  It was clear that
+        requiring a new template test for each new test scenario would be
+        impossible, so a new format for test definitions had to be created.
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    Ah, the templates\ldots
+    \vfill
+    \begin{quote}
+complex, esoteric and fragile
+    \end{quote}
+    \vfill
+    \begin{quote}
+difficult to extend and use
+    \end{quote}
+    \vfill
+    \begin{quote}
+not able to share common test logic
+    \end{quote}
+    \vfill
+    \begin{quote}
+duplication and fragmentation
+    \end{quote}
+    \vfill
+    \note{
+        This sentiment is visible in the design document, which constantly
+        mentions the limitations of templates which impeded the maintenance of
+        existing and creation of new tests.
+    }
+\end{frame}
+
+\begin{frame}
+    \autotitle
+    \begin{itemize}
+        \item Small number of extremely complex \texttt{Pod} definitions.
+            \begin{itemize}
+                \item
+                    Python embedded in Bash embedded in YAML embedded in
+                    \ldots
+                \item Each responsible for the entire execution of an E2E test.
+            \end{itemize}
+        \item
+            Equally small set of people willing to / capable of ``maintaining''
+            them.
+        \item Adding a new test scenario
+            \begin{itemize}
+                \item copying an existing template (thousands of lines of YAML)
+                \item minor edits
+                \item (extreme duplication)
+            \end{itemize}
+        \item
+            Configuration exposed and required knowledge of byzantine
+            implementation details of \texttt{ci-operator}.
+        \item<2> \emph{etc.}
+    \end{itemize}
+    \note{
+        Here is a small selection (an entire presentation could be made about
+        them):
+
+        \begin{itemize}
+            \item
+                Template tests are defined in a single YAML file containing,
+                among other items, a \texttt{Pod} definition.  The definition
+                consisted of several inline \texttt{bash} scripts, sometimes
+                with multiple fragments of other languages inside them.
+            \item
+                The entirety of the test flow had to be contained in this single
+                YAML file.
+            \item
+                Because definitions were completely self-contained, creating new
+                types of tests required blindly copying colossal YAML files and
+                editing usually just a few lines, creating massive duplication
+                and divergence.  Changing common code required editing all
+                copies.
+            \item
+                The integration with other parts of \texttt{ci-operator}
+                (images, releases, etc.) was very precarious, requiring test
+                authors to know obscure aspects of the underlying
+                implementation.
+        \end{itemize}
+
+        For these reasons and many others, the set of maintainers of these test
+        definitions was virtually non-existent.
+    }
+\end{frame}
