@@ -11,7 +11,7 @@ of the data.
 
 In order to add a new secret to our system, you will first need to create a "secret collection". Secret collections are managed
 at [selfservice.vault.ci.openshift.org](https://selfservice.vault.ci.openshift.org). Just head there, log in, click on the
-"New Collection" button, enter a name for your new secret collection, and click the "Submit" button and, ideally, add your teammates as members.
+"New Collection" button, enter a name for your new secret collection, click the "Submit" button and, ideally, add your teammates as members.
 Important: Secret collection names are globally unique in our system.
 {{< alert title="Info" color="info" >}} Users must have logged in to the DPTP Vault system at least once before they are listed as potential members. {{< /alert >}}
 
@@ -19,7 +19,11 @@ The secrets themselves are managed in our Vault instance at [vault.ci.openshift.
 You need to use the OIDC auth to log in there (leave the Role as blank/Default). After logging in, click on `kv`, and you should see your secret collection.
 
 To create a new secret, click on the link for your secret collection, add a new path (for example, "selfservice/(your secret collection)/newpath") in the
-text box to the left of `Create secret +`, then click `Create secret +`. Add your new secret data (as a key value pair).  Also, include the special `secretsync` key value pairs listed below. These key value pairs ensure that the new secret is propagated into the build clusters:
+text box to the left of `Create secret +`, then click `Create secret +`.  You can also just click "Create secret +",
+and enter the new path (for example, "selfservice/(your secret collection)/newpath") in the `Path for this secret` box.  The message that says
+`The secret path may not end in /` will then disappear.
+
+Add your new secret data (as a key value pair).  Also, include the special `secretsync` key value pairs listed below. These key value pairs ensure that the new secret is propagated into the build clusters:
 
 ```yaml
 secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
