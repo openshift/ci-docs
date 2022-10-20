@@ -69,16 +69,16 @@ The following are public and internal presentations from DPTP:
   Hongkai Liu, Petr Muller (2022,
   [recording](https://www.youtube.com/watch?v=aI7M_jqeQhg),
   [slides](https://static.sched.com/hosted_files/devconfcz2022/03/%5BDevConf2022%5DChallenges%20of%20OpenShift%20CI%20going%20multi-cluster.pdf)).
-* _`ci-operator` deep dive_, Petr Muller (2022, [recording](https://drive.google.com/file/d/1ye_Xim2oV4iJaQtBQrDUjre3vwDvZKDT/)).
+* _`ci-operator` deep dive_, Petr Muller (2022, [recording](https://drive.google.com/file/d/15_JmE61V4b4hdSG8fWqXNFJD21p1-H_D/)).
 * _Pod Scaler_, Stephen Goeddel (2022,
   [recording](https://drive.google.com/file/d/1H8ld2UHvZWwtMzuzjQ610PeT61kvPCQw/),
   [slides](https://docs.google.com/presentation/d/1lcYT-WtdNsiLGmgvme7srSVWDGqUUZSxbzMuJiFI6Rs/)).
 * _`ci-operator`_, Bruno Barcarol Guimarães (2022,
-  [recording](https://drive.google.com/file/d/1hYgYNBBlVUdSiyFRa9R6aGy5SbDaPLRY/),
+  [recording](https://drive.google.com/file/d/15_JmE61V4b4hdSG8fWqXNFJD21p1-H_D/),
   [slides](https://drive.google.com/file/d/1ql2MOFRIsvPzgg3iMwjJTy6fRS9G7sDG/),
   [slides (with notes)](https://drive.google.com/file/d/1Jxu9pK3Ujw_ZAgxdd7b1dCVgjAP0JIr_/)).
 * _End-to-End Tests in OpenShift_, Bruno Barcarol Guimarães (2022,
-  recordings [0](https://drive.google.com/file/d/1rD384Olyj5kBDjV98NZYLUUgIMhFjAU1/),
-  [1](https://drive.google.com/file/d/1_Vqvjj60u-sEj8h3e-fvECz0s4iWTgKs/),
+  recordings [0](https://drive.google.com/file/d/1AvWkn5-1HM5KRnzpxmng0DlNVhfgwQ_Y/),
+  [1](https://drive.google.com/file/d/1AvWkn5-1HM5KRnzpxmng0DlNVhfgwQ_Y/),
   [slides](https://drive.google.com/file/d/1fzingK9srLRr-NDUh3L4nI8OycwpJ76b/),
   [slides (with notes)](https://drive.google.com/file/d/108-Qn4LQwQwHcrSnW3SzjTXphyzdb0IP/)).
