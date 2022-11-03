@@ -303,6 +303,13 @@ the failed `ClusterDeployment`, which are useful e.g., for filing installer bugs
 
 By configuring [`ClusterPools.spec.hibernationConfig.resumeTimeout`](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#HibernationConfig), Hive stops waiting after the specified time on waking up a hibernating cluster, considers it broken and replaces it. If not set, Hive will keep waiting until it succeeds.
 
+### Renaming a Cluster Pool
+
+After the PR that renames a cluster pool gets merged, the new pool will be created while the old one still exists on the cluster.
+Because the automation which does the GitOps with the manifests does not support removal,
+please contact us if we need to delete a cluster pool that is no longer needed.
+
+To avoid hitting the resource limits on the cloud, it is suggested to downscale the cluster pool to zero in a separate PR before renaming it.
 
 ## Existing Cluster Pools
 
