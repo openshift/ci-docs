@@ -77,10 +77,22 @@ whenever a pull request would affect one or more CI jobs. Jobs affected by such 
 target component repository after the changes would be merged. This provides pull request authors early feedback about
 how config changes impact CI setup.
 
-All pull requests trigger a `ci/prow/pj-rehearse` job that inspects the changes in the PR and detects affected jobs. It
-then submits these jobs for execution, and they will report to the pull request results via the GitHub contexts named
-with the `ci/rehearse/$org/$repo/$branch/$test` pattern. Both the "driver" job (`ci/prow/pj-rehearse`) and the individual
-rehearsals do not block merges. This allows merging changes to CI configuration that affect jobs that fail for reasons
+#### External Prow Plugin
+
+All pull requests trigger a `pj-rehearse` external prow plugin. It checks the changes in a pull request and comments a list of jobs that are relevant to them. It also supplies directions for interacting with itself. The user can either comment:
+* `/pj-rehearse` to run up to 10 rehearsal jobs from the list
+* `/pj-rehearse more` to run up to 20 rehearsal jobs from the list
+* `/pj-rehearse max` to run up to 35 rehearsal jobs from the list
+* `/pj-rehearse skip` to opt-out of rehearsals for the PR, and add the `rehearsals-ack` label
+* `/pj-rehearse ack` to acknowledge the rehearsals (pass or fail), and add the `rehearsals-ack` label
+
+The `rehearsals-ack` label is not used at the moment.
+
+#### Rehearsal Logic
+When the plugin is asked to rehearse it submits rehearsal jobs for execution and will report to the pull request
+the results via the GitHub contexts named with the `ci/rehearse/$org/$repo/$branch/$test` pattern.
+The rehearsal jobs do not block merges. 
+This allows merging changes to CI configuration that affect jobs that fail for reasons
 unrelated to the change (like flakes or infrastructure issues). Also, merging a failing job can be useful when it gives
 correct signal so that such merge can be followed up in the target repo with a pull request fixing the failing job.
 
@@ -93,7 +105,7 @@ The following changes are considered when triggering rehearsals:
 1. Changes to cluster profiles (`cluster/test-deploy`)
 
 It is not possible to rerun individual rehearsal jobs. They do not react to any trigger commands. Rerunning rehearsals
-must be done by rerunning the "driver" job: `ci/prow/pj-rehearse`, which then triggers all rehearsals of jobs currently
+must be done by re-triggering the plugin: `/pj-rehearse`, which then triggers all rehearsals of jobs currently
 affected by the PR, including the rehearsals that passed before.
 
 Certain changes affect many jobs. For example, when a template or a step used by many jobs is changed, in theory all
