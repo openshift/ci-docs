@@ -309,7 +309,7 @@ After the PR that renames a cluster pool gets merged, the new pool will be creat
 Because the automation which does the GitOps with the manifests does not support removal,
 please contact us if we need to delete a cluster pool that is no longer needed.
 
-To avoid hitting the resource limits on the cloud, it is suggested to downscale the cluster pool to zero before renaming it.
+To avoid hitting the resource limits on the cloud, it is suggested to downscale the cluster pool to zero in a separate PR before renaming it.
 
 ## Existing Cluster Pools
 
