@@ -305,7 +305,7 @@ By configuring [`ClusterPools.spec.hibernationConfig.resumeTimeout`](https://pkg
 
 ### Renaming a Cluster Pool
 
-After the PR that renames a cluster pool gets merged, the new poll will be created while the old one still exists on the cluster.
+After the PR that renames a cluster pool gets merged, the new pool will be created while the old one still exists on the cluster.
 Because the automation which does the GitOps with the manifests does not support removal,
 please contact us if we need to delete a cluster pool that is no longer needed.
 
