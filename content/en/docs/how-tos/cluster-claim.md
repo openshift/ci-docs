@@ -316,7 +316,7 @@ To avoid hitting the resource limits on the cloud, it is suggested to downscale 
 The following table shows the existing cluster pools that a user can claim a cluster from. Each pool defines a set of
 characters about the clusters that are provisioned out of it. For instance, the cluster
 pool `ci-ocp-4-6-amd64-aws-us-east-1` is composed of OCP 4.6 clusters on AWS's `us-east-1` region. The values of
-**READY**, **SIZE** and **MAX SIZE** are taken
+**READY**, **STANDBY**, **SIZE** and **MAX SIZE** are taken
 from [the status and the specification of each pool](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#ClusterPool)
 . Clicking <img src="https://datatables.net/examples/resources/details_open.png" alt="details button"> shows the more
 details of the cluster pool, such as the release image that is used for provisioning a cluster and the labels defined on
@@ -336,6 +336,7 @@ but it will be soon.
             <th>NAMESPACE</th>
             <th>NAME</th>
             <th>READY</th>
+            <th>STANDBY</th>
             <th>SIZE</th>
             <th>MAX SIZE</th>
             <th>IMAGE SET</th>
