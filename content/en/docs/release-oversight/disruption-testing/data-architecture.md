@@ -47,17 +47,25 @@ It does not cover how the tests themselves are run against a cluster.
 
 1. The disruption uploader will parse out the results from the e2e run backend-disruption json files and push them to the [openshift-ci-data-analysis](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis) table in BigQuery.
 
-1. Currently, backend disruption data is queried from BigQuery and downloaded in `json` format. The resulting `json` file is then committed to [origin/pkg/synthetictests/allowedbackenddisruption/query_results.json](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) for **backend disruption** or [origin/pkg/synthetictests/allowedalerts/query_results.json](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedalerts/query_results.json) for **alert data** (see [how to query](#how-to-query-the-data))
+1. We currently run a periodic [disruption data analyzer job](https://github.com/openshift/release/blob/7186dca51d5350e3d42c75b071d8a1e4e6f68d5f/ci-operator/jobs/infra-periodics.yaml#L2549-L2630) in the infra cluster. It gathers the recent disruption data and commits the results back to `openshift/origin`. The PR it generates will also include a report that will help show the differences from previous to current disruptions in a table format. ([example PR](https://github.com/openshift/origin/pull/27475#issue-1414053178)).
+
+   Note, the read only BigQuery secret used by this job is saved in `Vault` using the processes described in this [HowTo](../../../how-tos/adding-a-new-secret-to-ci/#add-a-new-secret).
 
 1. The static `query_results.json` in `openshift/origin` are then used by the the [matchers](../code-implementation#best-matcher) that the `samplers` invoke to find the best match for a given test (typically with "remains available using new/reused connections" or "should be nearly zero single second disruptions") to check if we're seeing noticeably worse disruption during the run.
 
-### How To Query The Data
+### How To Query The Data Manually
+
+The process for gathering and updating disruption data is fully automated, however, if you wish to explore the BigQuery data set, below are some of the queries you can run. If you also want to run the `job-run-aggregator` locally, the [README.md](https://github.com/openshift/ci-tools/tree/master/cmd/job-run-aggregator) for the project will provide guidance.
 
 Once you have access to BigQuery in the `openshift-ci-data-analysis` project, you can run the below query to fetch the latest results.
 
 #### Query
 
-{{% card-code header="[origin/pkg/synthetictests/allowedbackenddisruption/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption/types.go#L13-L43)" %}}
+{{% alert title="⚠️ Note!" color="warning" %}}
+The below queries are examples, please feel free to visit the linked permalinks for where to find the most up to date queries used by our automation.
+{{% /alert %}}
+
+{{% card-code header="[ci-tools/pkg/jobrunaggregator/jobrunaggregatorlib/ci_data_client.go](https://github.com/openshift/ci-tools/blob/13478ce7f8e79d8f2ddc25af859afc9ae4be3c67/pkg/jobrunaggregator/jobrunaggregatorlib/ci_data_client.go#L98-L136)" %}}
 
 ```sql
 SELECT
@@ -96,7 +104,7 @@ BackendName, Release, FromRelease, Platform, Architecture, Network, Topology
 
 {{% /card-code %}}
 
-{{% card-code header="[origin/pkg/synthetictests/allowedalerts/types.go](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedalerts/types.go#L17-L35)" %}}
+{{% card-code header="[ci-tools/pkg/jobrunaggregator/jobrunaggregatorlib/ci_data_client.go](https://github.com/openshift/ci-tools/blob/13478ce7f8e79d8f2ddc25af859afc9ae4be3c67/pkg/jobrunaggregator/jobrunaggregatorlib/ci_data_client.go#L167-L190)" %}}
 
 ```sql
 SELECT * FROM openshift-ci-data-analysis.ci_data.Alerts_Unified_LastWeek_P95
