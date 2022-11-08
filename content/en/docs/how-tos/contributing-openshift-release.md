@@ -86,7 +86,7 @@ All pull requests trigger a `pj-rehearse` external prow plugin. It checks the ch
 * `/pj-rehearse skip` to opt-out of rehearsals for the PR, and add the `rehearsals-ack` label
 * `/pj-rehearse ack` to acknowledge the rehearsals (pass or fail), and add the `rehearsals-ack` label
 
-The `rehearsals-ack` label is not used at the moment.
+Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met.
 
 #### Rehearsal Logic
 When the plugin is asked to rehearse it submits rehearsal jobs for execution and will report to the pull request
