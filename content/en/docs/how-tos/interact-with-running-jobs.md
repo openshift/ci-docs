@@ -70,12 +70,13 @@ your test is running:
 ```
 
 As the pull request author, you are the administrator of the project (`ci-op-mtn6xs34` in example above). You will
-therefore have access to the link above. From the console, to login, choose `GitHub`. Once in the console, you can follow
-the logs from the running pods _or_ you can grab the login command from the upper right `?` -> `Command Line Tools` ->
-`Copy Login Command`. Again, choose the `GitHub` authentication, then `Display Token`. Copy in your terminal to access
-the CI build farm cluster. Before running the login command, you might run `unset KUBECONFIG` if you currently have an
-active development cluster and local `$KUBECONFIG`, since this login command will either update the currently set
-`$KUBECONFIG` or write/update to `~/.kube/config`. The login command will look similar to this:
+therefore have access to the link above. From the console, to login, choose `Red Hat Internal SSO`. Once in the
+console, you can follow the logs from the running pods _or_ you can grab the login command from the upper right
+`?` -> `Command Line Tools` -> `Copy Login Command`. Again, choose the `Red Hat Internal SSO` authentication, then
+`Display Token`. Copy in your terminal to access the CI build farm cluster. Before running the login command, you
+might run `unset KUBECONFIG` if you currently have an active development cluster and local `$KUBECONFIG`, since
+this login command will either update the currently set `$KUBECONFIG` or write/update to `~/.kube/config`. The
+login command will look similar to this:
 
 ```bash
 oc login --token=sha256~dMKQv... --server=https://api.build02.gcp.ci.openshift.org:6443
