@@ -285,7 +285,7 @@ modifications to allow some commonly needed customizations:
 |`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
 
 {{< alert title="Warning" color="warning" >}}
-Nightly jobs ran using the [release-controller](https://github.com/openshift/release-controller) do **not** honor the `cluster` setting. They have their own [load balancing system](https://github.com/sshnaidm/release-controller/blob/6b7f7b2e92f49d417ce54ec7b037fbede09c2301/cmd/release-controller/sync_verify_prow.go#L26) which will set the cluster accordingly.
+Nightly jobs run using the [release-controller](https://github.com/openshift/release-controller) do **not** honor the `cluster` setting. They have their own [load balancing system](https://github.com/sshnaidm/release-controller/blob/6b7f7b2e92f49d417ce54ec7b037fbede09c2301/cmd/release-controller/sync_verify_prow.go#L26) which will set the cluster accordingly.
 {{< /alert >}}
 
 ### Handcrafted Jobs
