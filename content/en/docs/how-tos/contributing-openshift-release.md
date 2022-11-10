@@ -83,8 +83,10 @@ All pull requests trigger a `pj-rehearse` external prow plugin. It checks the ch
 * `/pj-rehearse` to run up to 10 rehearsal jobs from the list
 * `/pj-rehearse more` to run up to 20 rehearsal jobs from the list
 * `/pj-rehearse max` to run up to 35 rehearsal jobs from the list
+* `/pj-rehearse refresh` to obtain an updated list of affected jobs. This is useful in the event that the PR branch is pushed to
 * `/pj-rehearse skip` to opt-out of rehearsals for the PR, and add the `rehearsals-ack` label
 * `/pj-rehearse ack` to acknowledge the rehearsals (pass or fail), and add the `rehearsals-ack` label
+* `/pj-rehearse reject` to remove the `rehearsals-ack` label and re-block merging
 
 Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met.
 
