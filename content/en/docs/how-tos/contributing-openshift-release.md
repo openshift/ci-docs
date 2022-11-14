@@ -286,6 +286,10 @@ modifications to allow some commonly needed customizations:
 |`.max_concurrency`|Set to limit how many instances of the job can run simultaneously.|✓|✓|✓|
 |`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
 
+{{< alert title="Warning" color="warning" >}}
+Nightly jobs run using the [release-controller](https://github.com/openshift/release-controller) do **not** honor the `cluster` setting. They have their own [load balancing system](https://github.com/sshnaidm/release-controller/blob/6b7f7b2e92f49d417ce54ec7b037fbede09c2301/cmd/release-controller/sync_verify_prow.go#L26) which will set the cluster accordingly.
+{{< /alert >}}
+
 ### Handcrafted Jobs
 
 It is possible to add entirely handcrafted Prowjobs. The Prowjob configuration files' content is a YAML list, so adding
