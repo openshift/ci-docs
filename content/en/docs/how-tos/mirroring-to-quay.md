@@ -53,7 +53,7 @@ Images that are mirrored to Quay for the first time are **private** by default a
 will be checking to ensure your image does not contain private or licensed content such as RHEL or internal RHEL packages.
 {{< /alert >}}
 
-## Configuring Mirroring for New Organization
+### Configuring Mirroring for New Organization
 
 Submit a PR adding a new subdirectory
 [here](https://github.com/openshift/release/tree/master/core-services/image-mirroring), with at least a single mapping file
@@ -89,3 +89,13 @@ periodics:
       secret:
         secretName: registry-push-credentials-quay-io-NEW_ORGANIZATION # this matches the secretsync/target-name
 {{< / highlight >}}
+
+### Mirror Images With Wildcard
+
+The `*` wildcard might be useful in the case that the images are [tagged by commit](/docs/architecture/ci-operator/#publishing-images-tagged-by-commit)
+and it is desired to mirror every produced version.
+For example, the following command mirrors all tags of `my-imagestream` in `my-namespace` to the destination repository:
+
+```console
+$ oc image mirror registry.ci.openshift.org/my-namespace/my-imagestream:* quay.io/myrepository/myimage
+```
