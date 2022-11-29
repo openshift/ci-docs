@@ -121,6 +121,9 @@ The final set of observers will be: `{ observer-1, observer-2 }`.
 ### Writing from scratch inside Step Registry
 Writing an observer as a step inside the registry looks almost like a regular test.
 
+The `timeout` and the `grace_period` work the same as for [regular steps](/docs/architecture/timeouts/#step-registry-test-process-timeouts).
+By default, the `timeout` will be twenty four hours and the `grace_period` one hour.
+
 The Observer's definition file must have `-observer.yaml` suffix. The configuration looks like:
 {{< highlight yaml >}}
 observer:
@@ -136,6 +139,8 @@ observer:
     requests:
       cpu: 10m
       memory: 10Mi
+  timeout: 24h
+  grace_period: 1h
   documentation: |-
     A simple observer
 {{< / highlight >}}
