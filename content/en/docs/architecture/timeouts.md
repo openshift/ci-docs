@@ -17,6 +17,12 @@ Timeouts occur for a job when the overall job or some subset of the job exceeds 
 
 Furthermore, instability in the OpenShift build farm clusters hosting these workloads may also trigger the deletion of `Pods` that implement a job. In these cases, the resulting workflow is identical, as `Pod` eviction honors the configured grace periods.
 
+{{< alert title="Note" color="info" >}}
+Part of the CI implementation involves one or more small coordinating processes executed inside of each test `Pod`. This is the case for Prow jobs which execute `ci-operator` or any other program, as well as for the individual steps in a `ci-operator` test.
+
+These processes are layered such that each is made a parent of the next, with the ultimate descendant being the actual test script. This means "PID 1" described here and in the Kubernetes documentation will not be the script configured in the `commands` field (for `ci-operator` tests) or directly in the `ProwJob`. However, each of these processes, when present, correctly forwards signals to its child, so the method for handling interruptions remains the same.
+{{< / alert >}}
+
 ### Types of Timeouts
 
 #### Prow Infrastructure Timeouts
