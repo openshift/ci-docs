@@ -111,13 +111,15 @@ When this timeout is reached in a job, the following log lines from `ci-operator
 
 ```
 # when the timeout is reached:
-time="2021-02-15T15:27:53Z" level=info msg="Received signal." signal=interrupt
-2021/02/15 15:27:53 error: Process interrupted with signal interrupt, cancelling execution...
+{"component":"entrypoint","level":"error","msg":"Process did not finish before 4h0m0s timeout}
+# ci-operator's response:
+INFO[2021-02-15T15:26:53Z] Received signal.                              signal=interrupt
+INFO[2021-02-15T15:26:53Z] error: Process interrupted with signal interrupt, cancelling execution...
 # cleanup begins:
-2021/02/15 15:27:53 cleanup: Deleting release pod release-images-initial
-2021/02/15 15:27:53 cleanup: Deleting release pod release-images-latest
+INFO[2021-02-15T15:27:53Z] cleanup: Deleting release pod release-images-initial
+INFO[2021-02-15T15:27:53Z] cleanup: Deleting release pod release-images-latest
 # post-steps are triggered:
-2021/02/15 15:53:03 Executing pod "e2e-aws-upgrade-gather-extra" running image "stable:cli" 
+INFO[2021-02-15T15:53:03Z] Running step e2e-aws-upgrade-gather-extra.
 ```
 
 #### Step Registry Test Process Timeouts
