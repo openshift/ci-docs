@@ -1,6 +1,6 @@
 ---
 title: "Handling Job Timeouts and Interruptions"
-description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do when handling them. 
+description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do when handling them.
 ---
 
 # Overview
@@ -36,7 +36,7 @@ Prow is [configured](https://github.com/openshift/release/blob/9238ee8b89c861793
 - Global: these settings are global for all Prow jobs.  They're needed as Prow can launch job types other than Kubernetes `Pods`.
   - The `default_job_timeout` is a hard timeout for the overall lifetime of a job. This may be overridden for a specific job, but only to values smaller than the global timeout.
 - `plank`: this is the controller which creates and manages `Pods` for Prow jobs executed in Kubernetes/OpenShift clusters (as opposed to, for example, Jenkins).  Its settings affect all Prow job `Pods`, which usually execute `ci-operator`.
-  - The `plank.pod_{pending,unscheduled}_timeout` settings allow Prow to move on from a job for which `Pods` cannot start. Jobs exhibiting these timeouts occur when issues exist with the underlying build farm clusters where `Pods` are executed. These jobs will be listed as errored, not failed, and the DPTP on-call rotation will investigate them.
+  - The `plank.pod_{pending,unscheduled}_timeout` settings allow Prow to move on from a job for which `Pods` cannot start. Jobs exhibiting these timeouts occur when issues exist with the underlying build farm clusters where `Pods` are executed. These jobs will be listed as errored, not failed, and the DPTP on-call assignee will investigate them.
   - The `plank.pod_running_timeout` is the default timeout for the overall lifetime for a running `Pod` for a job. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
 - `sinker`: this controller is used in concert with `plank` and takes care of eventually removing `Pods` created to execute Prow jobs.  Its settings affect only `Pods` for jobs which have already completed.
   - The `sinker.max_pod_age` is the timeout in Prow's garbage collector for how long any individual `Pod` may exist. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
@@ -57,7 +57,7 @@ sinker: # Prow's garbage collector
 
 Prow is furthermore [configured](https://github.com/openshift/release/blob/9238ee8b89c861793f9b8e8f7f6509abe33bd0b8/core-services/prow/02_config/_config.yaml) to tightly bound the execution time budgets for all test processes for jobs in the system. Prow's infrastructure timeouts exist to guard the system against denial-of-service situations, so they are implemented as hard deadlines and are not meant to provide a pleasant user experience for test process authors. Prow projects a set of test process timeouts into jobs, as well, to allow test processes to exit gracefully before hard infrastructure timeouts occur. The configuration specifies a timeout as well as a grace period and can be overridden at the GitHub organization, repository or specific job level.
 
-In OpenShift CI, this timeout and grace period apply to the `ci-operator` orchestrator and are forwarded to test processes running for steps of a job. The `timeout` setting is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself. The `grace_period` is set as `pod.spec.terminationGracePeriodSeconds`. Prow will delete the `ci-operator` job `Pod` when the timeout is reached and Kubernetes handles the final `SIGKILL` after the configured grace period expires. 
+In OpenShift CI, this timeout and grace period apply to the `ci-operator` orchestrator and are forwarded to test processes running for steps of a job. The `timeout` setting is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself. The `grace_period` is set as `pod.spec.terminationGracePeriodSeconds`. Prow will delete the `ci-operator` job `Pod` when the timeout is reached and Kubernetes handles the final `SIGKILL` after the configured grace period expires.
 
 ```yaml
 plank: # Prow's controller to launch Pods for jobs
@@ -167,7 +167,7 @@ ref:
     Runs the test suite from source code.
 ```
 
-Note that the step declares a 120s termination grace period, which is much larger than the default of 30s. The step commands might look like:
+Note that the step declares a 120s termination grace period, which is much larger than the default of 15s. The step commands might look like:
 
 ```shell
 #!/usr/bin/env bash
