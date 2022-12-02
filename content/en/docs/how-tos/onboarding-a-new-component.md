@@ -253,6 +253,10 @@ All product teams that will ship an image to product must ensure their image is 
 published back to the nightly test jobs BEFORE you reference them from another component (via the image-references
 file), or before you set the image label `io.openshift.release.operator` to get automatically included.
 
+1. To include the build version, you can consume [environment variables like `OS_GIT_VERSION` and `BUILD_VERSION` set by ART's Doozer][doozer-environment-variables] in your Dockerfile.
+    For example, [here is build-machinery-go passing `OS_GIT_VERSION`, `SOURCE_GIT_COMMIT`, and `SOURCE_GIT_TREE_STATE` through to Go][build-machinery-go-version-ldflags].
+
+    CVO manifests may also use [the `0.0.1-snapshot` placeholder][cluster-version-manifest-version-placeholder] to have the OCP release version injected at release-assembly time.
 1. Ensure you have successfully published your image to the CI integration stream
 1. Follow the [ART instructions](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/guidelines_for_requesting_new_content_managed_by_ocp_art) to have them build your image
     * On the [dist-git part of the process](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/requesting_a_new_image_or_rpm_to_be_managed_by_art#jive_content_id_Naming) it is critical that you ensure your component/image names match as described in the bulleted criteria
@@ -339,3 +343,7 @@ operator's `image-references` file, or release payloads will fail to assemble af
    2. Unhold and merge PR2.
    3. Unhold and have the release-artist merge PR3.
    4. The release-artist should then remove the old component name from CI: `oc -n ocp tag 4.{minor}:{old-component-name} -d`.
+
+[doozer-environment-variables]: https://github.com/openshift/doozer/blob/57721c72b3ddd08e6493323fcce065f55327fd69/doozerlib/distgit.py#L1975-L1985
+[build-machinery-go-version-ldflags]: https://github.com/openshift/build-machinery-go/blob/e25cf57ea46d9ce17de894b1a00dcf43ba12ee1a/make/lib/golang.mk#L57-L69
+[cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/master/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
