@@ -95,6 +95,12 @@ Note: the shell script file must follow the [naming convention](#registry-layout
 A step accepts resource `requests` and `limits` for its container's configuration.
 There is more information about resources [here](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 
+{{< alert title="Warning" color="warning" >}}
+The resources for the pod running a test step might be overwritten by
+CI automation based on the historical data of the job and the limited
+hardware capability.
+{{< /alert >}}
+
 #### Configuring a Custom shm-size
 
 If it is necessary to increase the shared memory size (the default is 64m) of a Multi-Stage test, then the `resources` can be modified to add
