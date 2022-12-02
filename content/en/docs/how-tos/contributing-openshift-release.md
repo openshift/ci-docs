@@ -81,6 +81,7 @@ how config changes impact CI setup.
 
 All pull requests trigger a `pj-rehearse` external prow plugin. It checks the changes in a pull request and comments a list of jobs that are relevant to them. It also supplies directions for interacting with itself. The user can comment, one or more of the following commands, in either the PR body or as a seperate comment:
 * `/pj-rehearse` to run up to 10 rehearsal jobs from the list
+* `/pj-rehearse auto-ack` to run up to 10 rehearsal jobs, and automatically apply the `rehearsals-ack` label if they all succeed
 * `/pj-rehearse more` to run up to 20 rehearsal jobs from the list
 * `/pj-rehearse max` to run up to 35 rehearsal jobs from the list
 * `/pj-rehearse refresh` to obtain an updated list of affected jobs. This is useful in the event that the PR branch is pushed to
