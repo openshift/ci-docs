@@ -81,6 +81,7 @@ how config changes impact CI setup.
 
 All pull requests trigger a `pj-rehearse` external prow plugin. It checks the changes in a pull request and comments a list of jobs that are relevant to them. It also supplies directions for interacting with itself. The user can comment, one or more of the following commands, in either the PR body or as a seperate comment:
 * `/pj-rehearse` to run up to 10 rehearsal jobs from the list
+* `/pj-rehearse {test-name}` rehearse, one or more, specific jobs from the list of affected jobs. See [Rehearse Specific Jobs](#rehearse-specific-jobs) for more info.
 * `/pj-rehearse auto-ack` to run up to 10 rehearsal jobs, and automatically apply the `rehearsals-ack` label if they all succeed
 * `/pj-rehearse more` to run up to 20 rehearsal jobs from the list
 * `/pj-rehearse max` to run up to 35 rehearsal jobs from the list
@@ -90,6 +91,11 @@ All pull requests trigger a `pj-rehearse` external prow plugin. It checks the ch
 * `/pj-rehearse reject` to remove the `rehearsals-ack` label and re-block merging
 
 Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met.
+
+##### Rehearse Specific Jobs
+It is possible to **only** rehearse specific affected jobs from a PR. This can be done by commenting `/pj-rehearse` followed by a, space separated, list of one or more jobs. These job names can be found in the list that the plugin comments on the PR upon creation. Note, that the job must be found to be affected by the change in the PR in order to be rehearsed. For example:
+* `/pj-rehearse a-unit-test-job` will rehearse only the job named 'a-unit-test-job'
+* `/pj-rehearse a-unit-test-job some-other-test` will trigger rehearsals for both: 'a-unit-test-job' and 'some-other-test'
 
 #### Rehearsal Logic
 When the plugin is asked to rehearse it submits rehearsal jobs for execution and will report to the pull request
