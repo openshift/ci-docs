@@ -93,7 +93,7 @@ All pull requests trigger a `pj-rehearse` external prow plugin. It checks the ch
 Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met.
 
 ##### Rehearse Specific Jobs
-It is possible to **only** rehearse specific affected jobs from a PR. This can be done by commenting `/pj-rehearse` followed by a, space separated, list of one or more jobs. These job names can be found in the list that the plugin comments on the PR upon creation. Note, that the job must be found to be affected by the change in the PR in order to be rehearsed. For example:
+It is possible to **only** rehearse specific, affected jobs from a PR. This can be done by commenting `/pj-rehearse` followed by a, space separated, list of one or more jobs. These job names can be found in the list that the plugin comments on the PR upon creation. Note that the job must be found to be affected by the change in the PR in order to be rehearsed. For example:
 * `/pj-rehearse a-unit-test-job` will rehearse only the job named 'a-unit-test-job'
 * `/pj-rehearse a-unit-test-job some-other-test` will trigger rehearsals for both: 'a-unit-test-job' and 'some-other-test'
 
