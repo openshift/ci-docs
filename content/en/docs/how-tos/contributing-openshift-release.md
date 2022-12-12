@@ -113,9 +113,8 @@ The following changes are considered when triggering rehearsals:
 1. Changes to templates (`ci-operator/templates`)
 1. Changes to cluster profiles (`cluster/test-deploy`)
 
-It is not possible to rerun individual rehearsal jobs. They do not react to any trigger commands. Rerunning rehearsals
-must be done by re-triggering the plugin: `/pj-rehearse`, which then triggers all rehearsals of jobs currently
-affected by the PR, including the rehearsals that passed before.
+Rerunning rehearsals can be done by re-triggering the plugin: `/pj-rehearse`, which then triggers all rehearsals of jobs currently
+affected by the PR, including the rehearsals that passed before. Individual rehearsals can also be re-triggered by utilizing the ['Rehearse Specific Jobs'](#rehearse-specific-jobs) functionality.
 
 Certain changes affect many jobs. For example, when a template or a step used by many jobs is changed, in theory all
 these jobs could be affected by the change, but it is unrealistic to rehearse them all. In some of these cases,
@@ -149,6 +148,10 @@ rehearsals:
 
 Either of the preceding configurations will result in the `pj-rehearse.openshift.io/can-be-rehearsed: "true"` label not 
 being added to the affected jobs when running `make jobs`.
+
+{{< alert title="Warning" color="warning" >}}
+Jobs that are marked as `hidden: true` will never be rehearsed, regardless of the presence of the `pj-rehearse.openshift.io/can-be-rehearsed: "true"` label.
+{{< /alert >}}
 
 ### `ci-operator` Configuration Sharding
 
