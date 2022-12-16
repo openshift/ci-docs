@@ -115,7 +115,7 @@ The following changes are considered when triggering rehearsals:
 1. Changes to cluster profiles (`cluster/test-deploy`)
 
 Rerunning rehearsals can be done by re-triggering the plugin: `/pj-rehearse`, which then triggers all rehearsals of jobs currently
-affected by the PR, including the rehearsals that passed before. Individual rehearsals can also be re-triggered by utilizing the ['Rehearse Specific Jobs'](#rehearse-specific-jobs) functionality.
+affected by the PR, including the rehearsals that passed before. Individual rehearsals can also be re-triggered by utilizing the [Rehearse Specific Jobs](#rehearse-specific-jobs) functionality.
 
 Certain changes affect many jobs. For example, when a template or a step used by many jobs is changed, in theory all
 these jobs could be affected by the change, but it is unrealistic to rehearse them all. In some of these cases,
