@@ -80,9 +80,8 @@ messages of level `info` and above from its output, described [below]({{< ref
 text, but served as a regular text file, and is also available as
 `build-log.txt` in the artifacts directory.
 
-In the case of the example job, the [build log](https://storage.googleapis.com/origin-ci-test/pr-logs/pull/openshift_ci-tools/2877/pull-ci-openshift-ci-tools-master-unit/1539279980293263360/build-log.txt)
-was as follows (parts of it will be used in examples in this and the next
-sections).
+In the case of the example job, the `build-log.txt` was as follows (parts of it
+will be used in examples in this and the next sections).
 
 {{< highlight bash >}}
 INFO[2022-06-21T16:12:42Z] ci-operator version v20220617-3280eb53d
