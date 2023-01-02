@@ -147,8 +147,12 @@ registry. Make sure your `oc` CLI is [logged in](#how-do-i-log-in-to-pull-images
 `app.ci` cluster via the [console](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/), then you
 will be able to generate the pull credentials for your `ServiceAccount` using the `oc` CLI:
 
-```bash
-$ oc --namespace my-project registry login --service-account image-puller --registry-config=/tmp/config.json
+```console
+### Require jq cmd: https://stedolan.github.io/jq/
+$ oc registry login --auth-basic $(oc get secrets -n my-project --sort-by=.metadata.creationTimestamp -o json | \
+  jq '.items[] | select(.type=="kubernetes.io/dockercfg" and .metadata.annotations["kubernetes.io/service-account.name"]=="image-puller")' | \
+  jq -r -s '.[-1] | .data.".dockercfg"' | base64 -d | jq -r '."registry.ci.openshift.org" as $e | $e.username + ":" + $e.password') \
+  --registry-config=/tmp/config.json
 ```
 
 The created `/tmp/config.json` file can be then used as a standard `.docker/config.json` authentication file.
