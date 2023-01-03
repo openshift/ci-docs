@@ -357,13 +357,19 @@ should be set. Most commonly, the same integration `ImageStream` is specified fo
 
 {{< highlight yaml >}}
 releases:
-  initial: # this release will snapshot the current state of the integration stream, useful as an upgrade source
-    namespace: "ocp"
-    name: "4.5"
-  latest: # this release will add built images to the snapshot, allowing tests to verify changes to OCP components
-    namespace: "ocp"
-    name: "4.5"
-    include_built_images: true
+  # this release will snapshot the current state of the integration stream, useful as an 
+  # upgrade source
+  initial: 
+    integration:
+      namespace: "ocp"
+      name: "4.5"
+  # this release will add built images to the snapshot, allowing tests to verify changes 
+  # to OCP components
+  latest: 
+    integration:
+      namespace: "ocp"
+      name: "4.5"
+      include_built_images: true
 {{< / highlight >}}
 
 In the above example, `ci-operator` will snapshot the current state of the integration `ImageStream`,
