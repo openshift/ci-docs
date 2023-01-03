@@ -1,6 +1,6 @@
 ---
 title: "Handling Job Timeouts and Interruptions"
-description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do when handling them. 
+description: An overview of job execution timeouts, how to configure them and what the test workload is expected to do when handling them.
 ---
 
 # Overview
@@ -17,6 +17,12 @@ Timeouts occur for a job when the overall job or some subset of the job exceeds 
 
 Furthermore, instability in the OpenShift build farm clusters hosting these workloads may also trigger the deletion of `Pods` that implement a job. In these cases, the resulting workflow is identical, as `Pod` eviction honors the configured grace periods.
 
+{{< alert title="Note" color="info" >}}
+Part of the CI implementation involves one or more small coordinating processes executed inside of each test `Pod`. This is the case for Prow jobs which execute `ci-operator` or any other program, as well as for the individual steps in a `ci-operator` test.
+
+These processes are layered such that each is made a parent of the next, with the ultimate descendant being the actual test script. This means "PID 1" described here and in the Kubernetes documentation will not be the script configured in the `commands` field (for `ci-operator` tests) or directly in the `ProwJob`. However, each of these processes, when present, correctly forwards signals to its child, so the method for handling interruptions remains the same.
+{{< / alert >}}
+
 ### Types of Timeouts
 
 #### Prow Infrastructure Timeouts
@@ -25,13 +31,16 @@ Furthermore, instability in the OpenShift build farm clusters hosting these work
 Prow's infrastructure timeouts exist to guard the system against denial-of-service from poorly-formed jobs. These values are documented here for completeness, but exist to be tuned by administrators only. Effectively, job authors should worry only about test process timeouts from [Prow](#prow-test-process-timeouts), [`ci-operator`](#ci-operator-test-process-timeouts) and the [step registry](#step-registry-test-process-timeouts).
 {{< /alert >}}
 
-Prow is [configured](https://github.com/openshift/release/blob/9238ee8b89c861793f9b8e8f7f6509abe33bd0b8/core-services/prow/02_config/_config.yaml) to tightly bound the execution time budgets for all jobs in the system. The configuration specifies a number of timeouts, exceeding any of these will cause the test `Pod` (running `ci-operator`) to be deleted, triggering the Kubernetes graceful termination process. Each timeout has specific semantics:
+Prow is [configured](https://github.com/openshift/release/blob/9238ee8b89c861793f9b8e8f7f6509abe33bd0b8/core-services/prow/02_config/_config.yaml) to tightly bound the execution time budgets for all jobs in the system. The configuration specifies a number of timeouts, exceeding any of these will cause the test `Pod` (running `ci-operator`) to be deleted, triggering the Kubernetes graceful termination process. Timeouts are configured for several different components and each has specific semantics:
 
-- The `default_job_timeout` is a hard timeout for the overall lifetime of a job. This may be overridden for a specific job, but only to values smaller than the global timeout. This setting is global for all Prow jobs, it's needed as Prow can launch job types other than Kubernetes `Pods`.
-- The `plank.pod_{pending,unscheduled}_timeout` settings allow Prow to move on from a job for which `Pods` cannot start. Jobs exhibiting these timeouts occur when issues exist with the underlying build farm clusters where `Pods` are executed. These jobs will be listed as errored, not failed, and the DPTP on-call rotation will investigate them.
-- The `plank.pod_running_timeout` is the default timeout for the overall lifetime for a running `Pod` for a job. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
-- The `sinker.max_pod_age` is the timeout in Prow's garbage collector for how long any individual `Pod` may exist. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
-- The `sinker.max_prowjob_age` is the timeout in Prow's garbage collector for how long Prow will try to execute a job - any individual attempt to run a `Pod` for the job may fail, and Prow will continue to retry where it can until this timeout is reached.
+- Global: these settings are global for all Prow jobs.  They're needed as Prow can launch job types other than Kubernetes `Pods`.
+  - The `default_job_timeout` is a hard timeout for the overall lifetime of a job. This may be overridden for a specific job, but only to values smaller than the global timeout.
+- `plank`: this is the controller which creates and manages `Pods` for Prow jobs executed in Kubernetes/OpenShift clusters (as opposed to, for example, Jenkins).  Its settings affect all Prow job `Pods`, which usually execute `ci-operator`.
+  - The `plank.pod_{pending,unscheduled}_timeout` settings allow Prow to move on from a job for which `Pods` cannot start. Jobs exhibiting these timeouts occur when issues exist with the underlying build farm clusters where `Pods` are executed. These jobs will be listed as errored, not failed, and the DPTP on-call assignee will investigate them.
+  - The `plank.pod_running_timeout` is the default timeout for the overall lifetime for a running `Pod` for a job. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
+- `sinker`: this controller is used in concert with `plank` and takes care of eventually removing `Pods` created to execute Prow jobs.  Its settings affect only `Pods` for jobs which have already completed.
+  - The `sinker.max_pod_age` is the timeout in Prow's garbage collector for how long any individual `Pod` may exist. This value is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself.
+  - The `sinker.max_prowjob_age` is the timeout in Prow's garbage collector for how long Prow will try to execute a job - any individual attempt to run a `Pod` for the job may fail, and Prow will continue to retry where it can until this timeout is reached.
 
 ```yaml
 default_job_timeout: 24h0m0s
@@ -48,7 +57,7 @@ sinker: # Prow's garbage collector
 
 Prow is furthermore [configured](https://github.com/openshift/release/blob/9238ee8b89c861793f9b8e8f7f6509abe33bd0b8/core-services/prow/02_config/_config.yaml) to tightly bound the execution time budgets for all test processes for jobs in the system. Prow's infrastructure timeouts exist to guard the system against denial-of-service situations, so they are implemented as hard deadlines and are not meant to provide a pleasant user experience for test process authors. Prow projects a set of test process timeouts into jobs, as well, to allow test processes to exit gracefully before hard infrastructure timeouts occur. The configuration specifies a timeout as well as a grace period and can be overridden at the GitHub organization, repository or specific job level.
 
-In OpenShift CI, this timeout and grace period apply to the `ci-operator` orchestrator and are forwarded to test processes running for steps of a job. The `timeout` setting is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself. The `grace_period` is set as `pod.spec.terminationGracePeriodSeconds`. Prow will delete the `ci-operator` job `Pod` when the timeout is reached and Kubernetes handles the final `SIGKILL` after the configured grace period expires. 
+In OpenShift CI, this timeout and grace period apply to the `ci-operator` orchestrator and are forwarded to test processes running for steps of a job. The `timeout` setting is _not_ encoded in the `pod.spec.activeDeadlineSeconds`, but handled by Prow itself. The `grace_period` is set as `pod.spec.terminationGracePeriodSeconds`. Prow will delete the `ci-operator` job `Pod` when the timeout is reached and Kubernetes handles the final `SIGKILL` after the configured grace period expires.
 
 ```yaml
 plank: # Prow's controller to launch Pods for jobs
@@ -102,13 +111,15 @@ When this timeout is reached in a job, the following log lines from `ci-operator
 
 ```
 # when the timeout is reached:
-time="2021-02-15T15:27:53Z" level=info msg="Received signal." signal=interrupt
-2021/02/15 15:27:53 error: Process interrupted with signal interrupt, cancelling execution...
+{"component":"entrypoint","level":"error","msg":"Process did not finish before 4h0m0s timeout}
+# ci-operator's response:
+INFO[2021-02-15T15:26:53Z] Received signal.                              signal=interrupt
+INFO[2021-02-15T15:26:53Z] error: Process interrupted with signal interrupt, cancelling execution...
 # cleanup begins:
-2021/02/15 15:27:53 cleanup: Deleting release pod release-images-initial
-2021/02/15 15:27:53 cleanup: Deleting release pod release-images-latest
+INFO[2021-02-15T15:27:53Z] cleanup: Deleting release pod release-images-initial
+INFO[2021-02-15T15:27:53Z] cleanup: Deleting release pod release-images-latest
 # post-steps are triggered:
-2021/02/15 15:53:03 Executing pod "e2e-aws-upgrade-gather-extra" running image "stable:cli" 
+INFO[2021-02-15T15:53:03Z] Running step e2e-aws-upgrade-gather-extra.
 ```
 
 #### Step Registry Test Process Timeouts
@@ -130,7 +141,7 @@ ref:
     Runs the end-to-end suite published by org/repo.
 ```
 
-{{< alert title="Warning" color="warning" >}}
+{{< alert title="Note" color="info" >}}
 The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podspec-v1-core) for more details. For these reasons, no timeout configured in the system makes use of this setting, instead relying on a thin wrapper around the executing code that's injected by Prow itself.
 {{< /alert >}}
 
@@ -156,7 +167,7 @@ ref:
     Runs the test suite from source code.
 ```
 
-Note that the step declares a 120s termination grace period, which is much larger than the default of 30s. The step commands might look like:
+Note that the step declares a 120s termination grace period, which is much larger than the default of 15s. The step commands might look like:
 
 ```shell
 #!/usr/bin/env bash
