@@ -547,9 +547,10 @@ There are few extra fields that can be configured to control if or when the test
 
 * `run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
 * `skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs-based-on-changes)).
-* `optional` Set to `true` to `make` the job not block merges.
+* `always_run` Set to `false` to disable automatic triggering on every PR. This deaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
+* `optional` Set to `true` to make the job not block merges.
 
-**Note:** `run_if_changed` and `skip_if_only_changed` are mutually exclusive.
+**Note:** `run_if_changed`, `skip_if_only_changed`, and `always_run: true` are mutually exclusive.
 
 ### Post-submit Tests
 
