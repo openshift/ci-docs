@@ -59,9 +59,10 @@ variable, as can be seen in the `ProwJob` object:
 [`sidecar`][sidecar] is the component responsible for gathering and uploading
 artifacts to Google Cloud Storage (GCS).  It is added as a secondary container
 to the one declared in the `pod_spec` and so will be executed in parallel with
-it.  The signal emitted by `entrypoint` when the test finishes will cause it to
-being its work.  It is controlled by a special environment variable
-`SIDECAR_OPTIONS`, which can be seen in the `ProwJob` object:
+it.  The signal emitted by `entrypoint` when the test finishes (in most cases,
+see the [timeout][timeouts] documentation) will cause it to being its work.  It
+is controlled by a special environment variable `SIDECAR_OPTIONS`, which can be
+seen in the `ProwJob` object:
 
 {{< highlight "yaml" >}}
 # pod_spec.containers[1].env[]|select(.name=="SIDECAR_OPTIONS").value
