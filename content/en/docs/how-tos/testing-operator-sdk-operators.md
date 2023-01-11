@@ -4,7 +4,7 @@ description: How to configure tests for a component that is deployed as an opera
 ---
 
 `ci-operator` supports building, deploying, and testing operator bundles, whether the operator repository uses the
-Operator SDK or not. This document outlines how to configure `ci-operator` to build bundle and index `images` and use those
+Operator SDK or not. This document outlines how to configure `ci-operator` to build bundle `images` and use those
 in end-to-end tests.
 
 Consult the `ci-operator` [overview](/docs/architecture/ci-operator/) and the step environment
@@ -15,7 +15,7 @@ operator test is defined in.
 
 Multiple different `images` are involved in installing and testing candidate versions of OLM-delivered operators: operand,
 operator, bundle, and index `images`. Operand and operator `images` are built normally using the `images` stanza in
-[`ci-operator` configuration](/docs/architecture/ci-operator/#building-container-images). OLM uses bundle and index `images`
+[`ci-operator` configuration](/docs/architecture/ci-operator/#building-container-images). OLM uses bundle `images`
 to install the desired version of an operator. `ci-operator` can build ephemeral versions of these `images` suitable for
 installation and testing, but not for production.
 
@@ -49,7 +49,7 @@ images:
   to: "tested-operator"
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
-  - as: my-bundle                         # optional
+  - as: my-bundle
     context_dir: "path/"                  # defaults to .
     dockerfile_path: "to/Dockerfile" # defaults to `bundle.Dockerfile`, relative to `context_dir`
     base_index: "operator-index"          # optional
@@ -66,19 +66,24 @@ operator:
 When configuring a bundle build, five options are available:
 
 * `as`: the image name for the built bundle. Specifying a name for the bundle image allows a multistage workflow
-  directly access the bundle by name. If not provided, a dynamically generated name will be created for the bundle
-  and the bundle will only be accessible via the default index image (`ci-index`).
+  directly access the bundle by name.
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
 * `dockerfile_path`: a path (relative to `context_dir`) to the `Dockerfile` that builds the bundle image,
   defaulting to `bundle.Dockerfile`
-* `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`.
-  If unspecified, the bundle will be added to an empty index. Requires `as` to be set.
+* `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`. It is
+used only in building an index image which is deprecated.
 * `update_graph`: the update mode to use when adding the bundle to the `base_index`. Can be: `semver`, `semver-skippatch`,
-  or `replaces` (default: `semver`). Requires `base_index` to be set.
+  or `replaces` (default: `semver`). Requires `base_index` to be set.  It is
+used only in building an index image which is deprecated.
 
 The `operator.bundles` stanza is a list, so it is possible to build multiple bundle `images` from one repository.
 
-## Building an Index
+## Building an Index: Deprecated
+
+{{< alert title="Warning" color="warning" >}}
+Building index images is deprecated and will be removed from ci-operator soon.
+See the [moving-to-file-based-catalog](/docs/how-tos/testing-operator-sdk-operators/#moving-to-file-based-catalog) section below.
+{{< /alert >}}
 
 When `ci-operator` builds at least one operator bundle from a repository, it will also automatically build an ephemeral
 index image to package those bundles. Test workloads should consume the bundles via this index image. For bundles that do
@@ -112,8 +117,9 @@ present.
 
 # Running Tests
 
-Once `ci-operator` builds the operator bundle and index, they are available to be used as a `CatalogSource` by OLM for
-deploying and testing the operator. The default index image is called `ci-index` and can be exposed to multi-stage test
+Once `ci-operator` builds the operator bundle, they are available to be used 
+by [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) for
+deploying and testing the operator. The default bundle image is called `my-bundle` and can be exposed to multi-stage test
 workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
 
 Step configuration example:
@@ -123,14 +129,14 @@ ref:
   from: "cli"
   commands: "step-consuming-ci-index.sh"
   dependencies:
-  - env: "OO_INDEX"
-    name: "ci-index"
+  - env: "OO_BUNDLE"
+    name: "my-bundle"
   documentation: ...
 {{< / highlight >}}
 
 Any test workflow involving such step will require `ci-operator` to build the index image before it executes the workflow.
-The `OO_INDEX` environmental variable set for the step will contain the pull specification of the index image. For tests with
-a named bundle, the correct index image can be configured via the `dependencies` field in the test's ci-operator config. See
+The `OO_BUNDLE` environmental variable set for the step will contain the pull specification of the index image. For tests with
+a bundle with a different name specified by `operator.bundles.as`, the correct bundle image can be configured via the `dependencies` field in the test's ci-operator config. See
 the [Simple Operator Installation](/docs/how-tos/testing-operator-sdk-operators#simple-operator-installation) section below.
 
 # Step Registry Content for Operators
@@ -185,7 +191,7 @@ tests:
       OO_PACKAGE: "myoperator"
       OO_TARGET_NAMESPACES: '!install'
     dependencies:
-      OO_INDEX: "ci-index-my-bundle" # if the bundle being tested is named, update the dependency to match
+      OO_BUNDLE: "bundle-name" # if the name of the bundle being tested is not my-bundle in the ci-opeator's configuration, update the dependency to match
     test:
     - as: "e2e"
       from: "src"               # the end-to-end tests run in the source repository
@@ -233,7 +239,7 @@ tests:
       OO_INITIAL_CHANNEL: "v1.1"
       OO_LATEST_CSV: "myoperator.v1.2.0"
     dependencies:
-      OO_INDEX: "ci-index-my-bundle" # operator upgrade tests require bundles with a base_index, and thus must be named
+      OO_BUNDLE: "bundle-name" # if the name of the bundle being tested is not my-bundle in the ci-opeator's configuration, update the dependency to match
     test:
     - as: "e2e"
       from: "src"               # the end-to-end tests run in the source repository
@@ -243,3 +249,16 @@ tests:
           cpu: 100m
           memory: 200Mi
 {{< / highlight >}}
+
+## Moving to File-Based Catalog
+
+Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) which deprecates the db-based index image.
+However, the method of building an index image used in `ci-opeartor` does not work with file-based index images.
+As a result, `ci-operator` has to skip the process of building the index image if
+it detects that the base index is file-based.
+This changes the expected way of consuming the bundles built in the workload from
+the index image which is used as a `CatalogSource` by OLM to the bundle image
+which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/). The command works with the index images of both formats. 
+
+In order to run e2e tests with an index image with `4.11+`, the owners of the steps using `OO_INDEX` needs to switch to `OO_BUNDLE`.
+Once all steps are migrated to `OO_BUNDLE`, `ci-operator` will remove the process of building index images.
