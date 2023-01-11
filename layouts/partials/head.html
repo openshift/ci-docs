@@ -99,6 +99,10 @@ function format ( d ) {
           success: function(res) {
             $.each(res.data, function(index, item) {
               var description=item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
+              if (item['error'] !== "") {
+                  $("#ul_clusters").append('<li>' + item["cluster"] + ': ' + item['error'] + '</li>');
+                  return;
+              }
               if (item['cluster'] === 'app.ci') {
                 description=description+' containing most Prow services.';
               } else if (item['cluster'] === 'hive') {
