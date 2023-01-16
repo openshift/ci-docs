@@ -98,7 +98,7 @@ function format ( d ) {
           dataType: 'jsonp',
           success: function(res) {
             $.each(res.data, function(index, item) {
-              if (item['error'] !== "") {
+              if (item['error']) {
                 $("#ul_clusters").append('<li>' + item["cluster"] + ': ' + item['error'] + '</li>');
                 return;
               }
