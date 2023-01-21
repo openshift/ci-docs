@@ -47,7 +47,7 @@ It does not cover how the tests themselves are run against a cluster.
 
 1. The disruption uploader will parse out the results from the e2e run backend-disruption json files and push them to the [openshift-ci-data-analysis](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis) table in BigQuery.
 
-1. We currently run a periodic [disruption data analyzer job](https://github.com/openshift/release/blob/7186dca51d5350e3d42c75b071d8a1e4e6f68d5f/ci-operator/jobs/infra-periodics.yaml#L2549-L2630) in the infra cluster. It gathers the recent disruption data and commits the results back to `openshift/origin`. The PR it generates will also include a report that will help show the differences from previous to current disruptions in a table format. ([example PR](https://github.com/openshift/origin/pull/27475#issue-1414053178)).
+1. We currently run a periodic [disruption data analyzer job](https://github.com/openshift/release/blob/7186dca51d5350e3d42c75b071d8a1e4e6f68d5f/ci-operator/jobs/infra-periodics.yaml#L2549-L2630) in the [app.ci](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/) cluster. It gathers the recent disruption data and commits the results back to `openshift/origin`. The PR it generates will also include a report that will help show the differences from previous to current disruptions in a table format. ([example PR](https://github.com/openshift/origin/pull/27475#issue-1414053178)).
 
    Note, the read only BigQuery secret used by this job is saved in `Vault` using the processes described in this [HowTo](../../../how-tos/adding-a-new-secret-to-ci/#add-a-new-secret).
 
