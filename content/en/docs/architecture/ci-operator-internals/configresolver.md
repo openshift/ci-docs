@@ -49,7 +49,7 @@ INFO[2022-03-08T14:20:18Z] Loading configuration from https://config.ci.openshif
 The request is based on the information in `JOB_SPEC`, which is a JSON object
 containing information about the event that triggered the job (e.g. a pull
 request) and is normally supplied by Prow at runtime, as described in the
-[documentation](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables).
+[documentation](https://docs.prow.k8s.io/docs/jobs#job-environment-variables).
 The mapping from the log output to the URL requested is trivial, but also
 displayed in the debug log:
 

@@ -7,7 +7,7 @@ Retester is a tool that evaluate which pull requests should be retested, and the
 by [@openshift-ci-robot](https://github.com/openshift-ci-robot) 's commenting `/retest-required` on the pull requests.
 
 ## How Do We Set up Retester?
-Retester completely reuses [`tide`](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/tide/README.md) 
+Retester completely reuses [`tide`](https://docs.prow.k8s.io/docs/components/core/tide/)
 configuration, whatever onboards to Tide, gets onboarded to retester too.
 Retester is aware of Prow and the concept of optional and required jobs. It only triggers retests on PRs 
 where at least one required Prow job is failing.

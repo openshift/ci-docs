@@ -145,7 +145,7 @@ The following environment variables will be available to commands in a step:
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
 `ci-operator` through [leases](#leases), [parameters](#parameters) and [dependencies](/docs/architecture/ci-operator/#referencing-images).
-A further set of environment variables are made available by [Prow](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables);
+A further set of environment variables are made available by [Prow](https://docs.prow.k8s.io/docs/jobs#job-environment-variables);
 if a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
 straightforward approach exists to achieve the same outcome.
 
