@@ -13,9 +13,9 @@ The subjects explored here are documented, if somewhat superficially, in the
 following files in the `kubernetes/test-infra` repository, in reverse order of
 usefulness to the casual Prow user:
 
-- ["Life of a Prow Job"](https://github.com/kubernetes/test-infra/blob/master/prow/life_of_a_prow_job.md)
-- ["Understanding Started.json and Finished.json"](https://github.com/kubernetes/test-infra/blob/master/prow/metadata_artifacts.md)
-- ["Pod Utilities"](https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md)
+- ["Life of a Prow Job"](https://docs.prow.k8s.io/docs/life-of-a-prow-job/)
+- ["Understanding Started.json and Finished.json"](https://docs.prow.k8s.io/docs/metadata-artifacts/)
+- ["Pod Utilities"](https://docs.prow.k8s.io/docs/components/pod-utilities/)
 {{< / alert >}}
 
 The job examined will be a simple unit test from the `openshfit/ci-tools`

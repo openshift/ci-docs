@@ -31,7 +31,7 @@ with that app, but that work is not yet done.
 
 ## Prow Configuration
 
-[Prow](https://github.com/kubernetes/test-infra/blob/master/prow/README.md) is the k8s-native upstream CI system, source
+[Prow](https://docs.prow.k8s.io/docs/overview/) is the k8s-native upstream CI system, source
 code hosted in the [kubernetes/test-infra](https://github.com/kubernetes/test-infra) repository. Prow interacts with
 GitHub to provide the automation UX that developers use on their pull requests, as well as orchestrating test workloads
 for those pull requests.
@@ -96,7 +96,7 @@ catalog](https://prow.ci.openshift.org/plugins) when choosing which plugins you 
 
 If your repository does not have `OWNERS files`, you will not be able to opt into the `/approve` process or automatic pull
 request review assignment. `OWNERS` file format and interaction details can be found
-[upstream.](https://github.com/kubernetes/test-infra/blob/master/prow/plugins/approve/approvers/README.md) You will also
+[upstream.](https://docs.prow.k8s.io/docs/components/plugins/approve/approvers/) You will also
 need to add bugzilla component information to your `OWNERS` file. Format can be found
 [here.](https://docs.google.com/document/d/1V_DGuVqbo6CUro0RC86THQWZPrQMwvtDr0YQ0A75QbQ/edit?usp=sharing)
 
@@ -122,7 +122,7 @@ Configuration for your repository’s tests live in YAML files in the
 many files, sharded by branch and job type, found under: `ci-operator/jobs/$org/$repo/$org-$repo-$branch-$jobtype.yaml`.
 The org and repo name redundancy is because of a requirement that the basename of your YAML file is unique under the
 `ci-operator/jobs` tree. More detailed Prow job configuration documentation lives
-[upstream.](https://github.com/kubernetes/test-infra/tree/master/prow#how-to-add-new-jobs)
+[upstream.](https://docs.prow.k8s.io/docs/jobs#how-to-configure-new-jobs)
 
 #### Generating Prow jobs from ci-operator configuration files
 
@@ -174,7 +174,7 @@ To enable Tide, place a new `_prowconfig.yaml` file in the
 the top-level `["tide"]` key. The easiest way to get the correct config is to
 copy it from an existing repo with similar requirements. Tide’s configuration
 options are documented
-[upstream](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/tide/config.md#configuring-tide).
+[upstream](https://docs.prow.k8s.io/docs/components/core/tide/config/).
 
 If your repository does not have `OWNERS` files, or if you have not chosen to
 opt into the `/approve `process, it is suggested that you require only the
@@ -188,7 +188,7 @@ Due to github's rate limiting it is possible that the `Tide` check will not appe
 
 Repo’s `OWNERS` and `OWNERS_ALIASES` define the list. It is a concept of Prow workflow. Those files also define who
 could get selected as reviewers of PRs in that repo. See [Prow's
-doc](https://github.com/kubernetes/test-infra/blob/master/prow/plugins/approve/approvers/README.md#approval-handler-and-the-approved-label)
+doc](https://docs.prow.k8s.io/docs/components/plugins/approve/approvers#approval-handler-and-the-approved-label)
 on this topic.
 
 #### Who can `/lgtm`?
@@ -197,7 +197,7 @@ Github’s users who are the repo’s collaborators. It is a [concept of
 github.](https://developer.github.com/v3/projects/collaborators/) Contributors should follow this
 [mojo](https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access) to become a collaborator for repositories
 in openshift org. See [Prow’s
-doc](https://github.com/kubernetes/test-infra/blob/master/prow/plugins/approve/approvers/README.md#lgtm-label) on this
+doc](https://docs.prow.k8s.io/docs/components/plugins/approve/approvers/#lgtm-label) on this
 topic.
 
 ## CI Operator Configuration

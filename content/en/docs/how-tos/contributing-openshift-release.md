@@ -290,12 +290,12 @@ modifications to allow some commonly needed customizations:
 |Field | Description |Presubmit |Postsubmit|Periodic|
 |:---|:---|:---|:---|:---|
 |`.always_run` | 	Set to `false` to disable automated triggers of the job on pull requests.|✓|||
-|`.run_if_changed`|Set to trigger the job based on the set of files changed by PRs (see the [documentation](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs)).|✓|||
-|`.skip_if_only_changed`|Set to trigger the job based on the set of files changed by PRs (see the [documentation](https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#triggering-jobs)).|✓|||
+|`.run_if_changed`|Set to trigger the job based on the set of files changed by PRs (see the [documentation](https://docs.prow.k8s.io/docs/jobs#triggering-jobs)).|✓|||
+|`.skip_if_only_changed`|Set to trigger the job based on the set of files changed by PRs (see the documentation link above).|✓|||
 |`.skip_report`|Set to `true` to `make` the job not report its result to the pull request.|✓|||
 |`.cluster`|Set to limit the job to a particular CI build cluster.|✓|✓|✓|
 |`.max_concurrency`|Set to limit how many instances of the job can run simultaneously.|✓|✓|✓|
-|`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://github.com/kubernetes/test-infra/blob/master/prow/cmd/crier/README.md#slack-reporter)).|||✓|
+|`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://docs.prow.k8s.io/docs/components/core/crier#slack-reporterhttpsgithubcomkubernetestest-infratreemasterprowcrierreportersslack)).|||✓|
 
 {{< alert title="Warning" color="warning" >}}
 Nightly jobs run using the [release-controller](https://github.com/openshift/release-controller) do **not** honor the `cluster` setting. They have their own [load balancing system](https://github.com/sshnaidm/release-controller/blob/6b7f7b2e92f49d417ce54ec7b037fbede09c2301/cmd/release-controller/sync_verify_prow.go#L26) which will set the cluster accordingly.
