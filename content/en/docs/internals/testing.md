@@ -13,23 +13,26 @@ reference pages as necessary.  Readers may also find the many
 
 Before that, the question in everyone's mind should be answered: why is it
 called `ci-operator`?  This is mostly for historical reasons: it is not actually
-an operator but a regular program that is executed inside a `Pod` and terminates
-as soon as it is done processing a single CI job.  There is a long-term goal of
-making it honor its name (see [this Jira issue][DPTP-32] --- double digits!).
+a [Kubernetes operator][kubernetes_operators] that acts as controllers of a
+custom resource but a regular program that is executed inside a `Pod` and
+terminates as soon as it is done processing a single CI job.  There is a
+long-term goal of making it honor its name (see [DPTP-32][DPTP-32] --- double
+digits!).
 
 ## First encounter
 
 The first step is to obtain a copy of the `ci-operator` binary.  The easiest and
-quickest method is via the container image used by CI jobs:
-`registry.ci.openshift.org/ci/ci-operator`.  It is available publicly, so no
-authentication is required (see [this section][registry_authentication_errors]
-if you are not able to pull it).  Chances are it will be usable even outside the
-image, since it is a regular, statically-linked Go binary:
+quickest method is via the container image
+`registry.ci.openshift.org/ci/ci-operator`, used by CI jobs.  It is available
+publicly, so no authentication is required (see [this
+section][registry_authentication_errors] if you are not able to pull it).
+Chances are it will be usable even outside the image, since it is a regular,
+statically-linked Go binary:
 
 {{< highlight bash >}}
 $ podman run --rm --entrypoint cat registry.ci.openshift.org/ci/ci-operator /usr/bin/ci-operator > ci-operator
 $ file ci-operator
-ci-operator: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=0zvyBlXh4_7ZatNIZPjt/uu9NARUA2TtdjUy55Vpo/PHVfZ5sNLyxrFtYBPXhZ/-yq-meUB9qiZCfE3PpAH, not stripped
+ci-operator: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=…, not stripped
 {{< / highlight >}}
 
 For developers wanting to make changes to the code, the alternative is to build
@@ -49,7 +52,7 @@ The ci-operator reads a declarative configuration YAML file and executes a set o
 steps on an OpenShift cluster for image-based components. By default, all steps are run,
 {{< / highlight >}}
 
-The initial attempt to execute it will be frustrated, however:
+Attempting to execute it without the appropriate setup leads to a failure:
 
 {{< highlight bash >}}
 $ ci-operator
@@ -73,8 +76,8 @@ can result in surprising and unintended behavior.
 `ci-operator`'s natural habitat is the [Prow][prow] job.  That is almost
 exclusively the environment where it is executed, and the default interface is
 optimized for that usage.  A discussion of the architecture of Prow is outside
-the scope of this document; the following upstream documents complement the
-brief discussion that follows:
+the scope of this document; for more information about the topics briefly
+discussed in the next sections, see the following upstream documents:
 
 - [ProwJobs][prowjobs]
 - [Life of a Prow Job][life_of_a_prow_job]
@@ -90,9 +93,9 @@ linked above).
 
 Two options are available to execute `ci-operator` directly, outside of Prow.
 The `--git-ref` argument can be used to pass a string in the format
-`org/repo@ref`, which instructs `ci-operator` to `ls-remote` the repository to
-determine the revisions.  It then build its own `JOB_SPEC` internally based on
-that information:
+`org/repo@ref`, which instructs `ci-operator` to [`ls-remote`][git_ls_remote]
+the repository to determine the revisions.  It then builds its own `JOB_SPEC`
+internally based on that information:
 
 {{< highlight bash >}}
 $ ci-operator --git-ref openshift/ci-tools@master |& head -n 2
@@ -102,13 +105,14 @@ INFO[2022-03-09T17:01:39Z] Resolved openshift/ci-tools@master to commit ef415037
 
 The second option is to manufacture a `JOB_SPEC` conforming to the format
 dictated by Prow to fit the desired test scenario.  This saves some time when
-testing several executions and can also be useful when testing the processing of
-this variable or alternative configurations.  `JOB_SPEC` is a JSON object which
-can be easily written manually.  For now, even a minimal definition suffices.
-However, code in Prow and `ci-tools` generally assumes a well-formed definition,
-so it is best to supply a valid value unless something very specific is begin
-tested.  The following examples assume a definition similar to what the
-`--git-ref` argument shown above generates:
+multiple tests are performed in succession and can also be useful when testing
+the processing of this variable or alternative configurations.  `JOB_SPEC` is a
+JSON object which can be easily written manually.  For now, even a minimal
+definition suffices.  However, code in Prow and `ci-tools` generally assumes a
+well-formed definition, so it is best to use real values unless something very
+specific is being tested (see the ["artifacts"][artifacts] documentation).  The
+following examples assume a definition similar to what the `--git-ref` argument
+shown above generates:
 
 {{< highlight bash >}}
 export JOB_SPEC='{
@@ -153,21 +157,22 @@ ERRO[2022-03-09T17:13:31Z] Failed to load arguments.                     error=f
 
 We will leave it be until a [later section]({{< relref "#test-namespaces" >}})
 and focus on the other log line that appeared in the output.  There is now a
-`JOB_SPEC`, so the <i>ref</i>s in it are used directly and simply echoed back in
-a slightly different manner, but the second line is completely new.
+`JOB_SPEC` from the exported environment variable, so the <i>ref</i>s in it are
+used directly and simply echoed back in a slightly different manner, but the
+second line is completely new.
 
 One of the other major `ci-operator` input values is its configuration file.
 Since no other information was given, it is derived from the repository
 configuration that is now being provided.  This is done with assistance from the
 `ci-operator-configresolver` service at `config.ci.openshift.org`, which has its
 own [documentation page][configresolver].  For our purposes, it is enough to
-mention that this is an easy way (both for CI jobs and for users) to obtain the
+know that this is an easy way (both for CI jobs and for users) to obtain the
 latest configuration file for a given input in a format that is directly usable
-by `ci-operator`.  We will assume that is not what is intended and will instead
-now detail the configuration file format.
+by `ci-operator`.  We will assume that the configuration will come from a local
+file instead and will now detail its format.
 
-Before leaving the resolver, we will note that it has other, secondary
-responsibilities beyond serving configuration files.  It also serves
+Before leaving the resolver, we will note that it has secondary responsibilities
+beyond serving configuration files.  It also serves
 https://steps.ci.openshift.org and, in particular, a [complete
 reference][ci_operator_reference] of the fields of the configuration file.
 Refer to it as we examine the files in the next sections.
@@ -277,8 +282,8 @@ documentation][services_networking]).
 
 Outside of a Kubernetes cluster, the connection information can be passed using
 the standard `KUBECONFIG` environment variable, which should point to a file
-just as `kubectl` and/or `oc` would expect it.  Note that the default context
-will be used, so make sure it points to the correct cluster.
+just as `kubectl` and/or `oc` would expect.  Note that the current context will
+be used, so make sure it points to the correct cluster.
 
 {{< highlight bash >}}
 $ oc whoami
@@ -366,11 +371,11 @@ a partial order, it is of limited usefulness in more complicated graphs with
 multiple dependencies between nodes, but it gives a general idea of the order of
 execution.
 
-The next two lines are each output by their respective step when it is executed.
-The image import describes its input and output (the meaning of `pipeline` will
-be explained in a [later section]({{< relref "#pipeline" >}})) and the test
-simply notifies that it is being executed.  Finally, the total execution time is
-displayed right at the end of the execution of `ci-operator`.
+Each of the next two lines is the output of their respective step when it is
+executed.  The image import describes its input and output (the meaning of
+`pipeline` will be explained in a [later section]({{< relref "#pipeline" >}}))
+and the test simply notifies that it is being executed.  Finally, the total
+execution time is displayed right at the end of the execution of `ci-operator`.
 
 Why was the `--target` argument necessary?  Remember that `ci-operator`'s
 defaults are optimized for its use in CI jobs.  As such, it implicitly includes
@@ -408,18 +413,20 @@ following pages:
 [ci_tools]: https://github.com/openshift/ci-tools.git
 [configresolver]: {{< relref "configresolver" >}}
 [external_images]: {{< relref "/docs/how-tos/external-images" >}}
+[git_ls_remote]: https://git-scm.com/docs/git-ls-remote.html
 [gitglossary]: https://www.man7.org/linux/man-pages/man7/gitglossary.7.html
 [gitrevisions]: https://www.man7.org/linux/man-pages/man7/gitrevisions.7.html
 [image_inputs]: {{< relref "/docs/architecture/ci-operator#configuring-inputs" >}}
 [index]: {{< relref "_index.md" >}}
-[job_env_variables]: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md#job-environment-variables
+[job_env_variables]: https://docs.prow.k8s.io/docs/jobs#job-environment-variables
+[kubernetes_operators]: https://kubernetes.io/docs/concepts/extend-kubernetes/operator#operators-in-kubernetes
 [kubernetes_resources]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-[life_of_a_prow_job]: https://github.com/kubernetes/test-infra/blob/master/prow/life_of_a_prow_job.md
+[life_of_a_prow_job]: https://docs.prow.k8s.io/docs/life-of-a-prow-job/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [presentations]: {{< ref "/docs/getting-started/useful-links#presentations" >}}
 [project]: https://docs.openshift.com/container-platform/4.9/rest_api/project_apis/projectrequest-project-openshift-io-v1.html
 [prow]: https://github.com/kubernetes/test-infra/tree/master/prow
-[prowjobs]: https://github.com/kubernetes/test-infra/blob/master/prow/jobs.md
+[prowjobs]: https://docs.prow.k8s.io/docs/jobs/
 [registry_authentication_errors]: {{< ref "/docs/how-tos/use-registries-in-build-farm#why-i-am-getting-an-authentication-error" >}}
-[services_networking]: https://kubernetes.io/docs/concepts/services-networking/
+[services_networking]: https://kubernetes.io/docs/tasks/run-application/access-api-from-pod/#directly-accessing-the-rest-api
 [steps]: {{< relref "steps.md" >}}
