@@ -22,7 +22,7 @@ Furthermore, instability in the OpenShift build farm clusters hosting these work
 configured in the `commands` field (for `ci-operator` tests) or directly in the
 `ProwJob`.  However, the protocol for handling interruptions is unaffected, so
 the standard guidelines should still be follow.  See the
-[internals documentation]({{< ref "/docs/architecture/ci-operator-internals/timeouts.md" >}})
+[internals documentation]({{< ref "/docs/internals/timeouts.md" >}})
 for details.
 {{< / alert >}}
 

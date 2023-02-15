@@ -1,6 +1,6 @@
 ---
-title: "CI Operator Internals"
-description: A detailed view of some aspects of the ci-operator implementation, intended for developers working on its source code.
+title: "CI Internals"
+description: A detailed view of some aspects of the implementation of CI services, intended for developers working on their source code.
 ---
 
 This section describes in detail some aspects of the implementation of

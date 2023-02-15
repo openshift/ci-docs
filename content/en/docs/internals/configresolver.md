@@ -100,7 +100,7 @@ the contents of the `openshift/release` repository are provided to the
 which the content that is served is updated is:
 
 0. A pull request is merged in `openshift/release`.
-1. [`git-sync`]({{< ref "/docs/architecture/ci-operator-internals/configuration-updates#git-sync" >}})
+1. [`git-sync`]({{< ref "/docs/internals/configuration-updates#git-sync" >}})
    performs its update cycle, notices the new revision, and updates the local
    clone and the symlink to it.
 1. The `configresolver` [monitors changes](https://github.com/openshift/ci-tools/blob/master/pkg/load/agents/)
