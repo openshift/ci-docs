@@ -258,7 +258,7 @@ authors, they are mostly meant for test platform engineers:
 
 {{< alert title="Info" color="info" >}}
 "Step" in this context refers to [`ci-operator` steps]({{< ref
-"docs/architecture/ci-operator-internals/steps" >}}), not steps of a
+"docs/internals/steps" >}}), not steps of a
 [multi-stage test]({{< ref "docs/architecture/step-registry#step" >}}) &mdash;
 the latter being a type of the former.
 
