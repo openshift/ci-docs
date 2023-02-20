@@ -7,5 +7,3 @@ RUN set -x && ln -s /bin/bash /usr/bin/bash && make generate
 FROM klakegg/html-proofer:3.18.5
 
 COPY --from=builder /src/public/ /src/public/
-
-RUN apk add --no-cache bash
