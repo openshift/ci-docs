@@ -128,7 +128,7 @@ inform them of the context in which they run. Commands in steps can communicate 
 
 #### Available Environment Variables
 
-The following environment variables will be available to commands in a step:
+The following environment variables will be available to commands in a step, on top of [the variables exposed by Prow](https://docs.prow.k8s.io/docs/jobs/#job-environment-variables):
 
 |Variable|Definition|When is it Present?|
 |:---|:---|:---|
