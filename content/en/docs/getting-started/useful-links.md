@@ -77,7 +77,7 @@ The following are public and internal presentations from DPTP:
   [recording](https://drive.google.com/file/d/1H8ld2UHvZWwtMzuzjQ610PeT61kvPCQw/),
   [slides](https://docs.google.com/presentation/d/1lcYT-WtdNsiLGmgvme7srSVWDGqUUZSxbzMuJiFI6Rs/)).
 * _`ci-operator`_, Bruno Barcarol Guimarães (2022,
-  [recording](https://drive.google.com/file/d/15_JmE61V4b4hdSG8fWqXNFJD21p1-H_D/),
+  [recording](https://drive.google.com/file/d/16cGHKEStxRV5Z20C5gj-frG8G0l2VO7H/),
   [slides](https://drive.google.com/file/d/1ql2MOFRIsvPzgg3iMwjJTy6fRS9G7sDG/),
   [slides (with notes)](https://drive.google.com/file/d/1Jxu9pK3Ujw_ZAgxdd7b1dCVgjAP0JIr_/)).
 * _End-to-End Tests in OpenShift_, Bruno Barcarol Guimarães (2022,
