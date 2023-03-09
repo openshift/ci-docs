@@ -65,7 +65,7 @@ type unless they require special treatment in the installation process.
 
 ### Adding New Leases
 
-In the pull request to `openshift/ci-tools`, the mapping between a `cluster_profile` and the implicit `lease` that will be requested is determined. The standard is to use leases named `<name>-quota-slice`, so the `aws` profile uses `aws-quota-slice`. The resources for leasing must be [registered](/docs/architecture/quota-and-leases/#adding-a-new-type-of-resource) with our leasing server ([example](https://github.com/openshift/release/pull/27033)).
+In the pull request to `openshift/ci-tools`, the mapping between a `cluster_profile` and the implicit `lease` that will be requested is determined. The standard is to use leases named `<name>-quota-slice`, so the `aws` profile uses `aws-quota-slice`. The resources for leasing must be [registered](/docs/architecture/quota-and-leases/#adding-a-new-type-of-resource) with our leasing server ([example](https://github.com/openshift/release/pull/32536)).
 
 ### Providing Credentials
 
