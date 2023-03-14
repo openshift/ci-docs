@@ -37,7 +37,23 @@ It does not cover how the tests themselves are run against a cluster.
 `openshift-tests` run `disruption samplers`, these run `GET` requests against a number of backends in the cluster every second and record the results to determine disruption. (see [Testing Backends For Availability](../backend_queries) for more info)
 {{% /alert %}}
 
-1. The `Disruption Uploader` is a `CronJob` that is set to run every `4 hours`. All the `Uploader` jobs are run in the DPCR cluster, the current configuration can be found in the `openshift/continuous-release-jobs` private repo under `config/clusters/dpcr/services/dpcr-ci-job-aggregation`.
+1. To initially setup disruption data collection, this command
+   `./job-run-aggregator create-tables --google-service-account-credential-file <credJsonFile>`
+   is run to create the `Jobs`, `JobRuns`, and `TestRuns` tables in big query.  That command is idempotent -- i.e., it
+   can be run any time regardless of whether the tables are created or not and is part of the `job-table-updater` CronJob.
+   Each of the "Uploader" CronJobs used in disruption data collection (`alert-uploader`, `disruption-uploader`, `job-run-uploader`,
+   and `job-table-updater`) requires the `Jobs` table to exist.
+
+   The `Jobs`, `JobRuns`, and `TestRuns` tables will already exist so no one should have to run that command unless the
+   `Jobs` table needs to be deleted/re-created.  This is rare and only happens when we need to correct something in the
+   `Jobs` table (because big query does not allow updates to tables).  The `JobRuns` and `TestRuns` tables should
+   generally be preserved because they contain historical disruption data.
+
+   If someone ever has to delete the `Jobs` table, delete it right before the `job-table-updater` CronJob
+   triggers. This way, the `Jobs` table will immediately be re-created for you.
+
+1. The `Disruption Uploader` is a `CronJob` that is set to run every `4 hours`. All the `Uploader` jobs (`disruption-uploader`,  `alert-uploader`, `job-run-uploader`, and `job-table-updater`) run in the DPCR cluster in the `dpcr-ci-job-aggregation` namespace, the current configuration can be found in the `openshift/continuous-release-jobs` private repo under `config/clusters/dpcr/services/dpcr-ci-job-aggregation`.
+.
 
 1. When e2e tests are done the results are uploaded to `GCS` and the results can be viewed in the artifacts folder for a particular job run.
 

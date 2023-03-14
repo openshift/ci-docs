@@ -37,11 +37,15 @@ In `Job Primer` a job name is very important. Please make sure that the job name
 
    **You must then rebuild the binary so the newly generated list is correctly embedded.**
 
-1. We then create the jobs in the BigQuery table by running the `prime-job-table` command. This will use the embedded `generated_jobs_names.txt` data and generate the `Jobs` rows based off of the naming convention (see below). After which the `Jobs` table should be updated with the latest jobs.
+1. We then create the jobs in the BigQuery table by running the `prime-job-table` command (as a `CronJob` in the DPCR cluster in the `dpcr-ci-job-aggregation` project). This will use the embedded `generated_jobs_names.txt` data and generate the `Jobs` rows based off of the naming convention (see below). After which the `Jobs` table should be updated with the latest jobs.
 
    ```sh
    ./job-run-aggregator prime-job-table
    ```
+
+NOTE: the `prime-job-table` depends on the `Jobs` table existing ; that `Jobs` table is created (if it doesn't already exist)
+by the `./job-run-aggregator create-tables --google-service-account-credential-file <credJsonFile>` command which is
+run as part of the `job-table-udpater` CronJob.
 
 ### Naming Convention
 
