@@ -121,7 +121,7 @@ present.
 
 Once `ci-operator` builds the operator bundle, they are available to be used 
 by the [`operator-sdk run bundle`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command for
-deploying and testing the operator. In the following example, the bundle image is named `my-bundle` after the `operator.bundles.as` filed
+deploying and testing the operator. In the following example, the bundle image is named `my-bundle` after the `operator.bundles.as` field
 and can be exposed to multi-stage test workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
 
 Test configuration example:
