@@ -15,9 +15,9 @@ operator test is defined in.
 
 Multiple different `images` are involved in installing and testing candidate versions of OLM-delivered operators: operand,
 operator, bundle, and index `images`. Operand and operator `images` are built normally using the `images` stanza in
-[`ci-operator` configuration](/docs/architecture/ci-operator/#building-container-images). OLM uses bundle `images`
-to install the desired version of an operator. `ci-operator` can build ephemeral versions of these `images` suitable for
-installation and testing, but not for production.
+[`ci-operator` configuration](/docs/architecture/ci-operator/#building-container-images). The desired version of an operator
+is installed by [the operator-sdk cli](https://sdk.operatorframework.io/docs/cli/) via the "bundle images".
+`ci-operator` can build ephemeral versions of these `images` suitable for installation and testing, but not for production.
 
 ## Building Operator Bundles
 
@@ -52,8 +52,8 @@ operator:
   - as: my-bundle
     context_dir: "path/"                  # defaults to .
     dockerfile_path: "to/Dockerfile" # defaults to `bundle.Dockerfile`, relative to `context_dir`
-    base_index: "operator-index"          # optional
-    update_graph: "replaces"              # defaults to `semver`
+    base_index: "operator-index"          # deprecated
+    update_graph: "replaces"              # deprecated
   substitutions:
   # replace references to the operand with the imported version (`base_images` stanza)
   - pullspec: "quay.io/openshift/operand:1.3"
@@ -86,7 +86,7 @@ See the [moving-to-file-based-catalog](/docs/how-tos/testing-operator-sdk-operat
 {{< /alert >}}
 
 When `ci-operator` builds at least one operator bundle from a repository, it will also automatically build an ephemeral
-index image to package those bundles. Test workloads should consume the bundles via this index image. For bundles that do
+index image to package those bundles. Test workloads can consume the bundles via this index image. For bundles that do
 not have a configured name via the `as` field, the index image is named `ci-index`. Bundles with `as` set have an index
 called `ci-index-` appended by the value from `as`. The index can be exposed to test steps via the
 [dependencies](/docs/architecture/ci-operator/#referring-to-images-in-tests) feature.
@@ -100,7 +100,7 @@ operator:
   ....
 ```
 
-Then index image built by CI is called `ci-index-my-bundle` and should be specified as `OO_INDEX` in examples below.
+Then index image built by CI is called `ci-index-my-bundle` and should be specified as `OO_INDEX`.
 
 For bundles without `base_index` configured, the ephemeral index is built from scratch and only the bundles without
 `base_index` set and built in the current `ci-operator` run will be added to it, nothing else. The bundles are added to
@@ -108,7 +108,7 @@ the index using the `semver` mode, which means that the `spec.version` stanza in
 Also, if the CSV has a `spec.replaces` stanza, it is ignored, because the index will not contain a bundle with the
 replaced version.
 
-## Validating Bundle and Index `Builds`
+## Validating Bundle `Builds`
 
 Similarly to how the job generator automatically creates a `pull-ci-$ORG-$REPO-$BRANCH-images` job to test image builds
 when `ci-operator` configuration has an `images` stanza, it will also `make` a separate job that builds the configured bundle
@@ -117,140 +117,120 @@ present.
 
 # Running Tests
 
-Once `ci-operator` builds the operator bundle, they are available to be used 
-by [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) for
-deploying and testing the operator. The default bundle image is called `my-bundle` and can be exposed to multi-stage test
-workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
+## Simple Operator Installation
 
-Step configuration example:
+Once `ci-operator` builds the operator bundle, they are available to be used 
+by the [`operator-sdk run bundle`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command for
+deploying and testing the operator. In the following example, the bundle image is named `my-bundle` after the `operator.bundles.as` field
+and can be exposed to multi-stage test workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
+
+Test configuration example:
 {{< highlight yaml >}}
-ref:
-  as: "step-consuming-ci-index"
-  from: "cli"
-  commands: "step-consuming-ci-index.sh"
-  dependencies:
-  - env: "OO_BUNDLE"
-    name: "my-bundle"
-  documentation: ...
+base_images:
+  operator-sdk:
+    name: "4.13"
+    namespace: origin
+    tag: operator-sdk
+...
+tests:
+- as: e2e-in-cluster-build
+  cluster_claim:
+    architecture: amd64
+    cloud: aws
+    owner: openshift-ci
+    product: ocp
+    timeout: 1h0m0s
+    version: "4.12"
+  steps:
+    test:
+    - as: install
+      cli: latest
+      commands: |
+        oc create namespace my-namespace
+        operator-sdk run bundle -n my-namespace "$OO_BUNDLE" # install my-operator
+        oc wait --for condition=Available -n my-namespace deployment my-operator # wait until my-operator is ready
+      dependencies:
+      - env: OO_BUNDLE # expose env. var. $OO_BUNDLE to the test
+        name: my-bundle # the value of $OO_BUNDLE is resolved by the pull spec of the bundle image
+      from: operator-sdk # the image operator-sdk defined above in base_images
+      resources:
+        ...
+    - as: run-test
+      cli: latest
+      commands: |
+        run-e2e.sh
+      from: src
+      resources:
+        ...
+    workflow: generic-claim
 {{< / highlight >}}
 
-Any test workflow involving such step will require `ci-operator` to build the index image before it executes the workflow.
-The `OO_BUNDLE` environmental variable set for the step will contain the pull specification of the index image. For tests with
-a bundle with a different name specified by `operator.bundles.as`, the correct bundle image can be configured via the `dependencies` field in the test's ci-operator config. See
-the [Simple Operator Installation](/docs/how-tos/testing-operator-sdk-operators#simple-operator-installation) section below.
+The `OO_BUNDLE` environmental variable set for the step will contain the pull specification of the bundle image.
+Note that the base index can be specified in the [`operator-sdk`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command.
+
+
+## Operator Upgrade Testing
+{{< highlight yaml >}}
+base_images:
+  my-bundle-init:
+    name: "my-bundle"
+    namespace: my-namespace
+    tag: init
+tests:
+- as: e2e-in-cluster-build
+  cluster_claim:
+    architecture: amd64
+    cloud: aws
+    owner: openshift-ci
+    product: ocp
+    timeout: 1h0m0s
+    version: "4.12"
+  steps:
+    test:
+    - as: install
+      cli: latest
+      commands: |
+        oc create namespace my-namespace
+        operator-sdk run bundle -n my-namespace "$OO_BUNDLE_INIT" # install my-operator with the version before upgrading
+        oc wait --for condition=Available -n my-namespace deployment my-operator # wait until my-operator is ready
+      dependencies:
+      - env: OO_BUNDLE_INIT
+        name: my-bundle-init
+    - as: upgrade
+      cli: latest
+      commands: |
+        oc create namespace my-namespace
+        operator-sdk run bundle-upgrade -n my-namespace "$OO_BUNDLE" # upgrade my-operator
+        wait_until_upgrade_is_complete.sh # wait until the new version of my-operator is ready
+      dependencies:
+      - env: OO_BUNDLE
+        name: my-bundle
+      from: operator-sdk
+      resources:
+        ...
+    workflow: generic-claim
+{{< / highlight >}}
 
 # Step Registry Content for Operators
 
-The step registry contains several generic steps and workflows that implement the common operations involving operators.
-We encourage operator repositories to consider using (and possibly improving) these shared steps and workflows over
-implementing their own from scratch.
-
-## Simple Operator Installation
-
-The `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws) ,
+Currently, the workflows involving operators such as 
+the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws) ,
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp),
-[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure)) family of workflows take the following
-steps to set up the test environment:
-
-* Deploy an ephemeral OpenShift cluster to test against
-* Create a `Namespace` to install into
-* Create an `OperatorGroup` and `CatalogSource` (referring to built index) to configure OLM
-* Create a `Subscription` for the operator under test
-* Wait for the operator under test to install and deploy
-
-These workflows enhance the general installation workflows (like
-[ipi-aws](https://steps.ci.openshift.org/workflow/ipi-aws)) with an additional
-[optional-operators-subscribe](https://steps.ci.openshift.org/reference/optional-operators-subscribe) step. Tests
-using these workflows need to provide the following parameters:
-
-|Parameter|Description|
-|:---|:---|
-|`OO_PACKAGE`|The name of the operator package to be installed.|
-|`OO_CHANNEL`|The name of the operator channel to track.|
-|`OO_INSTALL_NAMESPACE`|The namespace into which the operator and catalog will be installed. Special, default value `!create` means that a new namespace will be created.|
-|`OO_TARGET_NAMESPACES`|A comma-separated list of namespaces the operator will target. Special, default value `!all` means that all namespaces will be targeted. If no `OperatorGroup` exists in `$OO_INSTALL_NAMESPACE`, a new one will be created with its target namespaces set to `$OO_TARGET_NAMESPACES`. Otherwise, the `existing OperatorGroup`'s target namespace set will be replaced. The special value `!install` will set the target namespace to the operator's installation namespace.|
-
-
-The combination of `OO_INSTALL_NAMESPACE` and `OO_TARGET_NAMESPACES `values determines the `InstallMode` when installing the
-operator. The default `InstallMode` is `AllNamespaces` (the operator will be installed into a newly created namespace of a
-random name, targeting all namespaces). For named bundles, the index dependency can also be configured in the test's config.
-
-A user-provided test can expect to have `${KUBECONFIG}` set, with administrative privileges, and for the operator under
-test to be fully deployed at the time that the test begins. The following example runs a test in this manner
-
-`ci-operator` configuration:
-{{< highlight yaml >}}
-tests:
-- as: "operator-e2e"
-  steps:
-    workflow: "optional-operators-ci-aws"
-    cluster_profile: "aws"
-    env:
-      OO_CHANNEL: "alpha"
-      OO_INSTALL_NAMESPACE: "myoperator-test-namespace"
-      OO_PACKAGE: "myoperator"
-      OO_TARGET_NAMESPACES: '!install'
-    dependencies:
-      OO_BUNDLE: "bundle-name" # if the name of the bundle being tested is not my-bundle in the ci-opeator's configuration, update the dependency to match
-    test:
-    - as: "e2e"
-      from: "src"               # the end-to-end tests run in the source repository
-      commands: "make test-e2e" # the commands to run end-to-end tests
-      resources:
-        requests:
-          cpu: 100m
-          memory: 200Mi
-{{< / highlight >}}
-
-## Operator Upgrade Testing
-
-The `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade) ,
+[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure)) family and
+the `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade) ,
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp-upgrade),
-[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure-upgrade)) family of workflows take the same steps as
-the simple operator installation described above, but specify a different operator to install initially and then perform an upgrade
-from the initial operator/bundle to the newly built operator/bundle.
+[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure-upgrade)) family
+still use the index image to install the operator.
+The index image built by `ci-operator` is deprecated.
+See the [moving-to-file-based-catalog](/docs/how-tos/testing-operator-sdk-operators/#moving-to-file-based-catalog) section below.
+The aforementioned workflows are still useful when the index image is **not** built by the process described in
+the [Building an Index: Deprecated](/docs/how-tos/testing-operator-sdk-operators/#building-an-index-deprecated) section above.
 
-These workflows enhance the simple operator installation workflows (like
-[optional-operators-ci-aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws)) with an additional
-[optional-operators-ci-upgrade](https://steps.ci.openshift.org/reference/optional-operators-ci-upgrade) step. Tests
-using these workflows need to provide the parameters specified for the simple operator installation tests plus the following:
+We encourage operator repositories to consider creating workflows that use "operator-sdk" as the above example
+and share them with other tests.
 
-|Parameter|Description|
-|:---|:---|
-|`OO_INITIAL_CSV`|The name of initial version of the operator CSV to install.|
-|`OO_INITIAL_CHANNEL`|The name of the channel the initial CSV is in.|
-|`OO_LATEST_CSV`|The name of the CSV being upgraded to.|
 
-The following example runs a test that installs an initial version of an operator and then upgrades before performing a functional tests.
-
-`ci-operator` configuration:
-{{< highlight yaml >}}
-tests:
-- as: "operator-e2e-upgrade"
-  steps:
-    workflow: "optional-operators-ci-aws-upgrade"
-    cluster_profile: "aws"
-    env:
-      OO_CHANNEL: "alpha"
-      OO_INSTALL_NAMESPACE: "myoperator-test-namespace"
-      OO_PACKAGE: "myoperator"
-      OO_TARGET_NAMESPACES: '!install'
-      OO_INITIAL_CSV: "myoperator.v1.1.2"
-      OO_INITIAL_CHANNEL: "v1.1"
-      OO_LATEST_CSV: "myoperator.v1.2.0"
-    dependencies:
-      OO_BUNDLE: "bundle-name" # if the name of the bundle being tested is not my-bundle in the ci-opeator's configuration, update the dependency to match
-    test:
-    - as: "e2e"
-      from: "src"               # the end-to-end tests run in the source repository
-      commands: "make test-e2e" # the commands to run end-to-end tests
-      resources:
-        requests:
-          cpu: 100m
-          memory: 200Mi
-{{< / highlight >}}
-
-## Moving to File-Based Catalog
+# Moving to File-Based Catalog
 
 Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) which deprecates the db-based index image.
 However, the method of building an index image used in `ci-opeartor` does not work with file-based index images.
