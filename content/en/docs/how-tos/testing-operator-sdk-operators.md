@@ -157,8 +157,7 @@ tests:
         ...
     - as: run-test
       cli: latest
-      commands: |
-        run-e2e.sh
+      commands: run-e2e.sh
       from: src
       resources:
         ...
