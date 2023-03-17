@@ -66,7 +66,7 @@ operator:
 When configuring a bundle build, five options are available:
 
 * `as`: the image name for the built bundle. Specifying a name for the bundle image allows a multistage workflow
-  directly access the bundle by name.
+  directly access the bundle by name. The empty string is allowed only for backward compatibility.
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
 * `dockerfile_path`: a path (relative to `context_dir`) to the `Dockerfile` that builds the bundle image,
   defaulting to `bundle.Dockerfile`
@@ -112,7 +112,7 @@ replaced version.
 
 Similarly to how the job generator automatically creates a `pull-ci-$ORG-$REPO-$BRANCH-images` job to test image builds
 when `ci-operator` configuration has an `images` stanza, it will also `make` a separate job that builds the configured bundle
-and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index`, is created only when an `operator` stanza is
+and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index` for bundles without configuring `as`, or jobs named `pull-ci-$ORG-$REPO-$BRANCH-$BUNDLE` otherwise for each bundle where `$BUNDLE` is resolved by `operator.bundles[].as`, are created only when an `operator` stanza is
 present.
 
 # Running Tests
