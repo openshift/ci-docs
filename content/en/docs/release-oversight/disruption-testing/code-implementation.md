@@ -10,7 +10,7 @@ In the examples below we use the `Backend Disruption` tests, but the same will h
 {{% /alert %}}
 
 To measure our ability to provide upgrades to OCP clusters with minimal
-downtime the Disruption Testing framework monitors select backends and
+downtime, the Disruption Testing framework monitors select backends and
 records disruptions in the backend service availability.
 This document serves as an overview of the framework used to provide
 disruption testing and how to configure new disruption tests when needed
@@ -154,8 +154,7 @@ func MicroReleaseUpgrade(in platformidentification.JobType) (platformidentificat
 ## Adding new disruption tests
 
 Currently disruption tests are focused on disruptions created during upgrades.
-To add a new backend to monitor during the upgrade test
-Add a new backendDisruptionTest 
+To add a new backend to monitor during the upgrade test, add a new backendDisruptionTest
 {{% card-code header="Ex: `NewBackendDisruptionTest` [origin/test/extended/util/disruption/backend_sampler_tester.go](https://github.com/openshift/origin/blob/master/test/extended/util/disruption/backend_sampler_tester.go#L34-L41)" %}}
 ```go
 func NewBackendDisruptionTest(testName string, backend BackendSampler) *backendDisruptionTest {
@@ -207,7 +206,7 @@ func NewKubeAvailableWithNewConnectionsTest() upgrades.Test {
   
 
 
-If this is a completely new backend being tested then [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json)
+If this is a completely new backend being tested, then [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json)
 data will need to be added or, if preferable, NewBackendDisruptionTestWithFixedAllowedDisruption can be used instead of NewBackendDisruptionTest and the allowable disruption hardcoded.
 
 ### Updating test data
@@ -235,7 +234,7 @@ To check for disruptions while upgrading OCP clusters
   - Creating the event broadcaster, recorder and monitor
   - [Attempting to query the backend](../backend_queries) and timing out after the max interval (1 second typically)
   - Analyzing the disruption events for disruptions that exceed allowable values
-- When the disruption is complete the disruptions tests are validated via Matches / BestMatcher to find periods that exceed allowable thresholds
+- When the disruption is complete, the disruptions tests are validated via Matches / BestMatcher to find periods that exceed allowable thresholds
   - [Matches](https://github.com/neisw/origin/blob/43d9e9332d5fb148b2e68804200a352a9bc683a5/pkg/synthetictests/allowedbackenddisruption/matches.go#L11) will look for an entry in [query_results](https://github.com/openshift/origin/blob/master/pkg/synthetictests/allowedbackenddisruption/query_results.json) if an exact match is not found it will utilize [BestMatcher](#best-matcher) to look for data with the closest variants match
 
 {{% comment %}}
