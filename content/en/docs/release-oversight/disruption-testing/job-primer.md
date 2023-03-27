@@ -27,7 +27,7 @@ In `Job Primer` a job name is very important. Please make sure that the job name
 
 ### How The Data Flows
 
-1. We first look at the `origin/release` repo to gather a list of the current release jobs that were created. The below command is ran to look through the current configuration and generate the job names.
+1. We first look at the `origin/release` repo to gather a list of the current release jobs that were created. The below command is run to look through the current configuration and generate the job names.
 
    ```sh
    ./job-run-aggregator generate-job-names > pkg/jobrunaggregator/jobtableprimer/generated_job_names.txt
