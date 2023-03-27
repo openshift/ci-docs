@@ -50,8 +50,9 @@ images:
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
   - as: my-bundle
-    context_dir: "path/"                  # defaults to .
-    dockerfile_path: "to/Dockerfile" # defaults to `bundle.Dockerfile`, relative to `context_dir`
+    context_dir: "path/"                  # default to .
+    dockerfile_path: "to/Dockerfile"      # default to `bundle.Dockerfile`, relative to `context_dir`
+    skip_building_index: false            # default to false
     base_index: "operator-index"          # deprecated
     update_graph: "replaces"              # deprecated
   substitutions:
@@ -70,6 +71,7 @@ When configuring a bundle build, five options are available:
 * `context_dir`: base directory for the bundle image build, defaulting to the root of the source tree
 * `dockerfile_path`: a path (relative to `context_dir`) to the `Dockerfile` that builds the bundle image,
   defaulting to `bundle.Dockerfile`
+* `skip_building_index`: skip building the index image for this bundle. Default to false. It works only for named bundles, i.e., "as" is not empty.
 * `base_index`: the base index to add the bundle to. If set, image must be specified in `base_images` or `images`. It is
 used only in building an index image which is deprecated.
 * `update_graph`: the update mode to use when adding the bundle to the `base_index`. Can be: `semver`, `semver-skippatch`,
@@ -82,6 +84,7 @@ The `operator.bundles` stanza is a list, so it is possible to build multiple bun
 
 {{< alert title="Warning" color="warning" >}}
 Building index images is deprecated and will be removed from ci-operator soon.
+It can be skipped by setting `operator.bundles[].skip_building_index` to `true`.
 See the [moving-to-file-based-catalog](/docs/how-tos/testing-operator-sdk-operators/#moving-to-file-based-catalog) section below.
 {{< /alert >}}
 
@@ -112,8 +115,7 @@ replaced version.
 
 Similarly to how the job generator automatically creates a `pull-ci-$ORG-$REPO-$BRANCH-images` job to test image builds
 when `ci-operator` configuration has an `images` stanza, it will also `make` a separate job that builds the configured bundle
-and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index` for bundles without configuring `as`, or jobs named `pull-ci-$ORG-$REPO-$BRANCH-$BUNDLE` otherwise for each bundle where `$BUNDLE` is resolved by `operator.bundles[].as`, are created only when an `operator` stanza is
-present.
+and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index` for bundles without configuring `as`, or jobs named `pull-ci-$ORG-$REPO-$BRANCH-ci-index-$BUNDLE` otherwise for each bundle where `$BUNDLE` is resolved by `operator.bundles[].as`, are created only when an `operator` stanza is present. If `operator.bundles[].skip_building_index` is `true`, the job is named `pull-ci-$ORG-$REPO-$BRANCH-ci-bundle-$BUNDLE`.
 
 # Running Tests
 
