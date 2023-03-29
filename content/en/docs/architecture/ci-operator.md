@@ -221,6 +221,40 @@ By making use of the previously compiled artifacts in the intermediate `pipeline
 cache the Go build. If multiple output `images` exist that rely on a previously built artifact, this caching effect can
 reduce build times dramatically.
 
+## Build inputs
+[Building Container Images](#building-container-images  ) paragraph has shown how it is possible to leverage build inputs `.inputs[]` to speed the building process up. We are going to analyze this feature in a greater detail now.
+### `as:` substitutions
+It is a list of image names that directly maps to [`.spec.source.images[].as`](https://docs.openshift.com/container-platform/4.12/rest_api/workloads_apis/build-build-openshift-io-v1.html#spec-source-images-2) of an [Openshift Build](https://docs.openshift.com/container-platform/4.12/rest_api/workloads_apis/build-build-openshift-io-v1.html#specification), therefore it preserves the semantic.  
+When the aforementioned stanza exists, a build searches for every source images that matches one of the `.as` names and it performs a substitution with the image specified in `.inputs[]`.  
+
+Images substitution can happen in one of the following ways:  
+- in a `--from=` argument:
+```yaml
+images:
+- dockerfile_literal: |
+    # ...
+    COPY --from=nginx:latest /tmp/dummy /tmp/dummy
+  inputs:
+    bin:
+      as:
+      - nginx:latest
+```
+`nginx:latest` is going to be replaced with `pipeline:bin`  
+
+- in a `FROM` directive:
+```yaml
+images:
+- dockerfile_literal: |
+    FROM nginx:latest AS builder 
+    # ...
+    COPY --from=builder /tmp/dummy /tmp/dummy
+  inputs:
+    bin:
+      as:
+      - nginx:latest
+```
+`nginx:latest` is going to be replaced with `pipeline:bin`  
+
 ## Build Arguments
 The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.openshift.com/container-platform/4.7/cicd/builds/build-strategies.html#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument is taken from the field `value` in the configuration.
 
