@@ -533,6 +533,47 @@ The _released_ `4.Y` versions of `ClusterImageSet` [manifests](https://github.co
 a tool which ensures that they points to the latest version.
 It is currently not supported that a test claims by `cluster_claim` a cluster with the version which has not been released yet.
 
+### Testing with a Cluster from HyperShift
+[HyperShift](https://hypershift-docs.netlify.app/) is another alternative to create OpenShift clusters in CI. It is suitable to run e2e tests for an OpenShift component except [web console](https://docs.openshift.com/container-platform/4.12/web_console/web-console-overview.html) and [monitoring](https://docs.openshift.com/container-platform/4.12/welcome/index.html) or an optional operator, or an application running on the cluster.
+
+The [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow) can be used to claim a hosted cluster from HyperShift deployed in the management cluster (checkout [FAQ]( {{< ref "docs/how-tos/migrating-to-hypershift" >}} )).
+
+Below is an example on how to use `hypershift-hostedcluster-workflow`:
+
+```yaml
+...
+- as: e2e-hypershift
+  steps:
+    cluster_profile: aws-2
+    env:
+      HYPERSHIFT_BASE_DOMAIN: hypershift.aws-2.ci.openshift.org
+      HYPERSHIFT_HC_RELEASE_IMAGE: quay.io/openshift-release-dev/ocp-release@sha256:9ffb17b909a4fdef5324ba45ec6dd282985dd49d25b933ea401873183ef20bf8
+    workflow: hypershift-hostedcluster-workflow
+```
+
+For user using your own cluster profile, a Route53 public zone [needs](https://hypershift-docs.netlify.app/getting-started/) to be created.
+
+```shell
+BASE_DOMAIN=www.example.com
+aws route53 create-hosted-zone --name $BASE_DOMAIN --caller-reference $(whoami)-$(date --rfc-3339=date)
+```
+
+This workflow requires the following environment variables:
+- `HYPERSHIFT_BASE_DOMAIN`: The base domain for the hosted OpenShift installation.
+- `HYPERSHIFT_HC_RELEASE_IMAGE`: The release image for the hosted OpenShift installation. Release images can be located in [quay.io](https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags&tag=latest). Alternatively, this environment variable can be skipped to use `release:latest`.
+
+A full list of environment variables consumed by this workflow can be found in [step-registry](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow).
+
+This workflow exports following files:
+- `${SHARED_DIR}/nested_kubeconfig`: `kubeconfig` file for the `system:admin` account.
+- `${SHARED_DIR}/kubeadmin-password`: File contains `kubeadmin` user's password.
+
+This workflow also sets the following environment variables:
+- `${KUBECONFIG}`: Path to `system:admin` credentials.
+
+The workflow will create necessary VPC and other resources in the specified `cluster profile` account, then provision a hosted cluster from our HyperShift deployment. The worker nodes are created in the AWS account from specified `cluster profile`, and the control plane of the cluster will be maintained by us.
+
+
 ## Declaring Tests
 
 Tests as executed by `ci-operator` run a set of commands inside of a container; this is implemented by scheduling a `Pod`
