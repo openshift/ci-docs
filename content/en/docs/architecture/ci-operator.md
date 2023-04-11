@@ -492,12 +492,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
   steps:
     test:
     - as: claim
-      commands: |
-        printenv KUBECONFIG
-        printenv KUBEADMIN_PASSWORD_FILE
-        oc get node
-        oc config view
-        oc whoami
+      commands: oc get node # listing the nodes of the hosted cluster with the configured ${KUBECONFIG}
       from: stable-custom:cli # refer to cli tag from cluster claim release named in `as` under `cluster_claim`. It works for other tags as well.
       resources:
         requests:
@@ -534,45 +529,58 @@ a tool which ensures that they points to the latest version.
 It is currently not supported that a test claims by `cluster_claim` a cluster with the version which has not been released yet.
 
 ### Testing with a Cluster from HyperShift
-[HyperShift](https://hypershift-docs.netlify.app/) is another alternative to create OpenShift clusters in CI. It is suitable to run e2e tests for an OpenShift component except [web console](https://docs.openshift.com/container-platform/4.12/web_console/web-console-overview.html) and [monitoring](https://docs.openshift.com/container-platform/4.12/welcome/index.html) or an optional operator, or an application running on the cluster.
-
-The [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow) can be used to claim a hosted cluster from HyperShift deployed in the management cluster (checkout [FAQ]( {{< ref "docs/how-tos/migrating-to-hypershift" >}} )).
-
-Below is an example on how to use `hypershift-hostedcluster-workflow`:
+The [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow) is provided to claim a hosted cluster from [HyperShift](https://hypershift-docs.netlify.app/) deployed in the management cluster, which is another alternative to provision an OpenShift cluster for CI e2e tests.
+See the following test stanza as an example:
 
 ```yaml
 ...
+releases:
+  latest: # required; a dependency of the workflow to provide "release:latest"
+    release:
+      channel: stable
+      version: "4.12"
 - as: e2e-hypershift
   steps:
-    cluster_profile: aws-2
+    cluster_profile: aws-2 # required; the cluster profile to create the cloud resources for the hosted cluster by HyperShift
     env:
-      HYPERSHIFT_BASE_DOMAIN: hypershift.aws-2.ci.openshift.org
-      HYPERSHIFT_HC_RELEASE_IMAGE: quay.io/openshift-release-dev/ocp-release@sha256:9ffb17b909a4fdef5324ba45ec6dd282985dd49d25b933ea401873183ef20bf8
+      HYPERSHIFT_HC_RELEASE_IMAGE: quay.io/openshift-release-dev/ocp-release:4.12.9-multi # optional; the payload to install
+    test:
+    - as: my-e2e
+      commands: oc get node # listing the nodes of the hosted cluster with the configured ${KUBECONFIG}
+      from: stable:cli
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
     workflow: hypershift-hostedcluster-workflow
 ```
 
-For user using your own cluster profile, a Route53 public zone [needs](https://hypershift-docs.netlify.app/getting-started/) to be created.
+The workflow exports following files for the testing steps to access the hosted cluster:
+- `${SHARED_DIR}/nested_kubeconfig` or `${KUBECONFIG}`: Path to the `kubeconfig` file for the `system:admin` account.
+- `${SHARED_DIR}/kubeadmin-password`: Path to the `kubeadmin` password file.
 
-```shell
-BASE_DOMAIN=www.example.com
-aws route53 create-hosted-zone --name $BASE_DOMAIN --caller-reference $(whoami)-$(date --rfc-3339=date)
-```
+{{% alert title="NOTE" color="info" %}}
+If another cluster profile is chosen, `BASE_DOMAIN` or `HYPERSHIFT_BASE_DOMAIN` has to be changed accordingly.
+See [how to configuring Route 53](https://docs.openshift.com/container-platform/4.12/installing/installing_aws/installing-aws-account.html#installation-aws-route53_installing-aws-account) for details.
+A full list of environment variables consumed by this workflow can be found in the
+[step-registry](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow).
+An example of this workflow is the Prow job [release-openshift-origin-installer-launch-hypershift-hosted](https://github.com/openshift/release/blob/master/ci-operator/jobs/openshift/release/openshift-release-infra-periodics.yaml) which is used as the implementation of the Cluster Bot.
+{{% /alert %}}
 
-This workflow requires the following environment variables:
-- `HYPERSHIFT_BASE_DOMAIN`: The base domain for the hosted OpenShift installation.
-- `HYPERSHIFT_HC_RELEASE_IMAGE`: The release image for the hosted OpenShift installation. Release images can be located in [quay.io](https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags&tag=latest). Alternatively, this environment variable can be skipped to use `release:latest`.
+The hosted clusters provisioned by HyperShift have the following advantages over generic OpenShift clusters:
+* More efficient: A hosted cluster can usually be created in about 15 mins.
+* More cost-effective: Instances only for workers are created in the cloud. The masters are running as pods in the management cluster. See [HyperShift's documentation](https://hypershift-docs.netlify.app/) for details.
 
-A full list of environment variables consumed by this workflow can be found in [step-registry](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow).
 
-This workflow exports following files:
-- `${SHARED_DIR}/nested_kubeconfig`: `kubeconfig` file for the `system:admin` account.
-- `${SHARED_DIR}/kubeadmin-password`: File contains `kubeadmin` user's password.
+The known limitations of hosted clusters are
+* It cannot be used in the e2e tests for the OpenShift core components
+[web console](https://docs.openshift.com/container-platform/4.12/web_console/web-console-overview.html) and
+[monitoring](https://docs.openshift.com/container-platform/4.12/welcome/index.html).
+* As the time of writing, HyperShift supports only AWS and the supported versions of the hosted clusters are `4.12+`.
 
-This workflow also sets the following environment variables:
-- `${KUBECONFIG}`: Path to `system:admin` credentials.
-
-The workflow will create necessary VPC and other resources in the specified `cluster profile` account, then provision a hosted cluster from our HyperShift deployment. The worker nodes are created in the AWS account from specified `cluster profile`, and the control plane of the cluster will be maintained by us.
-
+Test owners are encouraged to migrate from the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow to
+the [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow)
+which can be achieved simply by renaming the name of the workflow.
 
 ## Declaring Tests
 
