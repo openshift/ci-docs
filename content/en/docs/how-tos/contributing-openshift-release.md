@@ -85,13 +85,12 @@ All pull requests trigger a `pj-rehearse` external prow plugin. It checks the ch
 * `/pj-rehearse auto-ack` to run up to 10 rehearsal jobs, and automatically apply the `rehearsals-ack` label if they all succeed
 * `/pj-rehearse more` to run up to 20 rehearsal jobs from the list
 * `/pj-rehearse max` to run up to 35 rehearsal jobs from the list
-* `/pj-rehearse refresh` to obtain an updated list of affected jobs. This is useful in the event that the PR branch is pushed to
 * `/pj-rehearse abort` to abort all active rehearsals
 * `/pj-rehearse skip` to opt-out of rehearsals for the PR, and add the `rehearsals-ack` label
 * `/pj-rehearse ack` to acknowledge the rehearsals (pass or fail), and add the `rehearsals-ack` label
 * `/pj-rehearse reject` to remove the `rehearsals-ack` label and re-block merging
 
-Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met.
+Once the `rehearsals-ack` label is present on the PR it will be able to be merged provided that all additional merge criteria are met. If a new push is made to a PR the label will be removed, and need to be reapplied using either `/pj-rehearse ack` or `/pj-rehearse skip` prior to merge.
 
 ##### Rehearse Specific Jobs
 It is possible to **only** rehearse specific, affected jobs from a PR. This can be done by commenting `/pj-rehearse` followed by a, space separated, list of one or more jobs. These job names can be found in the list that the plugin comments on the PR upon creation. Note that the job must be found to be affected by the change in the PR in order to be rehearsed. For example:
