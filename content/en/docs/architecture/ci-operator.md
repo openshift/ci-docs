@@ -185,9 +185,7 @@ COPY --from=builder /go/src/github.com/myorg/myrepo/mybinary /usr/bin/
 
 While such a `Dockerfile` could simply be built by `ci-operator`, a number of optimizations can be configured to speed up
 the process -- especially if multiple output `images` share artifacts. An output container image build is configured for
-`ci-operator` with the `images` stanza in the configuration. Any entry in the `images` stanza can be configured with native
-OpenShift `Builds` options; the full list can be viewed
-[here](https://godoc.org/github.com/openshift/ci-tools/pkg/api#ProjectDirectoryImageBuildInputs). In the following
+`ci-operator` with the `images` stanza in the configuration. In the following
 example, an output container image is built where the builder image is replaced with the image layers containing built
 artifacts in `pipeline:bin` and the output image base is replaced with the appropriate entry from `base_images`.
 
@@ -196,7 +194,7 @@ artifacts in `pipeline:bin` and the output image base is replaced with the appro
 {{< highlight yaml >}}
 images:
 - dockerfile_path: "Dockerfile" # this is a relative path from the root of the repository to the multi-stage Dockerfile
-  from: "base" # a reference to the named base_image, used to replace the output FROM in the Dockerfile
+  from: "base" # a reference to the named base_image, used to replace the last FROM image in the Dockerfile
   inputs:
     bin: # declares that the "bin" tag is used as the builder image when overwriting that FROM instruction
       as:
@@ -269,6 +267,26 @@ images:
   from: os
   to: test-image
 ```
+
+## How Builds Work In CI
+Every container image built in CI is implemented by
+[a native OpenShift build](https://docs.openshift.com/container-platform/4.12/cicd/builds/understanding-image-builds.html), i.e.,
+`ci-operator` uses the parameters in the `images` stanza from the configuration file to define `builds` options on CI clusters.
+
+
+| `images`              | `build`                                        |
+|-----------------------|------------------------------------------------|
+| `.build_args`         | `.spec.strategy.dockerStrategy.buildArgs`      |
+| `.dockerfile_literal` | `.spec.source.dockerfile`                      |
+| `.dockerfile_path`    | `.spec.strategy.dockerStrategy.dockerfilePath` |
+| `.context_dir`        | `.spec.source.images.paths.sourcePath`                 |
+| `.from`               | `.spec.strategy.dockerStrategy.from`           |
+| `.inputs`             | `.spec.source.images`                          |
+| `.to`                 | `.spec.output.to`                              |
+
+The manifests of the builds as well as the pods running them, and build logs are all stored as "Artifacts" of the job.
+They reveals more details about the container image building procedure orchestrated by `ci-operator` and
+are helpful when debugging the outcome from OpenShift CI.
 
 ## Publishing Container Images
 
