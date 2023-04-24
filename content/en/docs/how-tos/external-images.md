@@ -41,6 +41,4 @@ base_images:
 
 ## Mirror Private Images
 
-If the image is in a private registry that requires authentication to pull it, you will need to [add your credentials](/docs/how-tos/adding-a-new-secret-to-ci/) and define a new periodic [mirroring job](/docs/how-tos/mirroring-to-quay/) with it.
-
-We cannot reuse the existing job as the keys in the credentials config are registries and we might have to set up multiple credentials for the same registry.
+It is not supported at the moment to mirror external private images to the central CI registry.
