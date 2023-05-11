@@ -26,3 +26,6 @@ A particular job or set of jobs can be triggered by `/payload-job`, such as
 A job can be executed more than once by a single `/payload-aggregate` command, e.g, 
 
 > /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
+
+### Abort all Payload Jobs
+It is possible to quickly abort all running payload jobs for a specific PR. Simply comment `/payload-abort` on the PR to do so.
