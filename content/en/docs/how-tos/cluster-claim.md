@@ -322,8 +322,8 @@ from [the status and the specification of each pool](https://pkg.go.dev/github.c
 details of the cluster pool, such as the release image that is used for provisioning a cluster and the labels defined on
 the pool. The Search box can filter out the pools according to the given keyword.
 
-The cluster pools owned by `openshift-ci` are general-purpose pools maintained by DPTP
-and they can be used by anyone. Pools with different owners should be used only with
+The cluster pools owned by `openshift-ci` are general-purpose pools for OpenShift workloads maintained by DPTP
+and they can be used by any tests in the `openshift` org. Pools with different owners should be used only with
 knowledge and approval of their owner. This is not currently programmaticaly enforced
 but it will be soon.
 
