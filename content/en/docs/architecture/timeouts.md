@@ -145,7 +145,7 @@ ref:
 ```
 
 {{< alert title="Note" color="info" >}}
-The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podspec-v1-core) for more details. For these reasons, no timeout configured in the system makes use of this setting, instead relying on a thin wrapper around the executing code that's injected by Prow itself.
+The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#podspec-v1-core) for more details. For these reasons, no timeout configured in the system makes use of this setting, instead relying on a thin wrapper around the executing code that's injected by Prow itself.
 {{< /alert >}}
 
 ## How Interruptions May Be Handled
