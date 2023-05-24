@@ -21,9 +21,9 @@ If your component repository is **not** in this organization:
 
 1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as [collaborators](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository) for the repository.
 1. The invitations will be accepted automatically via the `periodic-openshift-release-master-accept-invitations-ci-robot` and `periodic-openshift-release-master-accept-invitations-merge-robot` jobs in _no more_ than 4 hours.
-1. By default, we enable [branch-protection](/docs/architecture/branch-protection) for
-	 all prow-controlled repos. This requires `openshift-merge-robot` to be an admin of the repo. We can disable it in
-   prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
+1. The `openshift-merge-robot` **must** be given `admin` permissions to support either of the following use cases:
+   1. In order for `tide` to automatically merge PRs it must be allowed to verify the repo's allowed merge methods. 
+   1. By default, we enable [branch-protection](/docs/architecture/branch-protection) for all prow-controlled repos. We can disable it in prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
 1. If a repository is [enrolled in centralized branch management](https://docs.ci.openshift.org/docs/architecture/branching/) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
 1. All repositories need the [Openshift CI](https://github.com/apps/openshift-ci) GitHub App installed. Go to the [app](https://github.com/apps/openshift-ci) and click Configure. We plan to eventually replace the bot accounts entirely
 with that app, but that work is not yet done.
