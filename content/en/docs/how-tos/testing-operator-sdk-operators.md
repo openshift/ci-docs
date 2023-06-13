@@ -214,21 +214,27 @@ tests:
 
 # Step Registry Content for Operators
 
-Currently, the workflows involving operators such as 
-the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws) ,
+The workflows involving operators such as 
+the `optional-operators-ci-operator-sdk-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-aws) ,
+[gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-gcp),
+[azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-azure)) family in the step registry
+are alternatives to the workflow `generic-claim` in the above examples to install and test operational operators
+with `operator-sdk`.
+
+
+Currently, the workflows such as 
+the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws),
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp),
 [azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure)) family and
-the `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade) ,
+the `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade),
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp-upgrade),
 [azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure-upgrade)) family
 still use the index image to install the operator.
 The index image built by `ci-operator` is deprecated.
 See the [moving-to-file-based-catalog](/docs/how-tos/testing-operator-sdk-operators/#moving-to-file-based-catalog) section below.
-The aforementioned workflows are still useful when the index image is **not** built by the process described in
+Those workflows are still useful when the index image is **not** built by the process described in
 the [Building an Index: Deprecated](/docs/how-tos/testing-operator-sdk-operators/#building-an-index-deprecated) section above.
-
-We encourage operator repositories to consider creating workflows that use "operator-sdk" as the above example
-and share them with other tests.
+We encourage the test owners to migration from those workflows to the ones with "operator-sdk" for all other use cases.
 
 
 # Moving to File-Based Catalog
