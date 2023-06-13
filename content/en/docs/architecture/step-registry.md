@@ -462,7 +462,7 @@ fields:
 
 * `name`: environment variable name
 * `default` (optional): the value assigned if none is provided
-* `documentation` (optional): a textual description of the parameter
+* `documentation` (optional): a textual description of the parameter. Markdown supported.
 
 Parameters are declared in the `env` section (note that the placement of this
 section varies depending on the component type, see [common
