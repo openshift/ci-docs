@@ -9,6 +9,7 @@ params:
   github_branch: master
   github_repo: "https://github.com/openshift/ci-docs"
   api_v1_url: "https://cluster-display.ci.openshift.org"
+  helpdesk_faq_api_url: "http://helpdesk-faq-ci.apps.ci.l2s4.p1.openshiftapps.com/api/v1/faq-items"
 enableGitInfo: true
 menu:
   main:
