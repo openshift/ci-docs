@@ -82,7 +82,7 @@ function format ( d ) {
       $('#table_pools tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row( tr );
- 
+
         if ( row.child.isShown() ) {
             row.child.hide();
             tr.removeClass('shown');
@@ -144,6 +144,68 @@ function format ( d ) {
       }
   });
 
+    $(document).ready( function () {
+        function formatDate(timestamp) {
+            const d = new Date(timestamp * 1000);
+            let formattedDate = `${d.getMonth() + 1}-${d.getDate()}--${d.getFullYear()}`;
+            const hours = d.getHours().toString().padStart(2, 0);
+            const minutes = d.getMinutes().toString().padStart(2, 0);
+            const formattedTime = `${hours}:${minutes}`;
+            return `${formattedDate} ${formattedTime}`;
+        }
+
+        $.fn.dataTable.ext.errMode = 'throw';
+        var table =  $('#table_helpdesk_faq').DataTable({
+            "ajax": {
+                "url": "{{ $.Site.Params.helpdesk_faq_api_url }}",
+                "dataType": "jsonp",
+            },
+            "columns": [
+                {
+                    "className":      'details-control',
+                    "orderable":      false,
+                    "data":           null,
+                    "defaultContent": ''
+                },
+                { "data": "question" },
+                { "data": "author"},
+                {
+                    "data": "timestamp",
+                    "render": function (data, type, row, meta) {
+                        return formatDate(data);
+                    }
+
+                },
+            ]
+        });
+
+        function answers (item) {
+            let formatted = '<table width="100%">';
+
+            formatted += '<head><th>Answer</th><th>User</th><th>Date</th></head>'
+            $.each(item.answers, function(index, answer) {
+                formatted += '<tr><td>' + answer["body"] + '</td><td>' + answer["author"] + '</td><td>' + formatDate(answer["timestamp"]) + '</td></tr>';
+            });
+
+            formatted += '</table>';
+
+            return formatted;
+        }
+
+        $('#table_helpdesk_faq tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row( tr );
+
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                row.child(answers(row.data())).show();
+                tr.addClass('shown');
+            }
+        } );
+    });
+
   $(document).ready( function () {
       $.fn.dataTable.ext.errMode = 'throw';
       var table =  $('#table_registries').DataTable({
@@ -156,7 +218,7 @@ function format ( d ) {
           "dataType": "jsonp",
         },
        "columns": [
-            { 
+            {
               "data": "cluster",
               "render": function (data, type, row, meta) {
                   if (row['cluster'] === 'qci') {
@@ -165,7 +227,7 @@ function format ( d ) {
                   return '<a href="https://' + row['consoleHost'] +  '/">' + data + '</a>';
                 }
             },
-            { 
+            {
               "data": "registryHost",
               "render": function (data, type, row, meta) {
                   if (row['cluster'] === 'qci') {
@@ -174,7 +236,7 @@ function format ( d ) {
                   return '<a href="https://' + row['registryHost'] +  '/">' + data + '</a>';
                 }
             },
-            { 
+            {
               "data": "description",
               "render": function (data, type, row, meta) {
                   var data="contains images either built in Prow jobs or imported from QCI"
