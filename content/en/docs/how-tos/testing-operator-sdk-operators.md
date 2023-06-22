@@ -121,7 +121,7 @@ and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index` for bu
 
 ## Simple Operator Installation
 
-Once `ci-operator` builds the operator bundle, they are available to be used 
+Once `ci-operator` builds the operator bundle, they are available to be used
 by the [`operator-sdk run bundle`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command for
 deploying and testing the operator. In the following example, the bundle image is named `my-bundle` after the `operator.bundles.as` field
 and can be exposed to multi-stage test workloads via the [dependencies feature](/docs/architecture/ci-operator/#referring-to-images-in-tests):
@@ -212,9 +212,22 @@ tests:
     workflow: generic-claim
 {{< / highlight >}}
 
+# Launching Clusters with Operator built from PR via Cluster Bot
+
+The Cluster Bot supports launching clusters and installing optional operators built from PRs onto the clusters, allowing
+developers to test and interact with operator built from PRs that haven't merged yet. In order to do so, the ci-operator
+configuration for the repo must contain a multistage test with a step in the `test` section called `install` that
+contains a dependency on the `OO_BUNDLE` image. The example provided in the [previous
+section](#simple-operator-installation) would work for Cluster Bot. If a launch command with a PR to an
+optional-operator repo is made, the Cluster Bot will install a cluster as it normally would and then use the `install`
+step from the ci-operator config to install the built operator.  Here is an example of a command to the Cluster Bot that
+builds PR 12 from `myOrg/myRepo`:
+
+```launch myOrg/myOperator#12```
+
 # Step Registry Content for Operators
 
-The workflows involving operators such as 
+The workflows involving operators such as
 the `optional-operators-ci-operator-sdk-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-aws) ,
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-gcp),
 [azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-operator-sdk-azure)) family in the step registry
@@ -222,7 +235,7 @@ are alternatives to the workflow `generic-claim` in the above examples to instal
 with `operator-sdk`.
 
 
-Currently, the workflows such as 
+Currently, the workflows such as
 the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws),
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp),
 [azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure)) family and
@@ -245,7 +258,7 @@ As a result, `ci-operator` has to skip the process of building the index image i
 it detects that the base index is file-based.
 This changes the expected way of consuming the bundles built in the workload from
 the index image which is used as a `CatalogSource` by OLM to the bundle image
-which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/). The command works with the index images of both formats. 
+which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/). The command works with the index images of both formats.
 
 In order to run e2e tests with an index image with `4.11+`, the owners of the steps using `OO_INDEX` needs to switch to `OO_BUNDLE`.
 Once all steps are migrated to `OO_BUNDLE`, `ci-operator` will remove the process of building index images.
