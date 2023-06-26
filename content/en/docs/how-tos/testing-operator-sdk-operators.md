@@ -212,6 +212,10 @@ tests:
     workflow: generic-claim
 {{< / highlight >}}
 
+The `$OO_BUNDLE_INIT` image in the above example is resolved by [dependency](/docs/architecture/ci-operator/#referring-to-images-in-tests) of the test which is declared as a base image.
+It is usually a production image released by the operator in an external registry and then [imported into the CI registry](/docs/how-tos/external-images/).
+Alternatively, the pull specification from the external registry can be directly referred in the `operator-sdk` command.
+
 # Launching Clusters with Operator built from PR via Cluster Bot
 
 The Cluster Bot supports launching clusters and installing optional operators built from PRs onto the clusters, allowing
