@@ -72,6 +72,10 @@ promotion:
   name: 4.3
 {{< / highlight >}}
 
+{{< alert title="Warning" color="warning" >}}
+In order for `blocking-issue-creator` to properly ensure that branches which are fast-forwarded do not allow merges, the repository must have GitHub "issues" enabled.
+{{< /alert >}}
+
 ## Why are there future release branches on my repository?
 DPTP will create release branches for future versions ahead of time so that ART and others may use them for building artifacts. These branches are frozen and should not be touched.
 
