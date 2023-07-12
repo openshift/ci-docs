@@ -71,11 +71,6 @@ The `default` key is a special identifier for declaring dynamic resources; use d
 If it is not clear exactly how many concurrent jobs can share the cloud provider at once, the convention is to set the
 `default` count to `1000`, to effectively leave jobs unlimited and allow for investigation.
 
-In addition to registering the volume of concurrent jobs that are allowed against a new cloud platform, it is required
-that the leasing server is configured to reap leases which have not seen a recent heartbeat. This is done by adding the
-name of the resource type to the
-[reaper's configuration](https://github.com/openshift/release/blob/e5a0ae275001b08192a2b9e70587bba1e71f29a6/clusters/app.ci/prow/03_deployment/boskos_reaper.yaml#L26).
-
 ## Configuration for Heterogeneous Resources
 
 The example configuration above will create dynamic resources and is most appropriate for operating against large cloud
