@@ -120,7 +120,7 @@ Certain changes affect many jobs. For example, when a template or a step used by
 these jobs could be affected by the change, but it is unrealistic to rehearse them all. In some of these cases,
 rehearsals samples from the set of affected jobs. Unfortunately, the sampled jobs are sometimes not stable between
 retests, so it is possible that in a retest, different jobs are selected for rehearsal than in the previous run. In this
-case, results from the previous runs stay on the pull request and because rehearsals cannot be individually triggered,
+case, results from the previous runs stay on the pull request and, unless they are individually re-triggered,
 they cannot be rid of. This is especially inconvenient when these "stuck" jobs failed. Rehearsals do not block merges,
 so these jobs do not prevent configuration changes from merging, but they can lead to confusing situations.
 
