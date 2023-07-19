@@ -28,7 +28,13 @@ tools to check for larger trends related to tests, errors and events.
 - [CI Search](https://search.ci.openshift.org/) - If you have found a particular log entry or test failure and want to search bugs and other junit runs to find:
     - How frequently does it occur
     - Did it start or spike recently
-    - Is there an open bug against it <br><br>
+    - Is there an open bug against it 
+    - [CI Search Metrics](https://search.ci.openshift.org/graph/metrics)
+      - Are you hitting timeouts and want to see if the duration of the job has increased
+        - [job:duration:total:seconds](https://search.ci.openshift.org/graph/metrics?metric=job%3Aduration%3Atotal%3Aseconds&job=periodic-ci-openshift-release-master-ci-4.11-e2e-gcp-upgrade)
+      - Is there a sudden increase in api errors
+        - [cluster:api:errors:total:requests](https://search.ci.openshift.org/graph/metrics?metric=cluster%3Aapi%3Aerrors%3Atotal%3Arequests&job=periodic-ci-openshift-release-master-ci-4.11-e2e-gcp-upgrade)
+      - Or other metrics <br><br>
 
 - [Sippy](https://sippy.dptools.openshift.org/sippy-ng/) - One of our primary tools for locating top failing jobs and tests, determining how often they are failing, on which variants, and when the problems started. You can filter by Release, Job, or Test as well as variants like platform, network, etc. Also stores historical data for the contents and status of each nightly and CI payload similar to the [release controller](https://amd64.ocp.releases.ci.openshift.org/), which clears older data after 10 or so payloads.
 
@@ -37,6 +43,10 @@ tools to check for larger trends related to tests, errors and events.
 - [Data Studio](https://datastudio.google.com/navigation/reporting) - Provides some prepared reports to review trends and dissect by variants using the data in BigQuery, including disruption charts.
 
 - [Test Grid](https://testgrid.k8s.io/redhat) - redhat-openshift-ocp-release-4.11-blocking, etc.  Summary of recent jobs with alerts and the ability to dig into jobs to look for most frequent failures. Sippy includes links to the relevant testgrid job pages in a number of prominent places.
+- Openshift commit history
+  - If you need to review the commit history across repos for recent changes
+  - [GitHub Openshift Search](https://github.com/openshift) - Change the date range and run a query like: is:pr user:openshift archived:false base:master merged:2022-06-24..2022-06-25 is:closed 
+  - [ocp-what-merged](https://github.com/mfojtik/ocp-what-merged)
 
 ### Prow Job
 The [Release Status](https://amd64.ocp.releases.ci.openshift.org/) will show recent build and test runs for each release version as well as CI and Nightly builds for the recent releases.
@@ -68,12 +78,19 @@ Some of the highlights contained in the artifacts are
     - pods  - most recent pod logs (but not ephemeral pods)
 - [Gather-network](https://steps.ci.openshift.org/chain/gather-network)
     - Includes network.tar that can be downloaded, untarred and searched / viewed locally
+- [gather-aws-console](https://steps.ci.openshift.org/reference/gather-aws-console), [gather-gcp-console](https://steps.ci.openshift.org/reference/gather-gcp-console), etc.  
+    - If you need to see what is going on in the base environment (checking RHCOS version, etc)
+  - test artifacts junit (artifacts/e2e-aws-serial/openshift-e2e-test/artifacts/junit/)
+    - e2e-timelines_openshift-control-plane - Timelines for the control plane pods
+    - e2e-timelines_operators - Timelines for operators
 
 ### Troubleshooting steps
 - Look for the obvious, did the job fail?  Is there a failure message that can be connected to a recent commit or service?
 - If there are multiple job failures look to see if the same blocking job is failing in each, or identify the one that is most frequently failing
     - Investigate those aggregated jobs that fail most frequently
     - Look at the individual runs for the aggregated jobs and identify the most commonly occurring failures
+- If there are sudden unexplained failures, check to see if RHCOS, kube, some other core version has changed
+    - From the release page check the Components, or look in the logs under gather-*-console/artifacts for 'Red Hat Enterprise Linux CoreOS'
 - If you can't identify a particular test to focus on based on frequency you either have to rely on your gut or ask for help
 - When you narrow in on an individual test:
     - Use Sippy and / or Big Query and see if this a new trend, if you can identify a time frame it began / trend changed and identify a commit that was introduced around that time

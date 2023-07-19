@@ -18,7 +18,7 @@ You'll need access to the appropriate groups to work with disruption data, pleas
   https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation
   ```
 
-- [Origin Synthetic Backend Tests](https://github.com/openshift/origin/tree/master/pkg/synthetictests/allowedbackenddisruption)
+- [Origin Synthetic Backend Tests](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption)
 
 ## Disruption Data Architecture
 
