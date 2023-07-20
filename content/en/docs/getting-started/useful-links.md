@@ -37,7 +37,7 @@ DPTP maintains several means of contact:
 
 * Slack
     * `#announce-testplatform`: general announcements and outages. Usage is limited to the DPTP team, please do not post messages there.
-    * `#forum-testplatform`: general queries and discussion for the test platform. Workflows exist within the channel (click on `+` by message box to see them) to interact with the Test Platform team:
+    * `#forum-ocp-testplatform`: general queries and discussion for the test platform. Workflows exist within the channel (click on `+` by message box to see them) to interact with the Test Platform team:
       * `Ask a Question`: general question for the team. Please provide as many details and links as possible to help us answer quickly.
       * `Report CI Outage`: if there is a systemic outage in the CI use this workflow, and we will look at it ASAP.
       * `Request PR Review`: if `dptp` is listed as approvers for one or more files in your PR use this to notify us of your request for review.
@@ -52,7 +52,7 @@ DPTP maintains several means of contact:
     * [Consulting template](https://issues.redhat.com/browse/DPTP-897) for long-term, asynchronous discussion.
 * Google Chat (Only for use when Slack is down):
     * [`announce-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAC1kVXs8) backup space for Slack `#announce-testplatform`
-    * [`forum-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAbH-Fq3g) backup space for Slack `#forum-testplatform`
+    * [`forum-ocp-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAbH-Fq3g) backup space for Slack `#forum-testplatform`
 
 ## Presentations
 
