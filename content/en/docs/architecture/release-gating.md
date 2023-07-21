@@ -13,10 +13,13 @@ Blocking jobs are monitored by the [technical release team](https://docs.ci.open
 and regressions to blocking jobs trigger an incident, which in the case of breaking code changes, TRT will immediately
 revert.
 
-Informing jobs do not block payload promotion directly, but TRT has the ability to extract blocking signal from them.
-As an example, we ensure that each platform/cni in our informer list installs the product successfully at least once.
-We're also able to ensure a particular test passes at least once across a set of  informing jobs. As an example, we require
-that techpreview jobs pass all serial and parallel conformance tests at least once on any platform.
+Informing jobs do not block payload promotion directly, but TRT has the ability to extract blocking signal from them using
+blocking analysis jobs. We are able to analyze a set of informers matching specific criteria, and ensure that a particular
+part of the job passes. We have two of them today, `install-analysis-all` and `overall-analysis-all`.  Install analysis
+ensures that we get at least one successful install across groups of jobs. For example, we can ensure we get at least one
+good install across each platform, each CNI, each IP stack, etc.  `overall-analysis-all` ensures that the test step succeeds,
+effectively acting as a proxy for "the job passes entirely."  For example, we require that techpreview jobs pass all serial
+and parallel conformance tests at least once on any platform.
 
 For layered products that extend the control plane of the cluster, they must be able to tie into OpenShift's CI and gate
 releases.  For example, OCS is a part of the OpenShift platform, and if an upgrade breaks OCS, we have broken part of our
