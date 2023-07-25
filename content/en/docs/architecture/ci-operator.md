@@ -547,6 +547,9 @@ a tool which ensures that they points to the latest version.
 It is currently not supported that a test claims by `cluster_claim` a cluster with the version which has not been released yet.
 
 ### Testing with a Cluster from HyperShift
+{{% alert title="LIMITED SUPPORT" color="warning" %}}
+`Testing with a Cluster from HyperShift` is a pilot project, and the support from the Test Platform is limited.
+{{% /alert %}}
 The [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow) is provided to claim a hosted cluster from [HyperShift](https://hypershift-docs.netlify.app/) deployed in the management cluster, which is another alternative to provision an OpenShift cluster for CI e2e tests.
 See the following test stanza as an example:
 
@@ -591,10 +594,10 @@ The hosted clusters provisioned by HyperShift have the following advantages over
 
 
 The known limitations of hosted clusters are
-* It cannot be used in the e2e tests for the OpenShift core components
+* It cannot be used in the e2e tests for the OpenShift core components, except
 [web console](https://docs.openshift.com/container-platform/4.12/web_console/web-console-overview.html) and
 [monitoring](https://docs.openshift.com/container-platform/4.12/welcome/index.html).
-* As the time of writing, HyperShift supports only AWS and the supported versions of the hosted clusters are `4.12+`.
+* As the time of writing, HyperShift supports only AWS and the supported versions of the hosted clusters are between `4.12` and `nightly`.
 
 Test owners are encouraged to migrate from the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow to
 the [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow)
