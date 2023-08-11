@@ -153,35 +153,6 @@ being added to the affected jobs when running `make jobs`.
 Jobs that are marked as `hidden: true` will never be rehearsed, regardless of the presence of the `pj-rehearse.openshift.io/can-be-rehearsed: "true"` label.
 {{< /alert >}}
 
-### `ci-operator` Configuration Sharding
-
-The configuration files under `ci-operator/config` need to be stored in the CI cluster before jobs can use them. That is
-done using the [updateconfig](https://github.com/kubernetes/test-infra/tree/master/prow/plugins/updateconfig) Prow
-plugin, which maps file path globs to `ConfigMap`s.
-
-Because of size constraints, files are distributed across several ConfigMaps based on the name of the branch they
-target. Patterns for the most common names already exist in the plugin configuration, but it may be necessary to add
-entries when adding a file for a branch with an unusual name. The
-[`correctly-sharded-config`](https://prow.ci.openshift.org/job-history/gs/origin-ci-test/pr-logs/directory/pull-ci-openshift-release-master-correctly-sharded-config)
-pre-submit job guarantees that each file is added to one (and only one) `ConfigMap`, and will fail in case a new entry is
-necessary. To add one, edit the top-level `config_updater` key in the [plugin
-configuration](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_plugins.yaml). Most
-likely, the new entry will be in the format:
-
-{{< highlight yaml >}}
-config_updater:
-  # …
-  maps:
-    # …
-    ci-operator/config/path/to/files-*-branch-name*.yaml:
-      clusters:
-        app.ci:
-        - ci
-      name: ci-operator-misc-configs
-{{< / highlight >}}
-
-The surrounding entries that add files to `ci-operator-misc-configs` can be used as reference. When adding a new glob,
-be careful that it does not unintentionally match other files by being too generic.
 
 ## Component CI Configuration
 
