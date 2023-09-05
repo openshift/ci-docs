@@ -21,6 +21,14 @@ good install across each platform, each CNI, each IP stack, etc.  `overall-analy
 effectively acting as a proxy for "the job passes entirely."  For example, we require that techpreview jobs pass all serial
 and parallel conformance tests at least once on any platform.
 
+TRT will also typically revert changes found to break informing jobs.
+
+{{< alert title="Note" color="info" >}}
+TRT will typically not see or revert changes that break jobs which are not release informing or blocking.
+For changes which break these jobs, the decision to revert or fix will need to be handled between the affected
+team and the team that made the change.
+{{< /alert >}}
+
 For layered products that extend the control plane of the cluster, they must be able to tie into OpenShift's CI and gate
 releases.  For example, OCS is a part of the OpenShift platform, and if an upgrade breaks OCS, we have broken part of our
 platform.  Extending our testing to these components is a requirement to perform regression and early verification.
@@ -29,7 +37,8 @@ We in general have four types of jobs that control the movement of code to produ
 
 1. PR gating - a set of tests that block PR merges across the entire organization. Each repository may run a different
    set of gating jobs (such as the installer repo testing multiple platforms). Almost every repository will run a
-   standard set of consistent tests to prevent regressions (component A breaks component B by changing an API)
+   standard set of consistent tests to prevent regressions. (component A breaks component B by changing an API)
+   Typically periodics which gate PRs should also be Release Gating.
 2. PR optional - a set of optional tests that can be invoked on PRs as needed by reviewers or testers to gain additional
    coverage, but which running all the time would be inefficient or unnecessary.
 3. Release gating - these jobs prevent the publication of a new release payload and are considered the minimum bar of
@@ -44,7 +53,7 @@ We in general have four types of jobs that control the movement of code to produ
 
 A CI job may gate a release once it has reached the following milestones:
 
-1. Useful: is testing a commonly used variation of the product that requires dedicated testing, is testing a project or 
+1. Useful: is testing a commonly used variation of the product that requires dedicated testing, is testing a project or
    product that will be widely used on top of OpenShift, or uses OpenShift APIs, or can provide
    useful feedback via automated testing to OpenShift about whether the project continues to work
 2. Stable: reached a maturity point where the job is expected to have a stable pattern and is known to
@@ -141,3 +150,17 @@ After at least 2 sprints of informing status, you may request the job become blo
 Blocking jobs come with the responsibility of being responsive to breakages.  Generally, TRT expects a team that requests
 a blocking job to respond to a breakage within 4 hours during their normal working hours only. In exchange for this agreement,
 TRT will monitor the jobs, alert on them, and revert changes in the product that caused the breakage.
+
+#### Shortcuts To Becoming Informing or Blocking
+
+Above we request at least 9 weeks from the time a job is created to the time it
+could first become blocking. This is to help make sure the job is stable enough
+and will not swamp TRT or unreasonably prevent us from getting green payloads.
+
+However, in some scenarios, it may be possible to shortcut this process. We
+have recently gained the ability to run specific jobs an arbitrary number of
+times via [Gangway](https://github.com/stbenjam/gangway-cli). This allows us to
+accumulate more data in a shorter window of time, and see if a job is stable
+enough to go blocking. If you feel this is necessary, please get in touch with
+TRT and we can try to work out budget concerns and amount of data runs
+required.
