@@ -13,10 +13,13 @@ Blocking jobs are monitored by the [technical release team](https://docs.ci.open
 and regressions to blocking jobs trigger an incident, which in the case of breaking code changes, TRT will immediately
 revert.
 
-Informing jobs do not block payload promotion directly, but TRT has the ability to extract blocking signal from them.
-As an example, we ensure that each platform/cni in our informer list installs the product successfully at least once.
-We're also able to ensure a particular test passes at least once across a set of  informing jobs. As an example, we require
-that techpreview jobs pass all serial and parallel conformance tests at least once on any platform.
+Informing jobs do not block payload promotion directly, but TRT has the ability to extract blocking signal from them using
+blocking analysis jobs. We are able to analyze a set of informers matching specific criteria, and ensure that a particular
+part of the job passes. We have two of them today, `install-analysis-all` and `overall-analysis-all`.  Install analysis
+ensures that we get at least one successful install across groups of jobs. For example, we can ensure we get at least one
+good install across each platform, each CNI, each IP stack, etc.  `overall-analysis-all` ensures that the test step succeeds,
+effectively acting as a proxy for "the job passes entirely."  For example, we require that techpreview jobs pass all serial
+and parallel conformance tests at least once on any platform.
 
 TRT will also typically revert changes found to break informing jobs.
 
@@ -147,7 +150,6 @@ After at least 2 sprints of informing status, you may request the job become blo
 Blocking jobs come with the responsibility of being responsive to breakages.  Generally, TRT expects a team that requests
 a blocking job to respond to a breakage within 4 hours during their normal working hours only. In exchange for this agreement,
 TRT will monitor the jobs, alert on them, and revert changes in the product that caused the breakage.
-
 
 #### Shortcuts To Becoming Informing or Blocking
 
