@@ -8,6 +8,7 @@ weight: 1
 The clusters that currently comprise CI are:
 
 {{< rawhtml >}}
+<div id="progress">Loading Cluster information ...</div>
 <ul id="ul_clusters">
 </ul>
 {{< /rawhtml >}}
