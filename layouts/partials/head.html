@@ -113,8 +113,12 @@ function format ( d ) {
                 description=description+' that executes a growing subset of the jobs.'
               }
               $("#ul_clusters").append('<li><a href="https://'+item["consoleHost"]+'/">'+item["cluster"]+'</a>: '+ description +'</li>');
+              $("#progress").hide();
             });
-          }
+          },
+          error: function(xhr) { 
+            $("#progress").text('failed to load the cluster info: status ' + xhr.status);
+          },
       });
 
   } );
