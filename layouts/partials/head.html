@@ -93,7 +93,8 @@ function format ( d ) {
         }
       } );
 
-      $.ajax({
+      if ($("#m-docsgetting-starteduseful-links").hasClass("active")) {
+        $.ajax({
           url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
           dataType: 'jsonp',
           success: function(res) {
@@ -119,9 +120,9 @@ function format ( d ) {
           error: function(xhr) { 
             $("#progress").text('failed to load the cluster info: status ' + xhr.status);
           },
-      });
-
-  } );
+        });
+      }
+  });
 
   $(document).ready( function () {
       $.fn.dataTable.ext.errMode = 'throw';
