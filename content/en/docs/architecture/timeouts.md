@@ -227,6 +227,15 @@ for (( i = 0; i < 999; i++ )); do
 done
 ```
 
+{{< alert title="Warning" color="warning" >}}
+You have to be careful with the `trap` specification.
+- If you specify `trap cleanup EXIT`, the `cleanup` function will catch the `SIGTERM`, but will ignore the `exit `status (in this case `1`). This will perform the same action on interruption and termination.
+- If you specify `trap cleanup TERM`, the `cleanup` function will be called only when the `SIGTERM` is received. Particularly useful when you are interested in the exit status of the process.
+- If you specify `trap cleanup TERM EXIT`, the `cleanup` function will be called twice: once when the `SIGTERM` is received, and once when the shell exits. This is not what you want.
+
+The prefix `SIG-` is not suggested, as it is not portable to all shells.
+{{< /alert >}}
+
 ### Declaring Post Steps
 
 When the amount of work necessary to respond to an interrupt is large, or the work does not depend on specific test process state, it is best to write the work as a `post-` step that will be executed once `ci-operator` begins handling the interrupt. For an example of such a step, see the [`must-gather`](https://steps.ci.openshift.org/reference/gather-must-gather) step in the [`gather`](https://steps.ci.openshift.org/chain/gather) chain, which holds generic steps that gather debugging information from OpenShift clusters under test to help with processing job output after the fact. All `post-` steps that run after `ci-operator` begins handling the interrupt must finish before the configured [grace period](#prow-test-process-timeouts).

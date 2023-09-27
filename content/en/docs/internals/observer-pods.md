@@ -173,7 +173,7 @@ When the last test from `test:` chain finishes, observers are going to be delete
 
 Artifacts are collected as if they were regular tests.
 
-It's a good habit to write the observer payload following this approach:
+It's a good habit to write the observer payload following this approach, see [here](/docs/architecture/timeouts/#forwarding-signals-to-children-in-steps) for more details on how to trap signals:
 {{< highlight bash >}}
 #!/bin/bash
 
@@ -186,7 +186,7 @@ function cleanup() {
     echo 'this will be executed at the end'
 }
 
-trap cleanup EXIT
+trap cleanup TERM
 
 # Do something here
 
