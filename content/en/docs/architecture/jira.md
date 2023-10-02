@@ -42,6 +42,22 @@ bug and link it to the PR. The automation will clone the provided bug and link t
 beginning of the PR's title. This command also supports cherrypicking multiple bugs (e.g.  `/jira cherrypick
 OCPBUGS-123,OCPBUGS-124`).
 
+## Non-bug Jira References
+
+Some repos or projects may wish to require PRs to have a valid Jira reference but not follow the full `OCPBUGS`
+lifecycle management and use their own Jira project instead. The Jira automation can handle this as well. The issue must
+be added as a prefix to the PR title as with the usual `OCPBUGS` issues. For instance, `PROJECT-123: fix this issue`. In
+these scenarios, the only validation that the Jira automation will perform is validating that the issue exists. If the
+issue exists, the PR will receive a `jira/valid-ref` label. If the issue does not exist, the PR will receive a
+`jira/invalid-ref` label. This allows teams to gate PR merges to require a Jira reference to merge by requiring a label
+to exist or not exist. However, some PRs may not require a jira reference. To add the `jira/valid-ref` label to a PR
+without requiring a Jira reference, users can use the `NO-ISSUE` or `NO-JIRA` title prefixes. For instance, `NO-ISSUE:
+fix a typo`.
+
+Note: While Jira references do not get validated in the same way as `OCPBUGS` issues, the automation will still check
+whether the issue's `Target Version` matches what is expected for the branch. If it does not match, the PR will still
+get the `jira/valid-ref` label, but the mismatch will be mentioned in the comment that the automation makes on the PR.
+
 ## Integration with QE verification
 
 Normally, QE will verify that a fix correctly resolves a Jira bug once the bug transitions to the `ON_QA` state, which
@@ -51,6 +67,32 @@ However, if a QE engineer is assigned to the Jira bug, they will also get notifi
 the bug. The QE engineer can add the `qe-approved` label on the pull request to indicate that the fix has been verified
 before the PR even merges. In this case, when the nightly release containing the fix is accepted, the Jira bug will
 automatically transition from the `ON_QA` state to the `VERIFIED` state.
+
+### Premerge Bugs
+
+New features may also be tracked by QE via an `OCPBUGS` issue. In these situations, the PR is created before the bug, so
+the PR will not contain a prefix when it is first created. Once QE creates a bug, they will need to retitle the PR using
+the `retitle` GitHub comment command. For instance, if a bug is called `OCPBUGS-123` and the PR's current title is `Bug
+Fix`, QE can update the title by commenting `/retitle OCPBUGS-123: Bug Fix` on the command. For PRs that have other bugs
+already linked, the bugs are listed as comma-separated values. For instance, if the title is `PROJECT-123: Bug Fix`, QE
+can commment `/retitle PROJECT-123,OCPBUGS-123: Bug Fix`.
+
+Premerge bugs have different requirements and a different lifecycle than normal `OCPBUGS` issues, so they are treated as
+jira references rather than full bugs. This means that the usual validations for `Target Version` and dependent bugs are
+not run. For a bug to be considered a premerge bug, it must have `premerge` as a value in both its `Affects Version(s)`
+and `Fix Version(s)` and the PR must be labelled as `qe-approved`. In these cases, the bugs will be immediately updated
+to `POST` upon being linked to the PR and will then be updated to `VERIFIED` once the PR is merged (this is configurable
+via the configuration file in the openshift/release repo and may change in the future if QE decides to use a different
+workflow).
+
+## Automatic Fix Version(s)
+
+Another Jira automation that is part of the `release-controller` is the automatic setting of the `Fix Version(s)` field.
+When a Jira issue lands in an `Accepted` nightly release, the automation will set the appropriate value for `Fix
+Version(s)` to the issue and its parent Epic. It will also set the `Fix Version(s)` value to the parent Feature if every
+Epic that is linked to the feature has had its `Fix Version(s)` field set. The value that is set will match the
+`Major.Minor` version of the nightly that the issue is included in and the micro value will be `.0` if the release has
+not become GA and `.z` if the release has become GA.
 
 ## Configuration
 
