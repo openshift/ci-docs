@@ -229,6 +229,22 @@ builds PR 12 from `myOrg/myRepo`:
 
 ```launch myOrg/myOperator#12```
 
+# Building a Catalog for an Operator built from PR via Cluster Bot
+
+In addition to being able to launch clusters with optional operators built from PRs, the Cluster Bot can also build catalogs
+that can be added to existing clusters to install the operator there. This can be useful for testing an operator across many
+different variants of openshift clusters without having to wait for the operator to build for each individual variant. To
+build a catalog, you would use the `catalog build` command:
+
+```catalog build myOrg/myRepo#12 myBundleName```
+
+Note that the command requires that the bundle name is specified after the PR reference. This command will build the
+operator, bundle, and catalog in the ci-operator namespace that the job runs in. The namespace can be determined by
+clicking the job link that the Cluster Bot provides. The page will provide the build logs for the job and a link to the
+build cluster's namespace will be among the first few lines of the log. The catalog will be tagged as `pipeline:catalog`
+and the bundle will be under the `ci-chat-bot` update channel for the application. The image will be available for 7
+days after the job is started.
+
 # Step Registry Content for Operators
 
 The workflows involving operators such as
