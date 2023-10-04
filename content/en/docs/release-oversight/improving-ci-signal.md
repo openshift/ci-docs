@@ -48,7 +48,7 @@ Upon detection of a pass rate regression (As observed via attempted payload acce
 
 ### The Mathy/Statistical/Implementation Details
 #### Pass/Fail rates for running jobs 10 times
-Using something called [Fischer’s Exact Probability Test](https://www.itl.nist.gov/div898/handbook/prc/section3/prc33.htm), it is possible to know how whether a payload being tested is better or worse than the payload(s) which produced a larger dataset.  This is the mathy way of finding the statistical thresholds for how many failed testruns should be a failure.
+Using something called [Fisher’s Exact Probability Test](https://www.itl.nist.gov/div898/handbook/prc/section3/prc33.htm), it is possible to know how whether a payload being tested is better or worse than the payload(s) which produced a larger dataset.  This is the mathy way of finding the statistical thresholds for how many failed testruns should be a failure.
 
 This graph shows us that if the corpus (history) is passing a job,test tuple at 95%, then a payload that only passed 7/10 attempts has a 95% chance of having regressed us.
 
