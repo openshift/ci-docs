@@ -50,13 +50,7 @@ simultaneously are also compatible.
 
 It is possible to authenticate to CI build farms with Red Hat Single-Sign-On:
 The corresponding Red Hat kerberos ID to the author of a pull request
-is permitted to accessing the `Namespace` that run jobs.
-
-{{< alert title="Info" color="info" >}}
-To access the `Namespace` it is required that your *GITHUB* user profile is configured in Rover People under 
-*PROFESSIONAL SOCIAL MEDIA* as the last or only github link. It may take up to 24 hours to synchronize the modification 
-at Rover People to the build farms.
-{{< /alert >}}
+is permitted to accessing the `Namespace` that run jobs provided that [GitHub is properly set up in Rover People](/docs/getting-started/useful-links/#configure-github-in-rover-people).
 
 From a pull request page on GitHub, you can access the build logs from the `Details` link next to each job listed in the
 checkbox at the bottom of the PR description page. This gives an overall picture of the test output, but you might want
