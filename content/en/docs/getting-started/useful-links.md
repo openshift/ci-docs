@@ -16,6 +16,11 @@ The clusters that currently comprise CI are:
 Except the ones not managed by DPTP, Red Hat SSO is enabled to login onto these clusters.
 GitHub Users in OpenShift organization who have no Red Hat SSO can still use Prow services to do CI tasks but they cannot login into these clusters.
 
+## Configure GitHub in Rover People
+For user permissions correctly set up on the CI clusters, it is required that the *GITHUB* user profile is configured in Rover People under
+*PROFESSIONAL SOCIAL MEDIA* as the last or only github link. It may take up to 24 hours to synchronize the modification
+at Rover People to the clusters.
+
 # Services
 
 Below is a non-exhaustive list of CI services.
