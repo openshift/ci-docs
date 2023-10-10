@@ -199,6 +199,9 @@ ref:
     The step runs with custom credentials injected.
 {{< / highlight >}}
 
+Note: For most cases, there won't be enough permissions to write the secrets under /var/run/ and therefore it is advised to instead save the secrets 
+to the /secrets/ folder.
+
 {{< alert title="Warning" color="warning" >}}
 Access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
 By default, only secrets in the `test-credentials` namespace will be available for mounting into test steps. Please follow the secret-management
