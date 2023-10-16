@@ -5,7 +5,7 @@ description: "How to add security scanning to gate PR merging."
 
 This document will guide you through adding security scanning using Snyk to ensure that PRs are free of vulnerabilities before merging.
 
-## Why adding security scanning?
+## Why add security scanning?
 
 In recent times, ensuring the security of applications has become paramount. One of the key aspects of ensuring security is to cooperate with the Security team. Their initiative, known as _Shift Left_, aims to run security scanning early in the development pipeline. By introducing security scanning at this stage, we are proactive in detecting vulnerabilities, which can save a lot of time and resources in the long run.
 
