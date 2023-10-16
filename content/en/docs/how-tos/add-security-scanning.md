@@ -42,4 +42,4 @@ To add the security scanning workflow as a test, you can include the following c
 
 As we set `optional: true`, this test will not block the PR from merging. However, it is advised to set `optional: false` to ensure that the PR is gated until the security scanning workflow passes.
 
-If your organisation is not OpenShift CI, you can optionally override the `ORG_NAME` environment variable to point to your organisation in snyk UI.
+If your organization is not OpenShift, you can optionally override the `ORG_NAME` environment variable to point to your organization in snyk UI.
