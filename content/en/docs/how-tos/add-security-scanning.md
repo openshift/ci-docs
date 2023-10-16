@@ -26,7 +26,7 @@ The security scanning workflow, named [`openshift-ci-security`](https://steps.ci
 
 The scanning is performed using the RedHat enterprise license with snyk.
 
-## How to add security scanning workflow as a test?
+## How to add the security scanning workflow as a test?
 
 To add the security scanning workflow as a test, you can include the following configuration:
 
