@@ -245,6 +245,11 @@ build cluster's namespace will be among the first few lines of the log. The cata
 and the bundle will be under the `ci-chat-bot` update channel for the application. The image will be available for 7
 days after the job is started.
 
+The credentials needed to pull the catalog and other built images from the build cluster to use in another cluster are
+in the `registry-pull-credentials` secret in the build namespace. For instruction on adding the credentials to a
+cluster, see the openshift documentation here:
+https://docs.openshift.com/container-platform/4.13/operators/admin/olm-managing-custom-catalogs.html#olm-accessing-images-private-registries_olm-managing-custom-catalogs.
+
 # Step Registry Content for Operators
 
 The workflows involving operators such as
