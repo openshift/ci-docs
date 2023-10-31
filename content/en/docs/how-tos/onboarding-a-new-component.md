@@ -262,7 +262,7 @@ file), or before you set the image label `io.openshift.release.operator` to get 
     * On the [dist-git part of the process](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/requesting_a_new_image_or_rpm_to_be_managed_by_art#jive_content_id_Naming) it is critical that you ensure your component/image names match as described in the bulleted criteria
 1. Ensure a single successful build is run (sync with ART to confirm)
 1. Open the PR to add `LABEL io.openshift.release.operator true` or to add your new image to another component (your operator, usually)
-1. Once the PR is merged, verify that the [nightly builds](https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
+1. Once the PR is merged, verify that the [nightly builds](https://amd64.ocp.releases.ci.openshift.org/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
 
 ### Renaming or removing components in the OpenShift release payload
 
