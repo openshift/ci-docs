@@ -81,6 +81,8 @@ lists the Job Names (as a link to the job run results) ranking them by Failure R
 low. Each job row will contain the test failures that match the overall risk level for that 
 job, the risk reason for each test failure and any known bugs associated with the test.
 
+In an effort to reduce flagging flaky tests, PR Commenting will only include tests that have failed in consecutive jobs.
+
 <br><br>
 Job Failure Risk Analysis for sha: 79d237196d93eb92ed58c66497d8718259264226
 
