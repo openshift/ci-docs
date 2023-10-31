@@ -260,7 +260,24 @@ file), or before you set the image label `io.openshift.release.operator` to get 
 1. Ensure you have successfully published your image to the CI integration stream
 1. Follow the [ART instructions](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/guidelines_for_requesting_new_content_managed_by_ocp_art) to have them build your image
     * On the [dist-git part of the process](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/requesting_a_new_image_or_rpm_to_be_managed_by_art#jive_content_id_Naming) it is critical that you ensure your component/image names match as described in the bulleted criteria
-1. Ensure a single successful build is run (sync with ART to confirm)
+1. Ensure a single successful build is run (sync with ART to confirm).  You can also check for your new image name in both ART and CI ImageStreams by checking [CI registries](/docs/how-tos/use-registries-in-build-farm/#how-do-i-log-in-to-pull-images-that-require-authentication):
+
+    ```console
+    $ oc image info registry.ci.openshift.org/ocp/4.15:cluster-config-api | head -n2  # looking for the 'cluster-config-api' name in the CI ImageStream for 4.15
+    Name:          registry.ci.openshift.org/ocp/4.15:cluster-config-api
+    Digest:        sha256:150fe471d8a7fad405aa89f3a873df6b7312e3fed82cb6c159e33f61a7f0caf8
+    $ oc image info registry.ci.openshift.org/ocp/4.15-art-latest:cluster-config-api | head -n2  # looking for the 'cluster-config-api' name in the ART ImageStream for 4.15
+    Name:        registry.ci.openshift.org/ocp/4.15-art-latest:cluster-config-api
+    Digest:      sha256:aefb9a83bac984a1bb54d3976f38ff25c60bc101a40117e63396bfb8891f190a
+    ```
+
+    You can also check all the available tag names in the ImageStreams after [logging into the `app.ci` cluster](/docs/getting-started/useful-links/#clusters).  For example:
+
+    ```console
+    $ oc -n ocp get -o json imagestream 4.15 | jq -c '.status.tags[] | {tag, items: (.items | length)}' | grep config-api
+    {"tag":"cluster-config-api","items":3}
+    ```
+
 1. Open the PR to add `LABEL io.openshift.release.operator true` or to add your new image to another component (your operator, usually)
 1. Once the PR is merged, verify that the [nightly builds](https://amd64.ocp.releases.ci.openshift.org/) continue to pass (usually 2-3 hours after your PR merges) and that you didn’t break the OCP CI test
 
