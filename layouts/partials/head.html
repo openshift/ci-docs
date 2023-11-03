@@ -107,7 +107,7 @@ function format ( d ) {
                 description=description+' containing most Prow services.';
               } else if (item['cluster'] === 'hive') {
                 description=description+' containing containing a Hive control plane.';
-              } else if (item['cluster'] === 'arm01' || item['cluster'] === 'vsphere') {
+              } else if (!item['cluster'].startsWith('build')) {
                 description=description+' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
               } else {
                 description=description+' that executes a growing subset of the jobs.'
