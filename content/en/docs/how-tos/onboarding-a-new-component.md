@@ -230,6 +230,10 @@ a requirement that all filenames be unique under `ci-operator/config`.
 Tests that require a running Openshift cluster should use one of the provided step registry workflows, more details
 [here](https://docs.ci.openshift.org/docs/architecture/step-registry/).
 
+{{< alert title="Non-Openshift organization users" color="info" >}}
+Please read the section about creating your own [cluster profile](https://docs.ci.openshift.org/docs/how-tos/adding-a-cluster-profile/). It is needed for all parties outside of OpenShift organization to operate on test platform using cloud accounts provided by your organization. Alternatively, you may be interested in creating your own [cluster pool](https://docs.ci.openshift.org/docs/how-tos/cluster-claim/).
+{{< /alert >}}
+
 ### Image Publishing and Mirroring
 
 When container images are declared as release artifacts for a repository in the CI Operator configuration file under the
