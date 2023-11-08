@@ -263,9 +263,18 @@ modifications to allow some commonly needed customizations:
 |`.run_if_changed`|Set to trigger the job based on the set of files changed by PRs (see the [documentation](https://docs.prow.k8s.io/docs/jobs#triggering-jobs)).|✓|||
 |`.skip_if_only_changed`|Set to trigger the job based on the set of files changed by PRs (see the documentation link above).|✓|||
 |`.skip_report`|Set to `true` to `make` the job not report its result to the pull request.|✓|||
-|`.cluster`|Set to limit the job to a particular CI build cluster.|✓|✓|✓|
 |`.max_concurrency`|Set to limit how many instances of the job can run simultaneously.|✓|✓|✓|
 |`.reporter_config`|Add this stanza to configure Slack alerts (see the [upstream doc](https://docs.prow.k8s.io/docs/components/core/crier#slack-reporterhttpsgithubcomkubernetestest-infratreemasterprowcrierreportersslack)).|||✓|
+
+### The Cluster Where A Job Runs
+In general, a job can be executed on any build farm clusters.
+There are automations that dispatch the jobs among the clusters to keep the workload even and fail the jobs over to others upon a cluster's outage.
+For most cases, the test owners should not be aware of any difference if a job is moved from one cluster to another.
+
+Although the `cluster` field in a `test` or `step` could be used to specify where it runs, it is **not** recommended to use it
+as it would block the automations from searching for any cluster to run the corresponding job even if the underlying cluster is completely available.
+The `cluster` field fits the use cases that the job does not work in any other cluster because the job has the restrictions e.g., on the hardware of the cluster and as a result failover would not be possible in the first place.
+
 
 {{< alert title="Warning" color="warning" >}}
 Nightly jobs run using the [release-controller](https://github.com/openshift/release-controller) do **not** honor the `cluster` setting. They have their own [load balancing system](https://github.com/sshnaidm/release-controller/blob/6b7f7b2e92f49d417ce54ec7b037fbede09c2301/cmd/release-controller/sync_verify_prow.go#L26) which will set the cluster accordingly.
