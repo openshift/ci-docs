@@ -166,8 +166,6 @@ represents the "internal" promotion to the stable stream prior to the execution
 of tests.  Dashed lines represent edges not fully depicted since they are
 optional and can be added to any image in the pipeline:
 
-- Each entry in `operator.substitutions` makes `src-bundle` depend on that
-  image.
 - The `operator.substitutions` entry, if specified, makes the `src-bundle`
   depend on those images.
 - The `operator.base_index` entry, if specified, makes all index generator
