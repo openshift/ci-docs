@@ -168,8 +168,6 @@ optional and can be added to any image in the pipeline:
 
 - Each entry in `operator.substitutions` makes `src-bundle` depend on that
   image.
-- The `operator.substitutions` entry, if specified, makes the `src-bundle`
-  depend on those images.
 - The `operator.base_index` entry, if specified, makes all index generator
   images depend on that image.
 
