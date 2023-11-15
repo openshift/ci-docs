@@ -35,6 +35,7 @@ AWS:
 GCP:
 - `Deployment Manager Editor`
 - `Compute Image User`
+- `Role Administrator`
 
 ## Adding a New Cluster Profile
 
