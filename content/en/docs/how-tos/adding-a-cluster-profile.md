@@ -24,6 +24,18 @@ When a `cluster_profile` is added to a job or workflow, the following actions oc
 
 Generally, the major difference between `cluster_profile`s is the content of the credentials.
 
+## Prepare the cloud account
+In order for most workflows to operate with the cluster profile, the cloud account must be prepared, including creating a new IAM user as described in the OCP document ([AWS](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-account.html), [GCP](https://docs.openshift.com/container-platform/4.14/installing/installing_gcp/installing-gcp-account.html)).
+
+Some common roles might needed in addition to the ones created by the OCP document:
+
+AWS:
+- `CloudFormationFullAccess`
+
+GCP:
+- `Deployment Manager Editor`
+- `Compute Image User`
+
 ## Adding a New Cluster Profile
 
 When adding a new `cluster_profile`, three major steps must be taken: registering the profile inside of `ci-operator`, adding the new leases to `Boskos`, and providing the credentials.
