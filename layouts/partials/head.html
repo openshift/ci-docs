@@ -152,7 +152,7 @@ function format ( d ) {
               "render": function (data, type, row, meta) {
                   var data="contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only"
                   if (row['cluster'] === 'app.ci') {
-                    data='the authoritative, central CI registry';
+                    data='the <a href="/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci">deprecated</a> authoritative, central CI registry';
                   } else if (row['cluster'] === 'hive') {
                     data='';
                   } else if (row['cluster'] === 'arm01' || row['cluster'] === 'vsphere') {
