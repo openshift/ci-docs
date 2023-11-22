@@ -286,7 +286,7 @@ The access to QCI has to be through a reverse proxy serving `quay-proxy.ci.opens
 #### Human Users
 Create a pull request to include a Rover group that you belong to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). The change will be applied automatically to `app.ci` after merging.
 
-Provided that `oc` has logged into `app.ci`, we may pull images from QCI such as `quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest`
+Provided that `oc` has logged in to `app.ci`, we may pull images from QCI such as `quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest`
 by the following commands:
 
 ```console
@@ -297,9 +297,9 @@ $ podman pull quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest --a
 #### Token For Programmatic Access to QCI
 With the `admin_manifest.yaml` [described above](/docs/how-tos/use-registries-in-build-farm/#how-do-i-get-a-token-for-programmatic-access-to-the-central-ci-registry), the members of group `my-project-admins`
 can [create bound tokens for the service account](https://docs.openshift.com/container-platform/4.13/authentication/bound-service-account-tokens.html#bound-sa-tokens-configuring-externally_bound-service-account-tokens) `image-puller`
-Once `oc` logged in with the service account token, we may use the same commands above to pull the images.
-Note that we should avoid creating long-lived tokens for service accounts as described in [the Kubernetes document](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#create-token). Regardless of the token types, The members of group `my-project-admins`
-is responsible for managing the tokens, e.g., rotate the token in case of leaking.
+Once `oc` logs in to `app.ci` with the service account token, we may use the same commands above to pull the images.
+Note that we should avoid creating long-lived tokens for service accounts for a lower risk as described in [the Kubernetes document](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#create-token). Regardless of the token types, the members of group `my-project-admins`
+are responsible for managing the tokens, e.g., rotate the token in case of leaking.
 
 ## Why I am getting an authentication error?
 
