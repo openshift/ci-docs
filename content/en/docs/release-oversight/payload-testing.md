@@ -35,16 +35,45 @@ It is possible to quickly abort all running payload jobs for a specific PR. Simp
 ### Manually Submitting a `PRPQR`
 It is also possible to manually create a `PullRequestPayloadQualificationRun` instance without using the `payload` command.
 This allows for additional options to be supplied that are currently not possible via the command.
+The following is an example of a full `PRPQR` CR that can be applied to the `app.ci` cluster to trigger a payload job:
 
-#### Supplying Multiple PRs from Component Repositories
-The `ci-operator` can assemble a release payload by building and using images from multiple PRs in distinct OCP component repos.
-In order to do this, refs for each PR must be provided in the `PRPQR` spec:
 ```yaml
 apiVersion: ci.openshift.io/v1
 kind: PullRequestPayloadQualificationRun
 metadata:
-  name: multiple-pr-payload-test
+  name: manually-submitted-prpqr
   namespace: ci
+spec:
+  jobs:
+    releaseControllerConfig:
+      ocp: ''
+      release: ''
+      specifier: ''
+    releaseJobSpec:
+    - ciOperatorConfig:
+        branch: master
+        org: openshift
+        repo: release
+        variant: ci-4.15
+      test: e2e-aws-sdn-upgrade
+  pullRequests:
+  - baseRef: master
+    baseSHA: 270de19d62fc7275f22de22a7eca270bd77dd05d
+    org: openshift
+    pr:
+      author: developer
+      number: 1575
+      sha: c9817bfb09b48bc84ef20a1cf5a01cac36c2687d
+      title: 'A Pull Request'
+    repo: kubernetes
+```
+
+#### Supplying Multiple PRs from Component Repositories
+The `ci-operator` can assemble a release payload by building and using images from multiple PRs in distinct OCP component repos.
+In order to do this, refs for each PR must be provided in the `PRPQR` spec:
+
+```yaml
+...
 spec:
   jobs:
     ...
