@@ -9,38 +9,33 @@ of the data.
 
 ## Add A New Secret
 
-In order to add a new secret to our system, you will first need to create a "secret collection". Secret collections are managed
-at [selfservice.vault.ci.openshift.org](https://selfservice.vault.ci.openshift.org). Just head there, log in, click on the
-"New Collection" button, enter a name for your new secret collection, click the "Submit" button and, ideally, add your teammates as members.
-Important: Secret collection names are globally unique in our system.
-{{< alert title="Info" color="info" >}} Users must have logged in to the DPTP Vault system at least once before they are listed as potential members. {{< /alert >}}
+1. Create a "secret collection" at [selfservice.vault.ci.openshift.org](https://selfservice.vault.ci.openshift.org).
 
-The secrets themselves are managed in our Vault instance at [vault.ci.openshift.org](https://vault.ci.openshift.org).
-You need to use the OIDC auth to log in there (leave the Role as blank/Default). After logging in, click on `kv`, and you should see your secret collection.
+   * Log in, click on the "New Collection" button, enter a name for your new secret collection, click the "Submit" button and, ideally, add your teammates as members.
 
-To create a new secret, click on the link for your secret collection, add a new path (for example, "selfservice/(your secret collection)/newpath") in the
-text box to the left of `Create secret +`, then click `Create secret +`.  You can also just click "Create secret +",
-and enter the new path (for example, "selfservice/(your secret collection)/newpath") in the `Path for this secret` box.  The message that says
-`The secret path may not end in /` will then disappear.
+   {{< alert title="Important" color="info" >}} Secret collection names are globally unique in our system. {{< /alert >}}
 
-Add your new secret data (as a key value pair).  Also, include the special `secretsync` key value pairs listed below. These key value pairs ensure that the new secret is propagated into the build clusters:
+   {{< alert title="Info" color="info" >}} Users must have logged in to the DPTP Vault system at least once before they are listed as potential members. {{< /alert >}}
 
-```yaml
-secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
-secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
-```
+2. Create a new secret.
 
-Before clicking on the "Save" button, it is helpful to switch to JSON mode (click near the top of the page) to ensure the secrets are correctly added
-(for example, you will be able to clearly see any entries inadvertently set as blank/empty).
-Your new secret will have a total of three key/value pairs -- one for your secret data, one for `secretsync/target-namespace`, and one for `secretsync/target-name`.
+   * Log in to [vault.ci.openshift.org](https://vault.ci.openshift.org) with your OIDC auth (leave the Role as blank/Default).
+   * After logging in, click on `kv`, and you should see your secret collection.
+   * Click on the link for your secret collection, then click `Create secret +`. Enter the new path (for example, `selfservice/(your secret collection)/newpath`) in the `Path for this secret` box. The message that says `The secret path may not end in /` disappears.
+   * Add your new secret data as a key-value pair. Include the special `secretsync` key value pairs listed below. These key value pairs ensure that the new secret is propagated into the build clusters:
+    
+    ```yaml
+    secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
+    secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
+    ```
 
-As an advanced feature, it is also possible to limit the clusters to which the secret should be synced. This is not needed
-in most cases and will result in failures if used for secrets that are used by jobs. This also works by using a special
-key in vault:
+    Before clicking on the "Save" button, it is helpful to switch to JSON mode (click near the top of the page) to ensure the secrets are correctly added (for example, you will be able to clearly see any entries inadvertently set as blank/empty). Your new secret will have a total of three key/value pairs -- one for your secret data, one for `secretsync/target-namespace`, and one for `secretsync/target-name`.
 
-```yaml
-secretsync/target-clusters: "one-cluster,another-cluster"
-```
+    As an advanced feature, it is also possible to limit the clusters to which the secret should be synced. This is not needed in most cases and will result in failures if used for secrets that are used by jobs. This also works by using a special key in vault:
+
+    ```yaml
+    secretsync/target-clusters: "one-cluster,another-cluster"
+    ```
 
 ## Use A Secret In A Job Step
 
