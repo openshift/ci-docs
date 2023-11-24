@@ -27,6 +27,7 @@ of the data.
     ```yaml
     secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
     secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
+    MY_SECRET_TOKEN: XXXXXXXX
     ```
 
     Before clicking on the "Save" button, it is helpful to switch to JSON mode (click near the top of the page) to ensure the secrets are correctly added (for example, you will be able to clearly see any entries inadvertently set as blank/empty). Your new secret will have a total of three key/value pairs -- one for your secret data, one for `secretsync/target-namespace`, and one for `secretsync/target-name`.
@@ -46,6 +47,14 @@ for details.
 
 The propagation of secret contents is scheduled immediately after they are
 added or modified and should be completed within 30m.
+
+To use the secret in a job step, export the secret. For example, in `your-build-step-command.sh`:
+
+```bash
+AUTH_TOKEN=$(cat /tmp/vault/my-secret/MY_SECRET_TOKEN)
+
+export AUTH_TOKEN
+```
 
 ## Protecting Secrets from Leaking
 
