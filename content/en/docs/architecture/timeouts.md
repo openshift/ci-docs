@@ -183,7 +183,6 @@ current=0
 
 function cleanup() {
   echo "Validated up to ${current}!"
-  exit 1
 }
 trap cleanup EXIT
 
@@ -216,7 +215,6 @@ function cleanup() {
   done
   wait
   echo "Validated up to ${current}!"
-  exit 1
 }
 trap cleanup EXIT
 
