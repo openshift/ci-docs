@@ -92,6 +92,27 @@ function format ( d ) {
         }
       } );
 
+      if ($("#m-docsarchitectureci-operator").hasClass("active")) {
+        $.ajax({
+          url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
+          dataType: 'jsonp',
+          success: function(res) {
+            $.each(res.data, function(index, item) {
+              if (item['error']) {
+                $('#hypershift_supported_versions').text(item['error']);
+                return;
+              }
+              if (item['cluster'] === 'hive') {
+                $('#hypershift_supported_versions').text(item["hypershiftSupportedVersions"]);
+              }
+            });
+          },
+          error: function(xhr) {
+            $("#hypershift_supported_versions").text('failed to load the hive cluster info: status ' + xhr.status);
+          },
+        });
+      }
+
       if ($("#m-docsgetting-starteduseful-links").hasClass("active")) {
         $.ajax({
           url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
@@ -116,7 +137,7 @@ function format ( d ) {
               $("#progress").hide();
             });
           },
-          error: function(xhr) { 
+          error: function(xhr) {
             $("#progress").text('failed to load the cluster info: status ' + xhr.status);
           },
         });
