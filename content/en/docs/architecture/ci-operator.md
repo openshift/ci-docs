@@ -370,6 +370,18 @@ promotion:
     tag_by_commit: true # publish tags based on the git commit being built
 {{< / highlight >}}
 
+### Publishing Images to multiple Namespaces
+Promotion is not limited to a single target anymore, several namespaces could be
+specified:
+{{< highlight yaml >}}
+promotion:
+  to:
+  - namespace: "ocp"
+    tag: "4.15"
+  - namespace: "origin"
+    tag: "4.15"
+{{< / highlight >}}
+
 ## Describing OpenShift Releases Involved in Tests {#describing-inclusion-in-an-openshift-release}
 
 `ci-operator` gives first-class support to repositories which need to run end-to-end tests in the context of an OpenShift
