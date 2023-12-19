@@ -314,12 +314,13 @@ allows release payloads to be created incorporating the latest tested version of
 
 {{< highlight yaml >}}
 promotion:
-  additional_images:
-    repo-scripts: "src"    # promotes "src" as "repo-scripts"
-  excluded_images:
-  - "mytests" # does not promote the test image
-  namespace: "ocp"
-  name: "4.5"
+  to:
+  - additional_images:
+      repo-scripts: "src"    # promotes "src" as "repo-scripts"
+    excluded_images:
+    - "mytests" # does not promote the test image
+    namespace: "ocp"
+    name: "4.5"
 {{< / highlight >}}
 
 ### Publishing to an Integration Namespace
@@ -335,12 +336,13 @@ add the following `promotion` stanza to `ci-operator` configuration.
 
 {{< highlight yaml >}}
 promotion:
-  additional_images:
-    repo-scripts: "src"    # promotes "src" as "repo-scripts"
-  excluded_images:
-  - "mytests" # does not promote the test image
-  namespace: "ocp"
-  tag: "4.5"
+  to:
+  - additional_images:
+      repo-scripts: "src"    # promotes "src" as "repo-scripts"
+    excluded_images:
+    - "mytests" # does not promote the test image
+    namespace: "ocp"
+    tag: "4.5"
 {{< / highlight >}}
 
 ### Publishing Images Tagged By Commit
@@ -358,13 +360,14 @@ that tracks the `latest` or most recent release, add `tag_by_commit: true` to th
 
 {{< highlight yaml >}}
 promotion:
-  additional_images:
-    repo-scripts: "src"    # promotes "src" as "repo-scripts"
-  excluded_images:
-  - "mytests" # does not promote the test image
-  namespace: "ocp"
-  tag: "4.5"
-  tag_by_commit: true # publish tags based on the git commit being built
+  to:
+  - additional_images:
+      repo-scripts: "src"    # promotes "src" as "repo-scripts"
+    excluded_images:
+    - "mytests" # does not promote the test image
+    namespace: "ocp"
+    tag: "4.5"
+    tag_by_commit: true # publish tags based on the git commit being built
 {{< / highlight >}}
 
 ## Describing OpenShift Releases Involved in Tests {#describing-inclusion-in-an-openshift-release}
@@ -739,8 +742,8 @@ installer will use pipeline:installer if that tag is present, falling back to st
 configuration fields use this defaulting mechanism:
 
 * `images[*].from`: configuring the base `FROM` which an image builds
-* `promotion.additional_images`: configuring which `images` are published
-* `promotion.excluded_images`: configuring which `images` are not published
+* `promotion.to[*].additional_images`: configuring which `images` are published
+* `promotion.to[*].excluded_images`: configuring which `images` are not published
 * `tests[*].container.from`: configuring the container image in which a single-stage test runs
 * `tests[*].steps.{pre,test,post}[*].from`: configuring the container image which some part of a multi-stage test runs
 

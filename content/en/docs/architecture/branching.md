@@ -68,8 +68,9 @@ Ensure that the promotion stanza in your `ci-operator` configuration for your [d
 
 {{< highlight yaml >}}
 promotion:
-  namespace: ocp
-  name: 4.3
+  to:
+  - namespace: ocp
+    name: 4.3
 {{< / highlight >}}
 
 {{< alert title="Warning" color="warning" >}}

@@ -236,8 +236,9 @@ images:
   from: base
   to: my-component
 promotion:
-  name: "4.7"
-  namespace: ocp
+  to:
+  - name: "4.7"
+    namespace: ocp
 ```
 
 The `my-component` image can be pulled from the authoritative registry with:
@@ -257,8 +258,9 @@ images:
   from: base
   to: my-component
 promotion:
-  namespace: my-organization
-  tag: latest
+  to:
+  - namespace: my-organization
+    tag: latest
 ```
 
 The `my-component` image can be pulled from the authoritative registry with:
