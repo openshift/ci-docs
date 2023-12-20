@@ -60,11 +60,12 @@ In the following `ci-operator` configuration, the following `images` are promote
 {{< highlight yaml >}}
 test_binary_build_commands: go test -race -c -o e2e-tests # will create the test-bin tag
 promotion:
-  additional_images:
-    repo-scripts: src    # promotes "src" as "repo-scripts"
-    repo-tests: test-bin # promotes "test-bin" as "repo-tests"
-  namespace: ocp
-  name: 4.4
+  to:
+  - additional_images:
+      repo-scripts: src    # promotes "src" as "repo-scripts"
+      repo-tests: test-bin # promotes "test-bin" as "repo-tests"
+    namespace: ocp
+    name: 4.4
 images:
 - from: ubi8
   to: component # promotes "component" by default
