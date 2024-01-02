@@ -26,8 +26,8 @@ of the data.
     
     ```yaml
     secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
-    secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
-    MY_SECRET_TOKEN: XXXXXXXX
+    secretsync/target-name: "my-secret" # The Name of your secret in the build clusters
+    my_secret_key: "my_secret_value" # Your secret data
     ```
 
     Before clicking on the "Save" button, it is helpful to switch to JSON mode (click near the top of the page) to ensure the secrets are correctly added (for example, you will be able to clearly see any entries inadvertently set as blank/empty). Your new secret will have a total of three key/value pairs -- one for your secret data, one for `secretsync/target-namespace`, and one for `secretsync/target-name`.
@@ -45,16 +45,16 @@ The most common case is to use secrets in a [step](/docs/architecture/step-regis
 defined in the `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
 for details.
 
-The propagation of secret contents is scheduled immediately after they are
-added or modified and should be completed within 30m.
-
-To use the secret in a job step, export the secret. For example, in `your-build-step-command.sh`:
+To use the secret in a job step, export the secret. For example, suppose the `mount_path` for the above `my-secret` is defined in a step as `/var/run/my-data`. The script in the step can access `my_secret_value` via the `/var/run/my-data/my_secret_key` file:
 
 ```bash
-AUTH_TOKEN=$(cat /tmp/vault/my-secret/MY_SECRET_TOKEN)
+AUTH_TOKEN=$(cat /var/run/my-data/my_secret_key)
 
 export AUTH_TOKEN
 ```
+
+The propagation of secret contents is scheduled immediately after they are
+added or modified and should be completed within 30m.
 
 ## Protecting Secrets from Leaking
 
