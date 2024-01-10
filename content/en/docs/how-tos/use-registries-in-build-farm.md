@@ -180,7 +180,7 @@ image with any normal container engine:
 $ podman pull registry.build02.ci.openshift.org/ci-op-2c2tvgti/pipeline:src
 ```
 
-**Warning:** Only `vSphere` system administrators can access the images on [registry.apps.build01-us-west-2.vmc.ci.openshift.org](https://registry.apps.build01-us-west-2.vmc.ci.openshift.org).
+**Warning:** Only `vSphere` system administrators can access the images on [registry.apps.build02.vmc.ci.openshift.org](https://registry.apps.build02.vmc.ci.openshift.org).
 
 ## How do I access the latest published images for my component?
 
