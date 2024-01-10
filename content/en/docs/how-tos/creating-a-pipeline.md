@@ -22,7 +22,7 @@ branch-protection:
           require_manually_triggered_jobs: true # enable pipelines on repo level
 ```
 
-Secondly, a job that is intended to be promoted to the second stage must be appropriately marked. This involves explicitly setting the `always_run: false` property. Additionally, the job cannot be marked as `optional: true` and should not have `skip_if_only_changed` or `run_if_changed` configured.
+Secondly, a job that is intended to be promoted to the second stage must be appropriately marked. This involves explicitly setting the `always_run: false` property. Additionally, the job cannot be marked as `optional: true` and should not have `skip_if_only_changed` or `run_if_changed` configured (for `run_if_changed`, there is an alternative if one is using Automatic Pipelines).
 
 ```yaml
 - always_run: false # job has to be explicitly marked
@@ -51,7 +51,7 @@ Manual pipelines are currently a default solution, so if all tests are properly 
 ### Known issues
 - Tide displays the message `In merge pool` if all required labels are applied, the first stage is complete, and no `/test remaining-required` comment is made. While this may suggest that the pull request is ready to be merged, this is not the case. The pull request will not be merged until all tests, including those in the second stage, have passed. TP is currently developing a fix for Tide to address this misleading message.
 
-## Automatic Pipelines (experimental)
+## Automatic Pipelines
 
 Users can opt-in to use automatic pipelines, which eliminates the need to track job execution. Our bot account will automatically comment `/test remaining-required` on pull requests when the following criteria are met:
 
@@ -68,6 +68,56 @@ The controller responsible for triggering the second stage maintains a 24-hour m
 
 To enable automatic pipelines, a PR must be submitted to modify the [openshift/release config](https://github.com/openshift/release/blob/master/core-services/pipeline-controller/config.yaml), adding the desired repository. Alternatively, it is also possible to add an entire organization by submitting a PR with the organization name, and without specifying any repositories.
 
+### `run_if_changed` alternative
+
+There exists the ability to utilize functionality similar to `run_if_changed` when employing an automated pipelines workflow. For example, the provided test configuration:
+```yaml
+- always_run: false
+  as: e2e-oo
+  run_if_changed: pkg/steps/(index|bundle).*.go
+  steps:
+    test:
+    - as: e2e
+      commands:
+      ...
+      from: test-bin
+      resources:
+        requests:
+          cpu: 200m
+          memory: 200Mi
+```
+
+May be repurposed to leverage a specialized `pipeline_run_if_changed` field:
+```yaml
+- always_run: false
+  as: e2e-oo
+  pipeline_run_if_changed: pkg/steps/(index|bundle).*.go
+  steps:
+    test:
+    - as: e2e
+      commands:
+      ...
+      from: test-bin
+      resources:
+        requests:
+          cpu: 200m
+          memory: 200Mi
+```
+
+Previously mentioned rules must be consistently applied to the job. This includes explicitly setting the `always_run: false` property. Additionally, the job should not be marked as `optional: true` and must avoid using the `skip_if_only_changed` or `run_if_changed` settings. While establishing `pipeline_run_if_changed`, it does not exempt labeling a GitHub context as required. Consequently, some contexts may be labeled as overridden if they are not conditionally required. The pipeline controller will issue a comment listing the contexts to either trigger or override them. Example comment:
+```
+[GitHub Comment]
+/test remaining-required
+
+Scheduling tests matching the `pipeline_run_if_changed` parameter:
+/test ci/prow/e2e
+
+Overriding unmatched contexts:
+/override ci/prow/e2e-oo
+```
+
+Overridden contexts will be considered as passed, and once all the remaining contexts have successfully passed, the pull request will be scheduled for merging.
+
 ### Troubleshooting
-Support for automatic pipelines is experimental. TP has made every effort to cover all known corner cases and ensure that the bot comments on PRs. However, in rare instances, including situations when the GitHub webhook is unavailable due to factors such as partial GitHub outages, the bot may not post the comment. In such cases, users should comment on the PR themselves `/test remaining-required` to activate second stage. If the issue persists or is repeatable in certain situations, please submit a bug report using our bot in the `#forum-ocp-testplaftorm` Slack channel.
+TP has made every effort to cover all known corner cases and ensure that the bot comments on PRs. However, in rare instances, including situations when the GitHub webhook is unavailable due to factors such as partial GitHub outages, the bot may not post the comment. In such cases, users should comment on the PR themselves `/test remaining-required` to activate second stage. If the issue persists or is repeatable in certain situations, please submit a bug report using our bot in the `#forum-ocp-testplaftorm` Slack channel.
 
