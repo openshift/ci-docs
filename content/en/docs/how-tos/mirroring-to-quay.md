@@ -5,7 +5,7 @@ description: How to mirror an image built in the CI system out to an external re
 
 ## Requirements
 
-In order to mirror an image built by CI to Quay, that image must be [promoted.](/docs/architecture/ci-operator/#publishing-container-images)
+In order to mirror an image built by CI to Quay, that image must be [promoted](/docs/architecture/ci-operator/#publishing-container-images).
 
 If the image is promoted into a namespace for which no other image mirroring is set up yet, some RBAC needs to
 be configured:
@@ -40,6 +40,7 @@ repositories already have mirroring pipelines configured; each directory
 [here](https://github.com/openshift/release/tree/master/core-services/image-mirroring) corresponds to a repository.
 These directories contain mapping files that define tags on images in the target repository. New images may be submitted
 to mirror to existing organizations, or new ones.  When naming your new image, please follow the [naming guidelines](https://github.com/openshift/release/blob/master/core-services/image-mirroring/openshift/GUIDELINES.md).
+For `quay.io/openshift/...` images, whether they will be [included in the OpenShift release payload](/docs/how-tos/onboarding-a-new-component/#product-builds-and-becoming-part-of-an-openshift-release) or not, also consider consulting [the OpenShift mirroring approvers](https://github.com/openshift/release/blob/master/core-services/image-mirroring/openshift/OWNERS), to review your name choices, before sinking significant time into work that depends on that naming (like creating Git repositories, requesting image repositories from [Software Production][CLOUDBLD], or writing multiple Go packages).
 
 ### Existing Organizations
 
@@ -99,3 +100,5 @@ For example, the following command mirrors all tags of `my-imagestream` in `my-n
 ```console
 $ oc image mirror registry.ci.openshift.org/my-namespace/my-imagestream:* quay.io/myrepository/myimage
 ```
+
+[CLOUDBLD]: https://issues.redhat.com/projects/CLOUDBLD

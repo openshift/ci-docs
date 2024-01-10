@@ -6,7 +6,9 @@ description: How to onboard a new component repository to the CI system for test
 ## Overview
 
 This document overviews the workflow for onboarding new public component repositories to the Openshift CI. Private
-repositories are not supported at this time, but will be in the future
+repositories are not supported at this time, but will be in the future.
+
+If you are thinking about adding new images to OpenShift release payloads, read [this section](#product-builds-and-becoming-part-of-an-openshift-release) first, to avoid doing work you might have to adjust later.
 
 ## Granting Robots Privileges and Installing the GitHub App
 
@@ -242,15 +244,17 @@ When container images are declared as release artifacts for a repository in the 
 a synthetic `[images]` target is available for CI Operator execution that will simply build all
 release images. In order for the container images built from your repository to be published, the
 Prow job generator will configure a Prow postsubmit job that uses the CI Operator `--target=[images]` and `--promote` flags.
-Information on how to publish images to an external registry can be found in a [separate document.](/docs/how-tos/mirroring-to-quay/).
+Information on how to publish images to an external registry can be found in a [separate document](/docs/how-tos/mirroring-to-quay/).
 
-### Product builds and becoming part of an OpenShift release image
+### Product builds and becoming part of an OpenShift release
 
-Some images become part of the OpenShift release image because they are core to the platform. To be part of the release
-image, there are additional requirements (beyond those described in the previous section).
+Some images become part of the OpenShift release because they are core to the platform. To be part of the release, there are additional requirements (beyond those described in the previous section).
+Adding images to releases is a significant addition, and requires [an enhancement][enhancements] to explain why the new functionality is important, and why it should be delivered via OpenShift releases (instead of via [an OLM-installed operator][operator-lifecycle-manager]).
+It also requires [the approval of image names for mirroring](/docs/how-tos/mirroring-to-quay/#mirroring-images).
+You can delay the enhancement proposal and image naming discussion if you need to get through some later steps in order to figure out what to put in the enhancement, but that it's good to round with likely enhancement and image naming approvers about that, and it comes with the risk that you sink in some work and then enhancement or image-name review ends up rejecting your idea or requesting invasive changes.
 
 There are two types of component images in the release payloads:
-1. Operators managed by the CVO - known as second level operators. If a [Dockerfile contains](https://github.com/openshift/cloud-credential-operator/blob/c2bec26d3734e444666024858e76d4ca80dd31cf/Dockerfile#L12) `LABEL io.openshift.release.operator true`, the component is a second level operator. 
+1. Operators managed by the CVO - known as second level operators. If a [Dockerfile contains](https://github.com/openshift/cloud-credential-operator/blob/c2bec26d3734e444666024858e76d4ca80dd31cf/Dockerfile#L12) `LABEL io.openshift.release.operator true`, the component is a second level operator.
 2. Operands managed by second level operators. These images are pulled into the release payload by virtue of being [specified in an image-references file by a second level operator](https://github.com/openshift/cloud-credential-operator/blob/c2bec26d3734e444666024858e76d4ca80dd31cf/manifests/image-references#L9-L12). 
 
 All product teams that will ship an image to product must ensure their image is built in OSBS at least once and
@@ -368,3 +372,5 @@ operator's `image-references` file, or release payloads will fail to assemble af
 [doozer-environment-variables]: https://github.com/openshift/doozer/blob/57721c72b3ddd08e6493323fcce065f55327fd69/doozerlib/distgit.py#L1975-L1985
 [build-machinery-go-version-ldflags]: https://github.com/openshift/build-machinery-go/blob/e25cf57ea46d9ce17de894b1a00dcf43ba12ee1a/make/lib/golang.mk#L57-L69
 [cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/master/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
+[enhancements]: https://github.com/openshift/enhancements
+[operator-lifecycle-manager]: https://olm.operatorframework.io/

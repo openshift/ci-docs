@@ -48,7 +48,7 @@ continuous integration; a repository opts into using an integration stream with 
 When configuring `ci-operator` for a repository, the `promotion` stanza declares which container `images` are published and
 defines the integration `ImageStream` where they will be available. By default, all container `images` declared in the
 `images` block of a `ci-operator` configuration are published when a `promotion` stanza is present to define the integration
-`ImageStream`. Promotion can be furthermore configured to include other `images`, as well, although promotion should be avoided unless there is an expectation of external consumption. For example, do not publish images with [the `io.openshift.release.operator` label](../../how-tos/onboarding-a-new-component/#product-builds-and-becoming-part-of-an-openshift-release-image) unless they should be included in OpenShift release images.
+`ImageStream`. Promotion can be furthermore configured to include other `images`, as well, although promotion should be avoided unless there is an expectation of external consumption. For example, do not publish images with [the `io.openshift.release.operator` label](../../how-tos/onboarding-a-new-component/#product-builds-and-becoming-part-of-an-openshift-release) unless they should be included in OpenShift release images.
 
 In the following `ci-operator` configuration, the following `images` are promoted for reuse by other repositories to the `ocp/4.4` integration `ImageStream`:
 
