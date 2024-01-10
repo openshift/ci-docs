@@ -46,6 +46,18 @@ When the CI image is built, the images in `FROM` directives of `Dockerfile.rhel7
 * `registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.6` is replaced by the image named `ocp_builder_rhel-8-golang-1.15-openshift-4.6`, which is imported in `base_images` from `registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.6`. This is colloquially known as _the builder image_.
 * `registry.ci.openshift.org/ocp/4.6:base` is replaced by the image named `base`, which is imported in `base_images` from `registry.ci.openshift.org/ocp/4.6:base`. This is colloquially known as _the base image_.
 
+To see what base and golang images are available under which name in CI for a specific OpenShift version, you can use a snippet like this:
+```bash
+version=4.14
+jq --arg version $version -r '
+  .Repository as $repo
+  | .Tags[]
+  | select(contains($version) and (contains(".art") | not))
+  | @text "\($repo):\(.)"' <(
+    skopeo list-tags docker://registry.ci.openshift.org/ocp/builder
+  )
+```
+
 ## Productized Images
 
 Build configurations for productized images are stored in the [`ocp-build-data` repository](https://github.com/openshift/ocp-build-data). For example, [`images/cluster-etcd-operator.yml`](https://github.com/openshift/ocp-build-data/blob/openshift-4.6/images/cluster-etcd-operator.yml) in the `openshift-4.6` branch defines the build of the productized image for the 4.6 `cluster-etcd-operator`. 
