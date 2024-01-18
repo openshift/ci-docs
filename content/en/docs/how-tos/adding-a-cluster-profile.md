@@ -105,6 +105,34 @@ changes.  These are:
   named `cluster-profile-<name>`, in which case a single new `switch` label is
   required.
 
+#### Storing AWS credentials as secrets
+
+Some workflows will provision resources before installing the cluster (e.g.,
+[`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws). These types of
+workflows requires AWS credentials exposed to the workflow as a Vault secret.
+It's important to note that the secret must contain a key-value pair where the
+key name is `.awscred` and the value is the contents of an [AWS credentials
+file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+Replace the placeholder values as appropriate:
+
+```
+[default]
+aws_access_key_id=<placeholder-id>
+aws_secret_access_key=<placeholder-secret>
+```
+
+#### Storing SSH key pairs
+
+In addition to credentials, some workflows (e.g., `ipi-aws`) require ssh keys,
+which allow you to access CI clusters. This can be important for debugging
+issues. We recommend generating a new key pair specifically for CI usage.
+
+SSH key pairs are also stored in Vault, just like provider credentials. They
+should be stored within the same secret as the provider credentials, but as
+separate key-value pairs. You'll have two new key-value pairs, where the keys
+are `ssh-publickey` and `ssh-privatekey` and they store the file contents of
+the SSH public and private key, respectively.
+
 ## Private Cluster Profiles
 
 To restrict the usage of your cluster profile to specific organizations and repositories, 
