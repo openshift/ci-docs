@@ -29,6 +29,12 @@ A job can be executed more than once by a single `/payload-aggregate` command, e
 
 > /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
 
+The payload tested can also include the images from multiple PRs from distinct repositories by using `/payload-job-with-prs`, such as
+
+> /payload-job-with-prs <periodic_ci_openshift_release_some_job> <org/repo#number> [<org/repo#number ...]
+
+Note that `/payload-job-with-prs` only accepts a single job per comment; additional jobs need to be triggered with separate comments (not just separate lines).
+
 #### Abort all Payload Jobs
 It is possible to quickly abort all running payload jobs for a specific PR. Simply comment `/payload-abort` on the PR to do so.
 
