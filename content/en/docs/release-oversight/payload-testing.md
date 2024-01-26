@@ -21,19 +21,28 @@ For example, if `/payload 4.10 nightly informing` is issued on a PR, the robot w
 The jobs triggered by the command are determined by [OpenShift Release Controllers](/docs/getting-started/useful-links/#services).
 The linked page from [payload-tests portal](https://pr-payload-tests.ci.openshift.org/runs/) at the bottom of the comment shows the status of the payload testing and the details of those jobs.
 
+The images from multiple PRs from distinct repositories can also be included in the payload tested by using the `/payload-with-prs` command, such as
+> /payload-with-prs <ocp_version> <ci|nightly> <informing|blocking> <org/repo#number> [<org/repo#number ...]
+
 A particular job or set of jobs can be triggered by `/payload-job`, such as
 
 > /payload-job <periodic_ci_openshift_release_some_job> <periodic_ci_openshift_release_another_job>
-
-A job can be executed more than once by a single `/payload-aggregate` command, e.g, 
-
-> /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
 
 The payload tested can also include the images from multiple PRs from distinct repositories by using `/payload-job-with-prs`, such as
 
 > /payload-job-with-prs <periodic_ci_openshift_release_some_job> <org/repo#number> [<org/repo#number ...]
 
-Note that `/payload-job-with-prs` only accepts a single job per comment; additional jobs need to be triggered with separate comments (not just separate lines).
+A job can be executed more than once by a single `/payload-aggregate` command, e.g, 
+
+> /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
+
+It is also possible to use the aggregation logic with additional PRs included in the payload with the `/payload-aggregate-with-prs` command, e.g, 
+
+> /payload-aggregate-with-prs <periodic_ci_openshift_release_some_job> <aggregated_count> <org/repo#number> [<org/repo#number ...]
+
+{{% alert title="NOTE" color="warning" %}}
+Note that: `/payload-with-prs`, `/payload-aggregate`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
+{{% /alert %}}
 
 #### Abort all Payload Jobs
 It is possible to quickly abort all running payload jobs for a specific PR. Simply comment `/payload-abort` on the PR to do so.
