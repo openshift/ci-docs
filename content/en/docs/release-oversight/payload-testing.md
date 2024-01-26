@@ -41,7 +41,7 @@ It is also possible to use the aggregation logic with additional PRs included in
 > /payload-aggregate-with-prs <periodic_ci_openshift_release_some_job> <aggregated_count> <org/repo#number> [<org/repo#number ...]
 
 {{% alert title="NOTE" color="warning" %}}
-Note that: `/payload-with-prs`, `/payload-aggregate`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
+`/payload-with-prs`, `/payload-aggregate`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
 {{% /alert %}}
 
 #### Abort all Payload Jobs
