@@ -722,7 +722,8 @@ tests:
   commands: "go test ./..."  # declares which commands to run
   container:
     from: "src"              # runs the commands in "pipeline:src"
-  cron: "0 */6 * * *"          # schedule a run on the hour, every six hours
+  cron: "0 */6 * * *"        # schedule a run on the hour, every six hours
+  presubmit: true            # run the test as a presubmit as well, used only when cron is set
 {{< / highlight >}}
 
 Note that the build farms used to execute jobs run on UTC time, so time-of-day based `cron` schedules must be set with
