@@ -29,6 +29,9 @@ of the data.
     secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
     ```
 
+    In order to avoid putting the sensitive data into a secret used by other tests, it is suggested to give the secret a name as specific as possible,
+    e.g., by including the team name or clarifying what content are stored in the secret. A good example is `redhat-developer-services-binding-operator-test-quay-credentials`.
+
     Before clicking on the "Save" button, it is helpful to switch to JSON mode (click near the top of the page) to ensure the secrets are correctly added (for example, you will be able to clearly see any entries inadvertently set as blank/empty). Your new secret will have a total of three key/value pairs -- one for your secret data, one for `secretsync/target-namespace`, and one for `secretsync/target-name`.
 
     As an advanced feature, it is also possible to limit the clusters to which the secret should be synced. This is not needed in most cases and will result in failures if used for secrets that are used by jobs. This also works by using a special key in vault:
