@@ -59,6 +59,9 @@ metadata:
   name: manually-submitted-prpqr
   namespace: ci
 spec:
+  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342
+  payload:
+    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
   jobs:
     releaseControllerConfig:
       ocp: ''
@@ -113,6 +116,19 @@ spec:
       repo: installer
 ...
 ```
+
+#### Overriding the Default Payload PullSpecs
+It is possible to override the pull-spec used for both the `initial` and `latest` release payloads by manually submitting a `PRPQR`.
+This is done by supplying the `spec.initial` and `spec.payload.base` fields respectively:
+```yaml
+...
+spec:
+  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342 # useful for supplying a different pull-spec for the initial payload during 'upgrade' jobs
+  payload:
+    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750 # images built using PR code will be layered on top of the base
+...
+```
+
 {{% alert title="NOTE" color="warning" %}}
 It is currently not possible to assemble the payload from multiple PRs in the same repository. This feature will be available at a later date.
 {{% /alert %}}
