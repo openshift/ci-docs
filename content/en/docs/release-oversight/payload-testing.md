@@ -123,9 +123,11 @@ This is done by supplying the `spec.initial` and `spec.payload.base` fields resp
 ```yaml
 ...
 spec:
-  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342 # useful for supplying a different pull-spec for the initial payload during 'upgrade' jobs
+  # useful for supplying a different pull-spec for the initial payload during 'upgrade' jobs
+  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342 
   payload:
-    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750 # images built using PR code will be layered on top of the base
+    # images built using PR code will be layered on top of the base
+    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
 ...
 ```
 
