@@ -117,6 +117,10 @@ spec:
 ...
 ```
 
+{{% alert title="NOTE" color="warning" %}}
+It is currently not possible to assemble the payload from multiple PRs in the same repository. This feature will be available at a later date.
+{{% /alert %}}
+
 #### Overriding the Default Payload PullSpecs
 It is possible to override the pull-spec used for both the `initial` and `latest` release payloads by manually submitting a `PRPQR`.
 This is done by supplying the `spec.initial` and `spec.payload.base` fields respectively:
@@ -130,7 +134,3 @@ spec:
     base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
 ...
 ```
-
-{{% alert title="NOTE" color="warning" %}}
-It is currently not possible to assemble the payload from multiple PRs in the same repository. This feature will be available at a later date.
-{{% /alert %}}
