@@ -62,6 +62,9 @@ spec:
   initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342
   payload:
     base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
+    tags:
+      - name: "machine-os-content"
+        tag: "4.13-2024-02-04-192545"
   jobs:
     releaseControllerConfig:
       ocp: ''
@@ -132,5 +135,18 @@ spec:
   payload:
     # images built using PR code will be layered on top of the base
     base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
+...
+```
+
+#### Overriding Specific Image Tags in the Payload
+It is also possible to override a specific image tag in the payload to any tag contained in an `ocp` ImageStream. Doing so requires manually submitting a `PRPQR`.
+This can be done by providing the tag overrides in the `spec.payload.tags` list:
+```yaml
+...
+spec:
+  payload:
+    tags:
+      - name: "machine-os-content" # name of the tag to be overridden
+        tag: "4.13-2024-02-04-192545" # ImageStream name in the 'ocp' namespace to override to
 ...
 ```
