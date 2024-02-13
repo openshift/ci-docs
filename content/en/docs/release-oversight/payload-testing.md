@@ -21,14 +21,14 @@ For example, if `/payload 4.10 nightly informing` is issued on a PR, the robot w
 The jobs triggered by the command are determined by [OpenShift Release Controllers](/docs/getting-started/useful-links/#services).
 The linked page from [payload-tests portal](https://pr-payload-tests.ci.openshift.org/runs/) at the bottom of the comment shows the status of the payload testing and the details of those jobs.
 
-The images from multiple PRs from distinct repositories can also be included in the payload tested by using the `/payload-with-prs` command, such as
+The images from multiple PRs can also be included in the payload tested by using the `/payload-with-prs` command, such as
 > /payload-with-prs <ocp_version> <ci|nightly> <informing|blocking> <org/repo#number> [<org/repo#number ...]
 
 A particular job or set of jobs can be triggered by `/payload-job`, such as
 
 > /payload-job <periodic_ci_openshift_release_some_job> <periodic_ci_openshift_release_another_job>
 
-The payload tested can also include the images from multiple PRs from distinct repositories by using `/payload-job-with-prs`, such as
+The payload tested can also include the images from multiple PRs by using `/payload-job-with-prs`, such as
 
 > /payload-job-with-prs <periodic_ci_openshift_release_some_job> <org/repo#number> [<org/repo#number ...]
 
@@ -90,7 +90,7 @@ spec:
 ```
 
 #### Supplying Multiple PRs from Component Repositories
-The `ci-operator` can assemble a release payload by building and using images from multiple PRs in distinct OCP component repos.
+The `ci-operator` can assemble a release payload by building and using images from multiple PRs in OCP component repos.
 In order to do this, refs for each PR must be provided in the `PRPQR` spec:
 
 ```yaml
@@ -119,10 +119,6 @@ spec:
       repo: installer
 ...
 ```
-
-{{% alert title="NOTE" color="warning" %}}
-It is currently not possible to assemble the payload from multiple PRs in the same repository. This feature will be available at a later date.
-{{% /alert %}}
 
 #### Overriding the Default Payload PullSpecs
 It is possible to override the pull-spec used for both the `initial` and `latest` release payloads by manually submitting a `PRPQR`.
