@@ -2,7 +2,7 @@ FROM klakegg/hugo:0.111.3-ext-ubuntu as builder
 
 COPY . /src/
 
-RUN set -x && ln -s /bin/bash /usr/bin/bash && make generate
+RUN set -x && make generate
 
 FROM nginxinc/nginx-unprivileged:1.18-alpine
 
