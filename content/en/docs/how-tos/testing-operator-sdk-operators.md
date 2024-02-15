@@ -51,7 +51,7 @@ operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
   - as: my-bundle
     context_dir: "path/"                  # default to .
-    dockerfile_path: "to/Dockerfile"      # default to `bundle.Dockerfile`, relative to `context_dir`
+    dockerfile_path: "to/Dockerfile"      # default to `Dockerfile`. The path to the Dockerfile, relative to the `context_dir`, to build the bundle (e.g., `bundle.Dockerfile`)
     skip_building_index: false            # default to false
     base_index: "operator-index"          # deprecated
     update_graph: "replaces"              # deprecated
