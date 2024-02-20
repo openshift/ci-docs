@@ -89,6 +89,11 @@ spec:
     repo: kubernetes
 ```
 
+{{% alert title="WARNING" color="warning" %}}
+If multiple `pullRequests` entries are supplied for a single org/repo pair, the `baseRef` and `baseSHA` will be selected only from the first one in the list.
+Therefore, it is not supported to have differing entries for these.
+{{% /alert %}}
+
 #### Supplying Multiple PRs from Component Repositories
 The `ci-operator` can assemble a release payload by building and using images from multiple PRs in OCP component repos.
 In order to do this, refs for each PR must be provided in the `PRPQR` spec:
@@ -144,5 +149,21 @@ spec:
     tags:
       - name: "machine-os-content" # name of the tag to be overridden
         tag: "4.13-2024-02-04-192545" # ImageStream name in the 'ocp' namespace to override to
+...
+```
+
+#### Sourcing Components from Specific Base
+A `PRPQR` can be submitted without referencing an open PR. This is useful to pin one or more component repos to a specific `baseRef` and `baseSHA` in order to test the state of things at that point.
+Doing so requires manually applying the `PRPQR` CR:
+```yaml
+...
+spec:
+  jobs:
+    ...
+  pullRequests:
+    - baseRef: master 
+      baseSHA: 270de19d62fc7275f22de22a7eca270bd77dd05d
+      org: openshift
+      repo: kubernetes
 ...
 ```
