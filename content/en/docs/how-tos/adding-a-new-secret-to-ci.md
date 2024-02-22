@@ -26,7 +26,8 @@ of the data.
     
     ```yaml
     secretsync/target-namespace: "test-credentials" # The Namespace of your secret in the build clusters. Multiple namespaces can be targeted by using a comma-separated list
-    secretsync/target-name: "my-secret"             # The Name of your secret in the build clusters
+    secretsync/target-name: "my-secret" # The Name of your secret in the build clusters
+    my_secret_key: "my_secret_value" # Your secret data
     ```
 
     In order to avoid putting the sensitive data into a secret used by other tests, it is suggested to give the secret a name as specific as possible,
@@ -46,6 +47,14 @@ The most common case is to use secrets in a [step](/docs/architecture/step-regis
 **require** the user to mirror secrets to `test-credentials` namespace. The pod which runs the step can access the secrets
 defined in the `credentials` stanza of the step definition. See [the documentation](https://docs.ci.openshift.org/docs/architecture/step-registry/#injecting-custom-credentials)
 for details.
+
+To use the secret in a job step, export the secret. For example, suppose the `mount_path` for the above `my-secret` is defined in a step as `/var/run/my-data`. The script in the step can access `my_secret_value` via the `/var/run/my-data/my_secret_key` file:
+
+```bash
+AUTH_TOKEN=$(cat /var/run/my-data/my_secret_key)
+
+export AUTH_TOKEN
+```
 
 The propagation of secret contents is scheduled immediately after they are
 added or modified and should be completed within 30m.
