@@ -139,7 +139,7 @@ To restrict the usage of your cluster profile to specific organizations and repo
 you can create a pull request in the `openshift/release` repository.
 Within the pull request, add your repository or organization to the [allowlist](https://github.com/openshift/release/tree/master/core-services/cluster-profiles/_config.yaml).
 
-For detailed instructions, please refer to the [README file](https://github.com/openshift/release/tree/master/core-services/cluster-profiles/README.md).
+For detailed instructions, please refer to the [readme file](https://github.com/openshift/release/tree/master/core-services/cluster-profiles/README.md).
 
 ## VPN connection
 
