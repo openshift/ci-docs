@@ -25,7 +25,7 @@ The above stanza indicates the image `gcr.io/k8s-staging-boskos/boskos:latest` i
 `registry.ci.openshift.org/ci/ci-tools-build-root:1.21` as `quay.io/openshift/ci:ci_ci-tools-build-root_1.21`. The target of the mapping
 `supplementalCIImages` is of the form `namespace/name:tag` and the source is specified either by `image` or a reference of an `imagestreamtag` on `app.ci`. The latter kind of source is useful when the source image is on `app.ci`, e.g., the output of a `buildConfig`.
 It takes a couple of hours to complete the mirroring after the change on the configuration file is merged.
-Once the target image lands on QCI, it can be referred in ci-operator's config file such as the following:
+Once the target image lands on QCI, it can be referenced in ci-operator's config file as follows:
 
 {{< highlight yaml >}}
 base_images:
