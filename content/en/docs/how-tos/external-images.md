@@ -3,7 +3,7 @@ title: "Using External Images in CI"
 description: How to mirror external images to the CI environments for use in jobs.
 ---
 
-The `ci-operator` config only allows to refer an image in form of `namespace/name:tag`, it does not allow to specify arbitrary Docker pull specs. In order
+The `ci-operator` config only allows referencing an image in the form of `namespace/name:tag`, it does not allow the specification of arbitrary Docker pull specs. In order
 to use external images, they need to be mirrored to [QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci).
 
 ## Mirror Public Images
