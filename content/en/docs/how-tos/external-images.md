@@ -3,33 +3,29 @@ title: "Using External Images in CI"
 description: How to mirror external images to the CI environments for use in jobs.
 ---
 
-The `ci-operator` config only allows to reference `ImageStreamTags`, it does not allow to specify arbitrary Docker pull specs. In order
-to use external images, they need to be mirrored to [the central CI registry](/docs/how-tos/use-registries-in-build-farm/#summary-of-available-registries).
+The `ci-operator` config only allows referencing an image in the form of `namespace/name:tag`, it does not allow the specification of arbitrary Docker pull specs. In order
+to use external images, they need to be mirrored to [QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci).
 
 ## Mirror Public Images
 
-If the source image is open to the public, we can mirror the image by adding it into a mapping file in
-[the `core-services/image-mirroring/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/supplemental-ci-images/) of `openshift/release` repository. The following line in the `mapping_supplemental_ci_images_ci` file mirrors 
-`gcr.io/k8s-staging-boskos/boskos:latest` to `registry.ci.openshift.org/ci/boskos:latest`. The naming convention of the mapping file is `mapping_supplemental_ci_images_<namespace>`, e.g., the images in `mapping_supplemental_ci_images_ci` are mirrored to the namespace `ci`.
+If the source image is open to the public, we can mirror it to [QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci) by adding it into [the configuration file](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml) in
+[the `core-services/image-mirroring` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/) of `openshift/release` repository.
 
-{{< highlight text >}}
-gcr.io/k8s-staging-boskos/boskos:latest registry.ci.openshift.org/ci/boskos:latest
-{{< / highlight >}}
+```yaml
+supplementalCIImages:
+  ci/boskos:latest:
+    image: gcr.io/k8s-staging-boskos/boskos:latest
+  ci/ci-tools-build-root:1.21:
+    namespace: ci
+    name: ci-tools-build-root
+    tag: "1.21"
+```
 
-{{< alert title="Warning" color="warning" >}}
-- We cannot mirror images from `docker.io` due to rate limiting constraints. Please, instead, push up an image to quay and mirror that to the CI registry.
-- It is not possible to use Red Hat managed namespaces. Therefore, you cannot mirror your image to **any** namespace that
-matches the following regular expression: (^kube.*|^openshift.*|^default$|^redhat.*). The mirroring job will fail if the namespace does not exist on `app.ci`.
-See [the steps](/docs/how-tos/use-registries-in-build-farm/) about claiming a namespace.
-- We cannot mirror images to an imagestream with the tags that are [promoted by ci-operator](/docs/architecture/ci-operator/#publishing-to-an-integration-stream). Otherwise, the target images will be cleaned up by the periodic Prow job `periodic-promoted-image-governor`.
-
-{{< /alert >}}
-
-The hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images)
-mirrors all the images defined in the mapping files.  Note that it operates on
-the contents of the `master` branch, so the changes to the files have to be
-merged before the images can be used in jobs and/or pull request rehearsals.
-Once it is mirrored, you can use the image like this:
+The above stanza indicates the image `gcr.io/k8s-staging-boskos/boskos:latest` is pushed to QCI as `quay.io/openshift/ci:ci_boskos_latest` and
+`registry.ci.openshift.org/ci/ci-tools-build-root:1.21` as `quay.io/openshift/ci:ci_ci-tools-build-root_1.21`. The target of the mapping
+`supplementalCIImages` is of the form `namespace/name:tag` and the source is specified either by `image` or a reference of an `imagestreamtag` on `app.ci`. The latter kind of source is useful when the source image is on `app.ci`, e.g., the output of a `buildConfig`.
+It takes a couple of hours to complete the mirroring after the change on the configuration file is merged.
+Once the target image lands on QCI, it can be referenced in ci-operator's config file as follows:
 
 {{< highlight yaml >}}
 base_images:
@@ -38,6 +34,16 @@ base_images:
     name:  boskos
     tag: latest
 {{< / highlight >}}
+
+{{< alert title="Warning" color="warning" >}}
+- We cannot mirror images from `docker.io` due to rate limiting constraints. Please, instead, push up an image to quay and mirror that to QCI.
+- Before [DPTP-3915](https://issues.redhat.com/browse/DPTP-3915) is in place, the target should be chosen carefully to avoid overriding existing images in QCI. It can be verified by pulling the targeting image from QCI.
+{{< /alert >}}
+
+
+## The mapping files: Deprecated
+The mapping files in [the `core-services/image-mirroring/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/supplemental-ci-images/) of `openshift/release` repository will be replaced with the mapping in the configuration file above. From now on, no new images will be accepted for those files. It is WIP at the moment.
+Once the migration is complete, the hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images) that consumes the mapping files will be removed.
 
 ## Mirror Private Images
 
