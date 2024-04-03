@@ -40,11 +40,6 @@ base_images:
 - Before [DPTP-3915](https://issues.redhat.com/browse/DPTP-3915) is in place, the target should be chosen carefully to avoid overriding existing images in QCI. It can be verified by pulling the targeting image from QCI.
 {{< /alert >}}
 
-
-## The mapping files: Deprecated
-The mapping files in [the `core-services/image-mirroring/supplemental-ci-images` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/supplemental-ci-images/) of `openshift/release` repository will be replaced with the mapping in the configuration file above. From now on, no new images will be accepted for those files. It is WIP at the moment.
-Once the migration is complete, the hourly periodic job [`periodic-image-mirroring-supplemental-ci-images`](https://prow.ci.openshift.org/?job=periodic-image-mirroring-supplemental-ci-images) that consumes the mapping files will be removed.
-
 ## Mirror Private Images
 
 It is not supported at the moment to mirror external private images to the central CI registry.
