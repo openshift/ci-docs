@@ -102,13 +102,13 @@ function format ( d ) {
                 $('#hypershift_supported_versions').text(item['error']);
                 return;
               }
-              if (item['cluster'] === 'hive') {
+              if (item['cluster'] === 'hosted-mgmt') {
                 $('#hypershift_supported_versions').text(item["hypershiftSupportedVersions"]);
               }
             });
           },
           error: function(xhr) {
-            $("#hypershift_supported_versions").text('failed to load the hive cluster info: status ' + xhr.status);
+            $("#hypershift_supported_versions").text('failed to load the hosted-mgmt cluster info: status ' + xhr.status);
           },
         });
       }
@@ -126,7 +126,7 @@ function format ( d ) {
               var description=item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
               if (item['cluster'] === 'app.ci') {
                 description=description+' containing most Prow services.';
-              } else if (item['cluster'] === 'hive') {
+              } else if (item['cluster'] === 'hosted-mgmt') {
                 description=description+' containing containing a Hive control plane.';
               } else if (!item['cluster'].startsWith('build')) {
                 description=description+' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
@@ -174,7 +174,7 @@ function format ( d ) {
                   var data="contains up-to-date image copies from the authoritative registry for jobs that run on this build farm only"
                   if (row['cluster'] === 'app.ci') {
                     data='the <a href="/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci">deprecated</a> authoritative, central CI registry';
-                  } else if (row['cluster'] === 'hive') {
+                  } else if (row['cluster'] === 'hosted-mgmt') {
                     data='';
                   } else if (row['cluster'] === 'arm01' || row['cluster'] === 'vsphere') {
                     data=data+'; only open to ' + row['cluster'].replace(/\d+/g, '').toUpperCase() + ' admins';

@@ -12,7 +12,7 @@ be configured:
 
 * Create a folder in [clusters/app.ci/registry-access](https://github.com/openshift/release/tree/master/clusters/app.ci/registry-access) with the name of the namespace, containing the manifests of the namespace and the RBAC regarding to that namespace. Provide an `OWNERS` file to allow your team to make changes to those manifests.
 * The admin of the namespace should allow the SA in the mirroring job defined below to access the images with `oc image mirror`,
-	like this, which makes the images open to the public:
+	like this, which makes the images open to all authenticated users on `app.ci`:
 
 {{< highlight yaml >}}
 apiVersion: rbac.authorization.k8s.io/v1
@@ -25,9 +25,6 @@ roleRef:
   kind: ClusterRole
   name: system:image-puller
 subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: Group
-  name: system:unauthenticated
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
   name: system:authenticated
@@ -82,23 +79,62 @@ Then, the mirroring jobs can mount the secret as a volume:
 
 {{< highlight yaml >}}
 periodics:
-- name: periodic-image-mirroring-NEW_ORGANIZATION
+- agent: kubernetes
+  cluster: app.ci
+  cron: '@hourly'
+  decorate: true
+  labels:
+    ci.openshift.io/area: NEW_ORGANIZATION
+    ci.openshift.io/role: image-mirroring
+  name: periodic-image-mirroring-NEW_ORGANIZATION
   spec:
-    # rest of the Pod config here ...
+    automountServiceAccountToken: true
+    containers:
+    - command:
+      - /tp-entrypoint.sh
+      env:
+      - name: HOME
+        value: /home/mirror
+      - name: MAPPING_FILE_PREFIX
+        value: mapping_NEW_ORGANIZATION
+      - name: dry_run
+        value: "false"
+      image: registry.ci.openshift.org/ci/image-mirror:oc-415
+      imagePullPolicy: Always
+      name: ""
+      resources:
+        requests:
+          cpu: 500m
+      volumeMounts:
+      - mountPath: /home/mirror/.docker/config.json
+        name: push
+        readOnly: true
+        subPath: config.json # this matches the key in the secret
+      - mountPath: /etc/imagemirror
+        name: config
     volumes:
     - name: push
       secret:
         secretName: registry-push-credentials-quay-io-NEW_ORGANIZATION # this matches the secretsync/target-name
+    - configMap:
+        name: image-mirror-mappings
+      name: config
 {{< / highlight >}}
+
+### Dry-run and Rehearsing
+
+Adding the label `pj-rehearse.openshift.io/can-be-rehearsed: "true"` onto the above job makes it [rehearsable](/docs/how-tos/contributing-openshift-release/#rehearsals)
+which is useful for a new mirroring job whose the mapping files have been merged and lands into `configMap/image-mirror-mappings`.
+The environment variable `dry_run=true` prints the actions that would be taken and exit without pushing the images to the destinations.
+If the output of the rehearsal looks satisfactory, remove the label and set `dry_run=false`. Thus the pull request is ready to go.
 
 ### Mirror Images With Wildcard
 
 The `*` wildcard might be useful in the case that the images are [tagged by commit](/docs/architecture/ci-operator/#publishing-images-tagged-by-commit)
-and it is desired to mirror every produced version.
-For example, the following command mirrors all tags of `my-imagestream` in `my-namespace` to the destination repository:
+and it is desired to mirror every produced tag.
+For example, the following line in the mapping file mirrors all tags of `my-imagestream` in `my-namespace` to the destination repository:
 
-```console
-$ oc image mirror registry.ci.openshift.org/my-namespace/my-imagestream:* quay.io/myrepository/myimage
+```txt
+registry.ci.openshift.org/my-namespace/my-imagestream:* quay.io/myrepository/myimage
 ```
 
-[CLOUDBLD]: https://issues.redhat.com/projects/CLOUDBLD
