@@ -6,7 +6,7 @@ description: >
 ---
 
 This section describes in detail how the CI infrastructure, both
-[upstream][test_infra] and [downstream][ci_tools], handles interruptions.  It is
+[upstream][prow] and [downstream][ci_tools], handles interruptions.  It is
 meant primarily for DPTP, but can also be useful when the [user
 documentation][user_documentation] fails to fully explain the behavior
 manifested in a job.
@@ -178,8 +178,8 @@ effect on the protocol for handling interruptions.
 
 [artifacts]: {{< ref "artifacts" >}}
 [ci_tools]: https://github.com/openshift/ci-tools.git
-[entrypoint]: https://github.com/kubernetes/test-infra/tree/master/prow/cmd/entrypoint
+[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/entrypoint
 [entrypoint_wrapper]: https://github.com/openshift/ci-tools/tree/master/cmd/entrypoint-wrapper
-[sidecar]: https://github.com/kubernetes/test-infra/tree/master/prow/cmd/sidecar
-[test_infra]: https://github.com/kubernetes/test-infra.git
+[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/sidecar
+[prow]: https://github.com/kubernetes-sigs/prow.git
 [user_documentation]: {{< ref "/docs/architecture/timeouts" >}}
