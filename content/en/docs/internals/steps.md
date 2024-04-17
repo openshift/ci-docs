@@ -138,7 +138,7 @@ static validation.
 `SourceStep` takes the image defined in `build_root` and clones the source code
 of the repository under test into it. The resulting image is tagged as `src` in
 the `pipeline` `ImageStream`. This cloning process uses the
-[`clonerefs`](https://github.com/kubernetes/test-infra/tree/master/prow/cmd/clonerefs)
+[`clonerefs`](https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/clonerefs)
 tool from `kubernetes/test-infra`.
 
 #### `PipelineImageCacheStep`

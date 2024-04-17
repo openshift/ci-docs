@@ -7,7 +7,7 @@ description: >
 
 ## Components
 
-Artifact collection is based on components from the [`test-infra`][test_infra]
+Artifact collection is based on components from the [`prow`][prow]
 repository.  These coordinating components are collectively know as
 [`pod-utilities`][pod_utils] and  augment the `pod_spec` declared in a `ProwJob`
 to add functionality such as [timeouts][timeouts], output censoring, execution
@@ -161,8 +161,8 @@ this.  The artifacts can be listed with:
 $ gsutil ls gs://$bucket/$path_prefix/… # …/logs/, …/pr-logs/, etc., as above
 {{< / highlight >}}
 
-[entrypoint]: https://github.com/kubernetes/test-infra/tree/master/prow/cmd/entrypoint
-[pod_utils]: https://github.com/kubernetes/test-infra/tree/master/prow/pod-utils
-[sidecar]: https://github.com/kubernetes/test-infra/tree/master/prow/cmd/sidecar
-[test_infra]: https://github.com/kubernetes/test-infra.git
+[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/entrypoint
+[pod_utils]: https://github.com/kubernetes-sigs/prow/tree/main/prow/pod-utils 
+[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/sidecar
+[prow]: https://github.com/kubernetes-sigs/prow.git
 [timeouts]: {{< ref "/docs/architecture/timeouts" >}}
