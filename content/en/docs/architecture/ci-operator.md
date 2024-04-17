@@ -575,6 +575,7 @@ releases:
     release:
       channel: stable
       version: "4.12"
+      architecture: multi # required; see notes below
 - as: e2e-hypershift
   steps:
     cluster_profile: aws-2 # required; the cluster profile to create the cloud resources for the hosted cluster by HyperShift
@@ -590,6 +591,11 @@ releases:
           memory: 200Mi
     workflow: hypershift-hostedcluster-workflow
 ```
+
+{{% alert title="ARCHITECTURE" color="info" %}}
+Test Platform is operating the HyperShift control plane with multi-architecture nodes. Using the `architecture: multi` in the `releases` stanza is mandatory to ensure the control plane pods are running correctly.
+If your test requires a specific architecture, please override the environment variable `CONTROL_PLANE_NODE_SELECTOR` to specify your nodeSelector, e.g., `kubernetes.io/arch=amd64`.
+{{% /alert %}}
 
 The workflow exports following files for the testing steps to access the hosted cluster:
 - `${SHARED_DIR}/nested_kubeconfig` or `${KUBECONFIG}`: Path to the `kubeconfig` file for the `system:admin` account.
