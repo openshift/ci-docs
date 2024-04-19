@@ -18,8 +18,8 @@ For example, by the above snippet, a Slack alert will be sent out to `#forum` ch
 
 * The channel has to be in [coreos.slack.com](https://coreos.slack.com/).
 * The channel has to be public. If it is not then the `@prow` bot has to be added to it otherwise it won't be able to properly post messages.
-* The state in `job_states_to_report` has to be a valid Prow job state. See [upstream documentation](https://godoc.org/k8s.io/test-infra/prow/apis/prowjobs/v1#ProwJobState).
-* The value of `report_template` is a [Go template](https://golang.org/pkg/text/template/) and it will be applied to the Prow job instance. The annotations such as `{{.Spec.Job}}` will be replaced by the job name when the alert is received in Slack. See [upstream documentation](https://godoc.org/k8s.io/test-infra/prow/apis/prowjobs/v1#ProwJob) for more fields of a Prow job. Note that no alerts will be sent out if the template is broken, e.g., cannot be parsed or applied successfully.
+* The state in `job_states_to_report` has to be a valid Prow job state. See [upstream documentation](https://pkg.go.dev/sigs.k8s.io/prow/pkg/apis/prowjobs/v1#ProwJobState).
+* The value of `report_template` is a [Go template](https://golang.org/pkg/text/template/) and it will be applied to the Prow job instance. The annotations such as `{{.Spec.Job}}` will be replaced by the job name when the alert is received in Slack. See [upstream documentation](https://pkg.go.dev/sigs.k8s.io/prow/pkg/apis/prowjobs/v1#ProwJob) for more fields of a Prow job. Note that no alerts will be sent out if the template is broken, e.g., cannot be parsed or applied successfully.
 
 The following snippet shows an example of embedding the `reporter_config` into a job definition:
 

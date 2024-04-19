@@ -49,7 +49,7 @@ content, and all necessary CI configuration of the fork in `openshift-priv`:
    [private-org-peribolos-sync](https://github.com/openshift/ci-tools/tree/master/cmd/private-org-peribolos-sync) tool to
    maintain the GitHub settings for the fork. These settings are asynchronously consumed by the
    [periodic-org-sync](https://prow.ci.openshift.org/?job=periodic-org-sync) job running the
-   [peribolos](https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/peribolos) tool to create the fork on GitHub
+   [peribolos](https://github.com/kubernetes-sigs/prow/tree/main/cmd/peribolos) tool to create the fork on GitHub
    and maintain its settings
 1. The
    [periodic-openshift-release-private-org-sync](https://deck-internal-ci.apps.ci.l2s4.p1.openshiftapps.com/?job=periodic-openshift-release-private-org-sync)

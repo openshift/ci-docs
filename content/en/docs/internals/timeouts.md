@@ -178,8 +178,8 @@ effect on the protocol for handling interruptions.
 
 [artifacts]: {{< ref "artifacts" >}}
 [ci_tools]: https://github.com/openshift/ci-tools.git
-[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/entrypoint
+[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/cmd/entrypoint
 [entrypoint_wrapper]: https://github.com/openshift/ci-tools/tree/master/cmd/entrypoint-wrapper
-[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/sidecar
+[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/cmd/sidecar
 [prow]: https://github.com/kubernetes-sigs/prow.git
 [user_documentation]: {{< ref "/docs/architecture/timeouts" >}}
