@@ -30,12 +30,12 @@ components and is divided in the following steps:
    `kubelet` updates the contents of the directory to match the new contents of
    the mount.
 4. The service somehow (e.g. using the [`test-infra` configuration agent
-   package](https://github.com/kubernetes-sigs/prow/blob/main/prow/config/agent.go))
+   package](https://github.com/kubernetes-sigs/prow/blob/main/pkg/config/agent.go))
    watches the mount directory and responds to those changes.
 
 ### `updateconfig`
 
-This [plugin](https://github.com/kubernetes-sigs/prow/tree/main/prow/plugins/updateconfig)
+This [plugin](https://github.com/kubernetes-sigs/prow/tree/main/pkg/plugins/updateconfig)
 is configured by files under the Prow configuration directory,
 [`core-services/prow/02_config`](https://github.com/openshift/release/tree/master/core-services/prow/02_config).
 The [`openshift/release/_pluginconfig.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/openshift/release/_pluginconfig.yaml)
@@ -91,7 +91,7 @@ by which `ConfigMap`s in the cluster are reconciled with the PR changes is:
 
 A second process, the [`openshift-release-master-config-bootstrapper`](https://prow.ci.openshift.org/job-history/gs/origin-ci-test/logs/openshift-release-master-config-bootstrapper)
 periodic Prow job, also performs this procedure every hour using the
-[`config-bootstrapper`](https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/config-bootstrapper)
+[`config-bootstrapper`](https://github.com/kubernetes-sigs/prow/tree/main/cmd/config-bootstrapper)
 program, which shares most of its code with the plugin.  The job is not
 triggered by a PR, so all configured files are loaded as if the repository had
 just been created (hence its name).  It is meant to continually ensure the

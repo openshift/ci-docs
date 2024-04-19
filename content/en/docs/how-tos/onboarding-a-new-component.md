@@ -81,7 +81,7 @@ Most individual plugins can be configured to change their behavior; only some pl
 at a repository level, many only expose global configuration options for all repositories that Prow monitors. If you
 think you need to configure an individual plugin, consult a CI administrator. While we work on a better solution,
 documentation for these options lives in the `type Configuration struct`
-[here.](https://github.com/kubernetes-sigs/prow/blob/main/prow/plugins/plugins.go)
+[here.](https://github.com/kubernetes-sigs/prow/blob/main/pkg/plugins/plugins.go)
 
 #### Repositories Under Existing Organizations
 
@@ -164,7 +164,7 @@ be placed into both `ci-operator/config/$org/$repo` and `ci-operator/jobs/$org/$
 
 ### Enabling Automatic Merges
 
-Prow’s [`tide`](https://github.com/kubernetes-sigs/prow/tree/main/prow/tide) component
+Prow’s [`tide`](https://github.com/kubernetes-sigs/prow/tree/main/pkg/tide) component
 periodically searches for pull requests that fit merge criteria (for instance, presence of a `lgtm`
 label and absence of the `do-not-merge/hold` label) and merges them. `Tide` furthermore requires not only that all required
 tests in the Prow configuration succeed and all posted statuses on the GitHub pull request are green but also that the

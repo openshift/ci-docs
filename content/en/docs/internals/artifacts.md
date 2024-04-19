@@ -161,8 +161,8 @@ this.  The artifacts can be listed with:
 $ gsutil ls gs://$bucket/$path_prefix/… # …/logs/, …/pr-logs/, etc., as above
 {{< / highlight >}}
 
-[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/entrypoint
-[pod_utils]: https://github.com/kubernetes-sigs/prow/tree/main/prow/pod-utils 
-[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/prow/cmd/sidecar
+[entrypoint]: https://github.com/kubernetes-sigs/prow/tree/main/cmd/entrypoint
+[pod_utils]: https://github.com/kubernetes-sigs/prow/tree/main/pkg/pod-utils 
+[sidecar]: https://github.com/kubernetes-sigs/prow/tree/main/cmd/sidecar
 [prow]: https://github.com/kubernetes-sigs/prow.git
 [timeouts]: {{< ref "/docs/architecture/timeouts" >}}
