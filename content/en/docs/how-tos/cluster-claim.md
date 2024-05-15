@@ -19,14 +19,14 @@ accounts.
 
 ## Instructions
 
-The OpenShift CI Hive instance is deployed on a dedicated OpenShift cluster, called `hive` and all resources involved in
+The OpenShift CI Hive instance is deployed on a dedicated OpenShift cluster, called `hosted-mgmt` and all resources involved in
 creating and running a custom cluster pool need to be created there. This is done via GitOps in the `openshift/release`
 repository.
 
 ### Prepare Your Cloud Platform Credentials
 
 First, you need to make sure the cloud platform credentials that will be used to install cluster for the pool are
-available on the `hive` cluster. If you are not familiar with OpenShift CI custom secret management, please consult the
+available on the `hosted-mgmt` cluster. If you are not familiar with OpenShift CI custom secret management, please consult the
 [Adding a New Secret to CI](/docs/how-tos/adding-a-new-secret-to-ci/) document first.
 
 1. Select a suitable collection in [Vault](https://vault.ci.openshift.org/ui/) to hold your cluster pool secret.
@@ -36,7 +36,7 @@ available on the `hive` cluster. If you are not familiar with OpenShift CI custo
    the cloud platform; consult the
    Hive [Cloud Credentials](https://github.com/openshift/hive/blob/master/docs/using-hive.md#cloud-credentials)
    document.
-3. Set `secretsync/target-clusters` key to `hive` to make sure your credentials are synced to the necessary cluster.
+3. Set `secretsync/target-clusters` key to `hosted-mgmt` to make sure your credentials are synced to the necessary cluster.
 4. Set `secretsync/target-namespace` key to a name of the namespace that will hold your pools (`${team}-cluster-pool` is a
    good baseline name).
 5. Set `secretsync/target-name` to a name under which the secret will be accessible in the
@@ -50,7 +50,7 @@ At the end, you should have a secret similar to the following in Vault:
 {
   "aws_access_key_id": "AWS KEY ID",
   "aws_secret_access_key": "AWS ACCESS KEY",
-  "secretsync/target-clusters": "hive",
+  "secretsync/target-clusters": "hosted-mgmt",
   "secretsync/target-name": "demo-aws-credentials",
   "secretsync/target-namespace": "dptp-demo-cluster-pool"
 }
@@ -67,7 +67,7 @@ At the end, you should have a secret similar to the following in Vault:
 2. Create `OWNERS` file in the directory to allow your teammates make and approve changes.
 3. Create a manifest for the namespace that will hold your Hive resources (the namespace name must match the one where
    you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)) and [set up RBACs](/docs/how-tos/rbac/) for the pool
-   owners to debug on the `hive` cluster:
+   owners to debug on the `hosted-mgmt` cluster:
 
 ```console
 $ make TEAM=team new-pool-admins
@@ -230,7 +230,7 @@ cluster and Hive starts installing clusters for your pool.
 
 ### Use the Cluster Pool from a CI Job
 
-After the pool manifests are applied on the `hive` cluster, the cluster pool can by used by CI jobs by setting
+After the pool manifests are applied on the `hosted-mgmt` cluster, the cluster pool can by used by CI jobs by setting
 a `cluster_claim` stanza with values matching the labels on the pool:
 
 ```yaml
