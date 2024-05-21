@@ -7,7 +7,7 @@ This page explains how the images in CI are stored and referenced in the tests.
 
 ## QCI
 
-[QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci),
+[QCI](/docs/how-tos/use-registries-in-build-farm/#summary-of-available-registries),
 the image repository `quay.io/openshift/ci`, stores all images used in OpenShift CI.
 There are the following kinds images in `QCI`:
 - [promoted](/docs/architecture/ci-operator/#publishing-container-images) by CI jobs, or
