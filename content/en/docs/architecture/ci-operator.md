@@ -557,7 +557,7 @@ To avoid the release overriding, `cluster_claim.as` can be given as a value whic
 
 The version of the claimed cluster is determined by the reference to a `ClusterImageSet` of the cluster pool
 which defines the image that contains the payload to use when installing a cluster.
-The _released_ `4.Y` versions of `ClusterImageSet` [manifests](https://github.com/openshift/release/tree/master/clusters/hive/pools) are maintained by
+The _released_ `4.Y` versions of `ClusterImageSet` [manifests](https://github.com/openshift/release/tree/master/clusters/hosted-mgmt/hive/pools) are maintained by
 a tool which ensures that they points to the latest version.
 It is currently not supported that a test claims by `cluster_claim` a cluster with the version which has not been released yet.
 
