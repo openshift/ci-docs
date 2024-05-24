@@ -47,7 +47,7 @@ Clients from CI users or their integration should _not_ reference the images the
 
 ## How do I gain access to QCI?
 The access control to the images in QCI is delegated to the [RBACs](/docs/how-tos/rbac/) on `app.ci`.
-This is to reduce the effort on managing users in different places.
+This is done to reduce the effort of managing users in different places.
 The access to QCI has to be through a reverse proxy serving `quay-proxy.ci.openshift.org` and only pull permission is granted.
 
 ### Human Users
