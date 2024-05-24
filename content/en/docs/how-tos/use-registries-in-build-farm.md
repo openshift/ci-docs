@@ -40,7 +40,7 @@ copies they hold are up-to-date and jobs that run there run with the correct con
 
 {{< alert title="Info" color="info" >}}
 In addition to QCI, `ci-operator` promotes images to `app.ci`'s registry `registry.ci.openshift.org` _only_ for the sake of internal automation such as Release Controllers, ART, and [mirroring CI images to an external repository](/docs/how-tos/mirroring-to-quay/#mirror-images-with-wildcard).
-Clients from CI users or their integration should _not_ reference the images there. Otherwise, please replace them with the corresponding image in QCI.
+Clients from CI users or their integration should _not_ reference the images there. Instead, please replace them with the corresponding image in QCI.
 {{< /alert >}}
 
 # Common Questions
