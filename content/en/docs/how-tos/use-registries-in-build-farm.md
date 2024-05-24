@@ -35,7 +35,7 @@ please use the corresponding image in QCI instead.
 Today, two major data flows exist for container images in the OpenShift CI ecosystem. First, when a job executes on
 one of the build farm clusters, container images that need to be [built](/docs/architecture/ci-operator/#building-container-images)
 for the execution will exist only on that cluster. Second, when changes are merged to repositories under test, updated
-images are built on a build farm and [promoted](/docs/architecture/ci-operator/#publishing-container-images) to QCI. Users should always pull from this registry for any images they interact with. When an image changes on QCI, that change is propagated to all build farm clusters as the images there are imported from QCI when the job is executed and thus the
+images are built on a build farm and [promoted](/docs/architecture/ci-operator/#publishing-container-images) to QCI. Users should always pull any images they interact with from this registry. When an image changes on QCI, that change is propagated to all build farm clusters as the images there are imported from QCI when the job is executed and thus the
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
 {{< alert title="Info" color="info" >}}
