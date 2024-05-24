@@ -5,7 +5,7 @@ description: How to interact with the CI image registries, set up service accoun
 
 # Summary of Available Registries
 All the CI images used by OpenShift CI are stored in the repository in quay.io: `quay.io/openshift/ci`, called _QCI_ for short.
-It is the authoritative CI registry and the source of truth of all CI images.
+It is the authoritative CI registry and the source of truth for all CI images.
 Any image stream tag `<namespace>/<name>:<tag>` e.g., referenced in ci-operator's configuration is saved as `quay.io/openshift/ci:<namespace>_<name>_<tag>`. Its namespace, name, and tag are connected with "_" to form the tag in QCI as the images in different namespaces are converged into a monorepo on `quay.io`.
 
 Besides QCI, the OpenShift CI system runs on OpenShift clusters. Each cluster hosts its own image registry. Therefore, a number of
