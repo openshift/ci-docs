@@ -268,7 +268,7 @@ file), or before you set the image label `io.openshift.release.operator` to get 
 1. Ensure you have successfully published your image to the CI integration stream
 1. Follow the [ART instructions](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/guidelines_for_requesting_new_content_managed_by_ocp_art) to have them build your image
     * On the [dist-git part of the process](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/requesting_a_new_image_or_rpm_to_be_managed_by_art#jive_content_id_Naming) it is critical that you ensure your component/image names match as described in the bulleted criteria
-1. Ensure a single successful build is run (sync with ART to confirm).  You can also check for your new image name in both ART and CI ImageStreams by checking [CI registries](/docs/how-tos/use-registries-in-build-farm/#how-do-i-access-to-qci):
+1. Ensure a single successful build is run (sync with ART to confirm).  You can also check for your new image name in both ART and CI ImageStreams by checking [CI registries](/docs/how-tos/use-registries-in-build-farm/#how-do-i-gain-access-to-qci):
 
     ```console
     $ podman login -u=$(oc --context app.ci whoami) -p=$(oc --context app.ci whoami -t) quay-proxy.ci.openshift.org --authfile /tmp/t.c

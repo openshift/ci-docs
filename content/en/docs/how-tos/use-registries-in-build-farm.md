@@ -226,13 +226,13 @@ you logged in to the registry in the past.
 
 ### I have not yet logged in to the registry.
 
-Please follow [the directions](#how-do-i-access-to-qci) to log in to the registry.
+Please follow [the directions](#how-do-i-gain-access-to-qci) to log in to the registry.
 
 ### I have logged in to the registry in the past.
 
 An unfortunate side-effect of the architecture for container image registry authentication results in authentication
 errors when your authentication token expired, even if the image you are attempting to pull requires no authentication.
-Authentication tokens expire once a month. All you'll need to do is follow [the directions](#how-do-i-access-to-qci)
+Authentication tokens expire once a month. All you'll need to do is follow [the directions](#how-do-i-gain-access-to-qci)
 to log in to the registry again.
 
 {{< alert title="Warning" color="warning" >}}
