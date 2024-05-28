@@ -138,7 +138,7 @@ the SSH public and private key, respectively.
 It is possible to take advantage of AWS's [BYOIP feature](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-byoip.html)
 to allow your test's ephemeral clusters to utilize configured IP Pools for cost savings. To utilize this, a few steps must be taken:
 1. Set up IP Pool in utilized region(s). See AWS [docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-byoip.html). Note that this feature can only handle **one** IP Pool per region.
-2. Add `Boskos` configuration for _every_ region you intend to utilize. See the [example](https://github.com/openshift/release/blob/6a8f889b353fd3764b7c877bb0cd52cf7ea68aba/core-services/prow/02_config/_boskos.yaml#L435-L438), noting, the `name` should be `{some-unique-name}-{region}`.
+2. Add `Boskos` configuration for _every_ region you intend to utilize. See the [example](https://github.com/openshift/release/blob/6a8f889b353fd3764b7c877bb0cd52cf7ea68aba/core-services/prow/02_config/_boskos.yaml#L435-L438), noting, the `name` should be `{cluster-profile-name}-ip-pools-{region}`.
 3. Add your lease name (without the region suffix) to the `ci-tools` [configuration](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/types.go#L1940-L1947) for your cluster-profile.
 4. (optional) If you **don't** want the [standard](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/leases.go#L50-L69) OpenShift branch validation to determine which tests can utilize the pools, modify [this function](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/types.go#L1952-L1957) to return `false` for your cluster-profile.
 
