@@ -4,11 +4,11 @@ description: How to mirror external images to the CI environments for use in job
 ---
 
 The `ci-operator` config only allows referencing an image in the form of `namespace/name:tag`, it does not allow the specification of arbitrary Docker pull specs. In order
-to use external images, they need to be mirrored to [QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci).
+to use external images, they need to be mirrored to [QCI](/docs/how-tos/use-registries-in-build-farm/#summary-of-available-registries).
 
 ## Mirror Public Images
 
-If the source image is open to the public, we can mirror it to [QCI](/docs/how-tos/use-registries-in-build-farm/#the-ci-image-repository-in-quayio-qci) by adding it into [the configuration file](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml) in
+If the source image is open to the public, we can mirror it to [QCI](/docs/how-tos/use-registries-in-build-farm/#summary-of-available-registries) by adding it into [the configuration file](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml) in
 [the `core-services/image-mirroring` folder](https://github.com/openshift/release/tree/master/core-services/image-mirroring/) of `openshift/release` repository.
 
 ```yaml
