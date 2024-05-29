@@ -36,6 +36,12 @@ In order to backport a bugfix to more then one past release, it must be done ser
 is important because a bugfix must always been made in newer releases first, otherwise openshift cluster upgrades can
 lead to running into already fixed bugs which should never happen.
 
+When backporting to more than one release, users may specify all releases they which to backport to separated by commas
+in their comment. For instance, if a bugfix needs to be backported to `release-4.15`, `release-4.14`, and `release-4.13`,
+the comment `/cherrypick release-4.15,release-4.14,release-4.13` can be made. When this is done, the automation will create
+a cherrypick for the first listed branch and include the remaining branches in the description. Once the new cherrypick is merged,
+the next branch will be handled the same and so on, without need for further cherrypcik comments to be manually made.
+
 If the `/cherrypick` command fails to run correctly due to conflicts, the Jira automation can still be used to assist in
 backporting. After manually creating the cherrypick PR, you can comment `/jira cherrypick OCPBUGS-XXX` to cherrypick a
 bug and link it to the PR. The automation will clone the provided bug and link the clone to the PR by adding it to the
