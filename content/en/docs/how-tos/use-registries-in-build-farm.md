@@ -51,7 +51,8 @@ This is done to reduce the effort of managing users in different places.
 The access to QCI has to be through a reverse proxy serving `quay-proxy.ci.openshift.org` and only pull permission is granted.
 
 ### Human Users
-Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). The change will be applied automatically to `app.ci` after merging.
+Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). The change will be applied automatically to `app.ci` after merging. Note that the group has to be on `app.ci`, i.e., `app.ci` is included `clusters` if it
+is specified in [this config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml).
 
 Provided that `oc` has logged in to `app.ci`, the user may pull images from QCI such as `quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest`
 by the following commands:
