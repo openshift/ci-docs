@@ -10,8 +10,9 @@ weight: 1
     <thead>
         <tr>
             <th></th>
-            <th>Question</th>
-            <th>User</th>
+            <th>Topic</th>
+            <th>Subject</th>
+            <th>Details</th>
             <th>Date</th>
         </tr>
     </thead>
