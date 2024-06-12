@@ -23,14 +23,14 @@
 {{ end }}
 {{ partialCached "head-css.html" . "asdf" }}
 <script
-  src="https://code.jquery.com/jquery-3.5.1.min.js"
-  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-  crossorigin="anonymous"></script>
+        src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
 {{ if .Site.Params.offlineSearch }}
 <script
-  src="https://unpkg.com/lunr@2.3.8/lunr.min.js"
-  integrity="sha384-vRQ9bDyE0Wnu+lMfm57BlYLO0/XauFuKpVsZPs7KEDwYKktWi5+Kz3MP8++DFlRY"
-  crossorigin="anonymous"></script>
+        src="https://unpkg.com/lunr@2.3.8/lunr.min.js"
+        integrity="sha384-vRQ9bDyE0Wnu+lMfm57BlYLO0/XauFuKpVsZPs7KEDwYKktWi5+Kz3MP8++DFlRY"
+        crossorigin="anonymous"></script>
 {{end}}
 {{ if .Site.Params.prism_syntax_highlighting }}
 <!-- stylesheet for Prism -->
@@ -38,160 +38,227 @@
 {{ end }}
 {{ partial "hooks/head-end.html" . }}
 {{/* Everything above here is copied from themes/docsy/layouts/partials/head.html to add the below section */}}
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js" integrity="sha384-9jwHdz3xcZ/aQmgwzEl+IfbIibihtBOx76/CoExUWGC11Nb4blmMdE8y2edqF9EF" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"
+        integrity="sha384-9jwHdz3xcZ/aQmgwzEl+IfbIibihtBOx76/CoExUWGC11Nb4blmMdE8y2edqF9EF"
+        crossorigin="anonymous"></script>
 <script>
-function format ( d ) {
-    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-        '<tr>'+
-            '<td>RELEASE IMAGE:</td>'+
-            '<td>'+d.releaseImage+'</td>'+
-        '</tr>'+
-        '<tr>'+
-            '<td>LABELS:</td>'+
-            '<td>'+d.labels+'</td>'+
-        '</tr>'+
-    '</table>';
-}
+    function format(d) {
+        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+            '<tr>' +
+            '<td>RELEASE IMAGE:</td>' +
+            '<td>' + d.releaseImage + '</td>' +
+            '</tr>' +
+            '<tr>' +
+            '<td>LABELS:</td>' +
+            '<td>' + d.labels + '</td>' +
+            '</tr>' +
+            '</table>';
+    }
 
-  $(document).ready( function () {
-      $.fn.dataTable.ext.errMode = 'throw';
-      var table =  $('#table_pools').DataTable({
-        "ajax": {
-          "url": "{{ $.Site.Params.api_v1_url }}/api/v1/clusterpools",
-          "dataType": "jsonp",
-        },
-       "columns": [
-            {
-                "className":      'details-control',
-                "orderable":      false,
-                "data":           null,
-                "defaultContent": ''
+    $(document).ready(function () {
+        $.fn.dataTable.ext.errMode = 'throw';
+        var table = $('#table_pools').DataTable({
+            "ajax": {
+                "url": "{{ $.Site.Params.api_v1_url }}/api/v1/clusterpools",
+                "dataType": "jsonp",
             },
-            { "data": "namespace" },
-            { "data": "name"},
-            { "data": "ready"},
-            { "data": "standby"},
-            { "data": "size"},
-            { "data": "maxSize"},
-            { "data": "imageSet"},
-            { "data": "owner"},
-        ],
-        "order": [[1, 'asc']]
-      });
+            "columns": [
+                {
+                    "className": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": ''
+                },
+                {"data": "namespace"},
+                {"data": "name"},
+                {"data": "ready"},
+                {"data": "standby"},
+                {"data": "size"},
+                {"data": "maxSize"},
+                {"data": "imageSet"},
+                {"data": "owner"},
+            ],
+            "order": [[1, 'asc']]
+        });
 
-      $('#table_pools tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row( tr );
- 
-        if ( row.child.isShown() ) {
-            row.child.hide();
-            tr.removeClass('shown');
-        } else {
-            row.child( format(row.data()) ).show();
-            tr.addClass('shown');
+        $('#table_pools tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                row.child(format(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+
+        if ($("#m-docsarchitectureci-operator").hasClass("active")) {
+            $.ajax({
+                url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
+                dataType: 'jsonp',
+                success: function (res) {
+                    $.each(res.data, function (index, item) {
+                        if (item['error']) {
+                            $('#hypershift_supported_versions').text(item['error']);
+                            return;
+                        }
+                        if (item['cluster'] === 'hosted-mgmt') {
+                            $('#hypershift_supported_versions').text(item["hypershiftSupportedVersions"]);
+                        }
+                    });
+                },
+                error: function (xhr) {
+                    $("#hypershift_supported_versions").text('failed to load the hosted-mgmt cluster info: status ' + xhr.status);
+                },
+            });
         }
-      } );
 
-      if ($("#m-docsarchitectureci-operator").hasClass("active")) {
-        $.ajax({
-          url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
-          dataType: 'jsonp',
-          success: function(res) {
-            $.each(res.data, function(index, item) {
-              if (item['error']) {
-                $('#hypershift_supported_versions').text(item['error']);
-                return;
-              }
-              if (item['cluster'] === 'hosted-mgmt') {
-                $('#hypershift_supported_versions').text(item["hypershiftSupportedVersions"]);
-              }
+        if ($("#m-docsgetting-starteduseful-links").hasClass("active")) {
+            $.ajax({
+                url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
+                dataType: 'jsonp',
+                success: function (res) {
+                    $.each(res.data, function (index, item) {
+                        if (item['error']) {
+                            $("#ul_clusters").append('<li>' + item["cluster"] + ': ' + item['error'] + '</li>');
+                            return;
+                        }
+                        var description = item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
+                        if (item['cluster'] === 'app.ci') {
+                            description = description + ' containing most Prow services.';
+                        } else if (item['cluster'] === 'hosted-mgmt') {
+                            description = description + ' containing containing a Hive control plane.';
+                        } else if (!item['cluster'].startsWith('build')) {
+                            description = description + ' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
+                        } else {
+                            description = description + ' that executes a growing subset of the jobs.'
+                        }
+                        $("#ul_clusters").append('<li><a href="https://' + item["consoleHost"] + '/">' + item["cluster"] + '</a>: ' + description + '</li>');
+                        $("#progress").hide();
+                    });
+                },
+                error: function (xhr) {
+                    $("#progress").text('failed to load the cluster info: status ' + xhr.status);
+                },
             });
-          },
-          error: function(xhr) {
-            $("#hypershift_supported_versions").text('failed to load the hosted-mgmt cluster info: status ' + xhr.status);
-          },
-        });
-      }
+        }
+    });
 
-      if ($("#m-docsgetting-starteduseful-links").hasClass("active")) {
-        $.ajax({
-          url: "{{ $.Site.Params.api_v1_url }}/api/v1/clusters",
-          dataType: 'jsonp',
-          success: function(res) {
-            $.each(res.data, function(index, item) {
-              if (item['error']) {
-                $("#ul_clusters").append('<li>' + item["cluster"] + ': ' + item['error'] + '</li>');
-                return;
-              }
-              var description=item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
-              if (item['cluster'] === 'app.ci') {
-                description=description+' containing most Prow services.';
-              } else if (item['cluster'] === 'hosted-mgmt') {
-                description=description+' containing containing a Hive control plane.';
-              } else if (!item['cluster'].startsWith('build')) {
-                description=description+' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
-              } else {
-                description=description+' that executes a growing subset of the jobs.'
-              }
-              $("#ul_clusters").append('<li><a href="https://'+item["consoleHost"]+'/">'+item["cluster"]+'</a>: '+ description +'</li>');
-              $("#progress").hide();
+    $(document).ready(function () {
+        function formatDate(timestamp) {
+            const d = new Date(timestamp * 1000);
+            let formattedDate = `${d.getMonth() + 1}-${d.getDate()}--${d.getFullYear()}`;
+            const hours = d.getHours().toString().padStart(2, 0);
+            const minutes = d.getMinutes().toString().padStart(2, 0);
+            const formattedTime = `${hours}:${minutes}`;
+            return `${formattedDate} ${formattedTime}`;
+        }
+
+        $.fn.dataTable.ext.errMode = 'throw';
+        var table = $('#table_helpdesk_faq').DataTable({
+            "ajax": {
+                "url": "{{ $.Site.Params.helpdesk_faq_api_url }}",
+                "dataType": "jsonp",
+            },
+            "columns": [
+                {
+                    "className": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": ''
+                },
+                {"data": "question.topic"},
+                {"data": "question.subject"},
+                {
+                    "data": "question.body",
+                },
+                {
+                    "data": "timestamp",
+                    "render": function (data, type, row, meta) {
+                        return formatDate(data);
+                    }
+
+                },
+            ]
+        });
+
+        function answers(item) {
+            let formatted = '<table width="100%">';
+
+            formatted += '<head><th>Answer</th><th>User</th><th>Date</th></head>'
+            $.each(item.answers, function (index, answer) {
+                formatted += '<tr><td>' + answer["body"] + '</td><td>' + answer["author"] + '</td><td>' + formatDate(answer["timestamp"]) + '</td></tr>';
             });
-          },
-          error: function(xhr) {
-            $("#progress").text('failed to load the cluster info: status ' + xhr.status);
-          },
-        });
-      }
-  });
 
-  $(document).ready( function () {
-      $.fn.dataTable.ext.errMode = 'throw';
-      var table =  $('#table_registries').DataTable({
-        "paging":   false,
-        "ordering": false,
-        "info":     false,
-        "searching": false,
-        "ajax": {
-          "url": "{{ $.Site.Params.api_v1_url }}/api/v1/clusters?skipHive=true",
-          "dataType": "jsonp",
-        },
-       "columns": [
-            { 
-              "data": "cluster",
-              "render": function (data, type, row, meta) {
-                  if (row['cluster'] === 'qci') {
-                    return '-';
-                  }
-                  return '<a href="https://' + row['consoleHost'] +  '/">' + data + '</a>';
-                }
+            formatted += '</table>';
+
+            return formatted;
+        }
+
+        $('#table_helpdesk_faq tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                row.child(answers(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $.fn.dataTable.ext.errMode = 'throw';
+        var table = $('#table_registries').DataTable({
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false,
+            "ajax": {
+                "url": "{{ $.Site.Params.api_v1_url }}/api/v1/clusters?skipHive=true",
+                "dataType": "jsonp",
             },
-            { 
-              "data": "registryHost",
-              "render": function (data, type, row, meta) {
-                  if (row['cluster'] === 'qci') {
-                    return 'quay-proxy.ci.openshift.org/openshift/ci';
-                  }
-                  return '<a href="https://' + row['registryHost'] +  '/">' + data + '</a>';
-                }
-            },
-            { 
-              "data": "description",
-              "render": function (data, type, row, meta) {
-                  var data="contains images either built in Prow jobs or imported from QCI"
-                  if (row['cluster'] === 'app.ci') {
-                    data='the CI registry with published images';
-                  } else if (row['cluster'] === 'hosted-mgmt') {
-                    data='';
-                  } else if (row['cluster'] === 'arm01' || row['cluster'] === 'vsphere') {
-                    data=data+'; only open to ' + row['cluster'].replace(/\d+/g, '').toUpperCase() + ' admins';
-                  } else if (row['cluster'] === 'qci') {
-                    data='the authoritative CI registry and the source of truth of all CI images';
-                  }
-                  return data;
-                }
-            },
-        ]
-      });
-      table.row.add({cluster: 'qci'});
-  } );
+            "columns": [
+                {
+                    "data": "cluster",
+                    "render": function (data, type, row, meta) {
+                        if (row['cluster'] === 'qci') {
+                            return '-';
+                        }
+                        return '<a href="https://' + row['consoleHost'] + '/">' + data + '</a>';
+                    }
+                },
+                {
+                    "data": "registryHost",
+                    "render": function (data, type, row, meta) {
+                        if (row['cluster'] === 'qci') {
+                            return 'quay-proxy.ci.openshift.org/openshift/ci';
+                        }
+                        return '<a href="https://' + row['registryHost'] + '/">' + data + '</a>';
+                    }
+                },
+                {
+                    "data": "description",
+                    "render": function (data, type, row, meta) {
+                        var data = "contains images either built in Prow jobs or imported from QCI"
+                        if (row['cluster'] === 'app.ci') {
+                            data = 'the CI registry with published images';
+                        } else if (row['cluster'] === 'hosted-mgmt') {
+                            data = '';
+                        } else if (row['cluster'] === 'arm01' || row['cluster'] === 'vsphere') {
+                            data = data + '; only open to ' + row['cluster'].replace(/\d+/g, '').toUpperCase() + ' admins';
+                        } else if (row['cluster'] === 'qci') {
+                            data = 'the authoritative CI registry and the source of truth of all CI images';
+                        }
+                        return data;
+                    }
+                },
+            ]
+        });
+        table.row.add({cluster: 'qci'});
+    });
 </script>
