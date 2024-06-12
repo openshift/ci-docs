@@ -12,7 +12,7 @@ If you do not have access to that account, and believe that you should, reach ou
 The logs are stored in the `us-east-1` region, so be sure that your console is utilizing that region.
 
 ## Querying the Logs
-Application logs are stored in the `ci-dv2np.application` Log Group.
+Application logs from `app.ci` are stored in the `ci-dv2np.application` Log Group.
 Due to the way that OpenShift logging forwards the logs to CloudWatch, most of the useful information is stored within the `structured` stanza of the log entry.
 
 ### Examples
