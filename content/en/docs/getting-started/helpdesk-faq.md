@@ -14,6 +14,7 @@ weight: 1
             <th>Subject</th>
             <th>Details</th>
             <th>Date</th>
+            <th>Link</th>
         </tr>
     </thead>
 </table>

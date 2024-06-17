@@ -189,15 +189,36 @@
                     }
 
                 },
+                {
+                    "data": "thread_link",
+                    "render": function (data, type, row, meta) {
+                        if (data !== "") {
+                            return "<a href=\"" + data + "\">Thread</a>"
+                        }
+                        return ""
+                    }
+                }
             ]
         });
 
-        function answers(item) {
+        function replies(item) {
             let formatted = '<table width="100%">';
 
-            formatted += '<head><th>Answer</th><th>User</th><th>Date</th></head>'
+            formatted += '<head><th>Type</th><th>Reply</th><th>User</th><th>Date</th></head>'
+            console.log(item)
+            $.each(item.contributing_info, function (index, answer) {
+                formatted += '<tr>' +
+                    '<td>Additional Context</td><td>' +
+                    formatLinks(answer["body"]) +
+                    '</td><td>' +
+                    answer["author"] +
+                    '</td><td>' +
+                    formatDate(answer["timestamp"]) +
+                    '</td></tr>';
+            });
             $.each(item.answers, function (index, answer) {
-                formatted += '<tr><td>' +
+                formatted += '<tr>' +
+                    '<td>Answer</td><td>' +
                     formatLinks(answer["body"]) +
                     '</td><td>' +
                     answer["author"] +
@@ -219,7 +240,7 @@
                 row.child.hide();
                 tr.removeClass('shown');
             } else {
-                row.child(answers(row.data())).show();
+                row.child(replies(row.data())).show();
                 tr.addClass('shown');
             }
         });
