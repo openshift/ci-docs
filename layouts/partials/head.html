@@ -156,6 +156,11 @@
             return `${formattedDate} ${formattedTime}`;
         }
 
+        // Replaces slack links (URL|text) with html links (<a href="URL">text</a>)
+        function formatLinks(reply) {
+            return reply.replace(/`?([^`\s]+)\|([^`\s]+)`?/g, '<a href=' + '"$1"' + '>$2</a>');
+        }
+
         $.fn.dataTable.ext.errMode = 'throw';
         var table = $('#table_helpdesk_faq').DataTable({
             "ajax": {
@@ -173,6 +178,9 @@
                 {"data": "question.subject"},
                 {
                     "data": "question.body",
+                    "render": function (data, type, row, meta) {
+                        return formatLinks(data)
+                    }
                 },
                 {
                     "data": "timestamp",
@@ -189,7 +197,13 @@
 
             formatted += '<head><th>Answer</th><th>User</th><th>Date</th></head>'
             $.each(item.answers, function (index, answer) {
-                formatted += '<tr><td>' + answer["body"] + '</td><td>' + answer["author"] + '</td><td>' + formatDate(answer["timestamp"]) + '</td></tr>';
+                formatted += '<tr><td>' +
+                    formatLinks(answer["body"]) +
+                    '</td><td>' +
+                    answer["author"] +
+                    '</td><td>' +
+                    formatDate(answer["timestamp"]) +
+                    '</td></tr>';
             });
 
             formatted += '</table>';
