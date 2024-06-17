@@ -318,7 +318,7 @@ characters about the clusters that are provisioned out of it. For instance, the 
 pool `ci-ocp-4-6-amd64-aws-us-east-1` is composed of OCP 4.6 clusters on AWS's `us-east-1` region. The values of
 **READY**, **STANDBY**, **SIZE** and **MAX SIZE** are taken
 from [the status and the specification of each pool](https://pkg.go.dev/github.com/openshift/hive/apis@master/hive/v1#ClusterPool)
-. Clicking <img src="https://datatables.net/examples/resources/details_open.png" alt="details button"> shows the more
+. Clicking <img src="/caret_right_icon.png" alt="details button"> shows the more
 details of the cluster pool, such as the release image that is used for provisioning a cluster and the labels defined on
 the pool. The Search box can filter out the pools according to the given keyword.
 
