@@ -156,9 +156,28 @@
             return `${formattedDate} ${formattedTime}`;
         }
 
-        // Replaces slack links (URL|text) with html links (<a href="URL">text</a>)
+
         function formatLinks(reply) {
-            return reply.replace(/`?([^`\s]+)\|([^`\s]+)`?/g, '<a href=' + '"$1"' + '>$2</a>');
+            return makeLinksClickable(formatSlackLinks(reply))
+        }
+
+        // Replaces slack links (URL|text) with html links (<a href="URL">text</a>)
+        function formatSlackLinks(text) {
+            return text.replace(/`?([^`\s]+)\|([^`\s]+)`?/g, '<a href=' + '"$1"' + '>$2</a>');
+        }
+
+        // Replaces plain URLs with html links (<a href="URL">URL</a>)
+        function makeLinksClickable(text) {
+            const regex = /(<a href[^>]*>.*?<\/a>|(?:https?:\/\/|www\.)\S+)/g;
+
+            return text.replace(regex, function(match) {
+                if (match.startsWith('<a href')) {
+                    return match;
+                }
+                // Ensure URL starts with http:// or https://
+                let fullUrl = match.startsWith('www.') ? 'https://' + match : match;
+                return '<a href="' + fullUrl + '">' + match + '</a>';
+            });
         }
 
         $.fn.dataTable.ext.errMode = 'throw';
