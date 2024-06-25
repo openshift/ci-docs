@@ -39,7 +39,8 @@ images are built on a build farm and [promoted](/docs/architecture/ci-operator/#
 copies they hold are up-to-date and jobs that run there run with the correct container image versions.
 
 {{< alert title="Info" color="info" >}}
-In addition to QCI, `ci-operator` promotes images to `app.ci`'s registry `registry.ci.openshift.org` _only_ for the sake of internal automation such as Release Controllers, ART, and [mirroring CI images to an external repository](/docs/how-tos/mirroring-to-quay/#mirror-images-with-wildcard).
+In addition to QCI, `ci-operator` promotes images to `app.ci`'s registry `registry.ci.openshift.org` _only_ for the sake of internal automation such as Release Controllers, and [mirroring CI images to an external repository](/docs/how-tos/mirroring-to-quay/#mirror-images-with-wildcard).
+ART still pushes the builder images for CI to `app.ci`'s registry and [then mirrored to QCI](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml) before a more sustainable way is available to ART.
 Clients from CI users or their integration should _not_ reference the images there. Instead, please replace them with the corresponding image in QCI.
 {{< /alert >}}
 
