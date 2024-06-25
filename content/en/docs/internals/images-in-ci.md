@@ -29,9 +29,9 @@ Only Test-Platform members and their automation have access to `QCI` directly.
 
 ## QCI-APPCI
 
-The reverse-proxy `QCI-APPCI` (`quay-proxy.ci.openshift.org`)  of `QCI` is the face of the images in QCI for human users and the 3rd party applications.
-Its existence is due to the fact that it delegates the access control of the images in `QCI` to `RBAC`s on `app.ci`, i.e.,
-Human users and the service accounts on `app.ci` can pull images in `QCI` via `QCI-APPCI`.
+The [reverse-proxy](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-appci.yaml) (`quay-proxy.ci.openshift.org`) `QCI-APPCI` of `QCI` is the face of the images in QCI for human users and the 3rd party applications.
+Its existence is due to the fact that it delegates the access control of the images in `QCI` to the `RBAC`s on `app.ci`, i.e.,
+human users and the service accounts on `app.ci` can pull images in `QCI` via `QCI-APPCI`.
 
 
 For example, the above `base` image will lead to a tag specified in [the `pipeline` image stream](/docs/architecture/ci-operator/#referencing-images):
@@ -52,7 +52,7 @@ spec:
 
 ## The Cache Server for QCI
 
-For reducing the cost, the pull-through cache server `qci-pull-through-cache-us-east-1-ci.apps.ci.l2s4.p1.openshiftapps.com` for QCI is deployed. Only Test-Platform members and their automation have access to it.
+For reducing the cost, [the pull-through cache server](https://github.com/openshift/release/blob/master/clusters/app.ci/quayio-pull-through-cache/qci-pull-through-cache-us-east-1.yaml) `qci-pull-through-cache-us-east-1-ci.apps.ci.l2s4.p1.openshiftapps.com` for QCI is deployed. Only Test-Platform members and their automation have access to it.
 It is used by [`ImageTagMirrorSet` and `ImageDigestMirrorSet`](https://docs.openshift.com/container-platform/4.15/openshift_images/image-configuration.html#images-configuration-registry-mirror_image-configuration) defined on all CI clusters.
 
 ```yaml
