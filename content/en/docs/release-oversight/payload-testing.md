@@ -1,169 +1,87 @@
 ---
 title: "Payload Testing"
-description: An overview of payload testing.
+description: An overview of release controller payload testing.
 ---
 
-TRT needs the capability to run [a selected subset of release qualification jobs](https://docs.google.com/document/d/1x-hGyTnWFUuN5UMGdUnL9yK27kIUX31AfOigJrWrc2o/edit?usp=sharing) on selected pull requests in all repositories that contribute to OCP, before they are merged.
-The `PullRequestPayloadQualificationRun` CRD and the `/payload` command is provided for this purpose.
+The [Release Controller](https://github.com/openshift/release-controller) ([status page](https://amd64.ocp.releases.ci.openshift.org/)) is responsible for assembling the various OpenShift components into a release payload, and initiating broad testing against that payload. If that testing passes the payload is Accepted, and if not it is Rejected. (TRT has the ability to manually accept/reject payloads when necessary)
+
+For cost reasons we cannot run every possible configuration against pull requests pre-merge. Payload testing however batches multiple changes together several times a day and allows us to run extensive testing. This provides an excellent secondary layer to catch regressions that may have merged, but have not made it into an accepted payload.
 
 
-## Usage
+## Payload / Job Organization
 
-### Payload Command
-Any collaborator of the GitHub OpenShift organization can issue the command on a pull request to a branch of a repository of the organization that contributes to OpenShift official images:
+The Release Controller maintains payloads for multiple architectures, each of which has their own status page. At present TRT primarily focused on [amd64](https://amd64.ocp.releases.ci.openshift.org/).
 
-> /payload <ocp_version> <ci|nightly> <informing|blocking>
+### CI vs Nightly Payloads
 
-For example, if `/payload 4.10 nightly informing` is issued on a PR, the robot will reply the list of the triggered jobs:
+You will see payloads broken down by OpenShift Release, and CI and nightly streams.
 
-![payload command](/payload-cmd.png)
+CI payloads largely track master branches and are built directly in our CI system.
 
-The jobs triggered by the command are determined by [OpenShift Release Controllers](/docs/getting-started/useful-links/#services).
-The linked page from [payload-tests portal](https://pr-payload-tests.ci.openshift.org/runs/) at the bottom of the comment shows the status of the payload testing and the details of those jobs.
+Nightly payloads are more official as they are built using the full Red Hat build infrastructure. These payloads are candidates for EC/release selection and thus you will see considerably more testing run. This payload stream is susceptible to outages and delays in the build system. Despite it's name, nightly payloads are typically run 2-4 times a day.
 
-The images from multiple PRs can also be included in the payload tested by using the `/payload-with-prs` command, such as
-> /payload-with-prs <ocp_version> <ci|nightly> <informing|blocking> <org/repo#number> [<org/repo#number ...]
+### Blocking vs Informing Jobs
 
-A particular job or set of jobs can be triggered by `/payload-job`, such as
+Jobs in the blocking section will reject the payload if they fail. Informing jobs will not. We need to be careful with what goes into blocking for this reason, see [Extending OpenShift Release Gates](https://docs.ci.openshift.org/docs/architecture/release-gating/) for more on how a job can become blocking.
 
-> /payload-job <periodic_ci_openshift_release_some_job> <periodic_ci_openshift_release_another_job>
 
-The payload tested can also include the images from multiple PRs by using `/payload-job-with-prs`, such as
+## Aggregated Jobs
 
-> /payload-job-with-prs <periodic_ci_openshift_release_some_job> <org/repo#number> [<org/repo#number ...]
 
-A job can be executed more than once by a single `/payload-aggregate` command, e.g, 
+Previously we were very susceptible to flaky tests allowing a problem to make it into the product. A test that was previously passing 100% of the time dropping to 80% of the time is relatively easy to slip through a binary testing process and make it into a formal build of the product.
 
-> /payload-aggregate <periodic_ci_openshift_release_some_job> <aggregated_count>
+Aggregated jobs were built to mitigate this by launching *10* jobs of a specific configuration, then checking the pass rate of every test across those 10 runs and comparing it to the historical pass rate over the past few week susing [Fisher's Exact Test](https://en.wikipedia.org/wiki/Fisher%27s_exact_test). If we see a statistically significant change, the aggregated job will fail. In theory, if every sub-job failed for a different flaky test, the aggregated job could still pass.
 
-It is also possible to use the aggregation logic with additional PRs included in the payload with the `/payload-aggregate-with-prs` command, e.g, 
+This has proven very effective at glazing over the minor flakes that inevitably occur with thousands of tests running against a complex product on unreliable cloud infrastructure, and finding the real regressions relatively quickly.
 
-> /payload-aggregate-with-prs <periodic_ci_openshift_release_some_job> <aggregated_count> <org/repo#number> [<org/repo#number ...]
+When viewing payload details for a devel release, you will typically see several blocking *aggregated* jobs.
 
-{{% alert title="NOTE" color="warning" %}}
-`/payload-with-prs`, `/payload-aggregate`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
-{{% /alert %}}
+Because of its cost we have to be extremely picky with what jobs get an aggregated variant. Aggregated jobs are disabled when a release reached GA, replaced by a simple max 3 retries for the job to fully pass.
 
-#### Abort all Payload Jobs
-It is possible to quickly abort all running payload jobs for a specific PR. Simply comment `/payload-abort` on the PR to do so.
+Two spyglass panels are present on aggregated jobs in prow:
+  * aggregation-testrun-summary.html: Displays which job runs failed Fisher's Exact for specific tests.
+  * job-run-summary: Displays links to each of the 10 sub-jobs, their overall state, and how long they ran for.
 
-### Manually Submitting a `PRPQR`
-It is also possible to manually create a `PullRequestPayloadQualificationRun` instance without using the `payload` command.
-This allows for additional options to be supplied that are currently not possible via the command.
-The following is an example of a full `PRPQR` CR that can be applied to the `app.ci` cluster to trigger a payload job:
+## Analysis Jobs
 
-```yaml
-apiVersion: ci.openshift.io/v1
-kind: PullRequestPayloadQualificationRun
-metadata:
-  name: manually-submitted-prpqr
-  namespace: ci
-spec:
-  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342
-  payload:
-    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
-    tags:
-      - name: "machine-os-content"
-        tag: "4.13-2024-02-04-192545"
-  jobs:
-    releaseControllerConfig:
-      ocp: ''
-      release: ''
-      specifier: ''
-    releaseJobSpec:
-    - ciOperatorConfig:
-        branch: master
-        org: openshift
-        repo: release
-        variant: ci-4.15
-      test: e2e-aws-sdn-upgrade
-  pullRequests:
-  - baseRef: master
-    baseSHA: 270de19d62fc7275f22de22a7eca270bd77dd05d
-    org: openshift
-    pr:
-      author: developer
-      number: 1575
-      sha: c9817bfb09b48bc84ef20a1cf5a01cac36c2687d
-      title: 'A Pull Request'
-    repo: kubernetes
+While Informing jobs will not cause a payload to be rejected, we wanted a mechanism to extract some signal from them regardless which would still fail a payload if certain severe conditions were met.
+
+### install-analysis-all
+
+Also known as the Test Case Analyzer, this job checks that at least one job for specific variant combinations passed a particular test a minimum number of times. Today this is used primarily for the install success test, allowing us to ensure at least one job installed regardless if subsequent testing fully passed or not. (i.e. we ensure at least one AWS techpreview job installed, one vSphere UPI, one AWS single-node, etc.) If any of these variant combinations does NOT have a successful install, this job will fail and the payload is rejected.
+
+For example, we can make sure there are at least 2 successful installations for all metal upi jobs for one particular payload run.
+In this example, even though none of the metal upi job runs are blocking, we can still block the overall payload from results of those informing jobs if we did not see enough successful installations.
+
+Let's delve into the details with the command for this:
+
 ```
-
-{{% alert title="WARNING" color="warning" %}}
-If multiple `pullRequests` entries are supplied for a single org/repo pair, the `baseRef` and `baseSHA` will be selected only from the first one in the list.
-Therefore, it is not supported to have differing entries for these.
-{{% /alert %}}
-
-#### Supplying Multiple PRs from Component Repositories
-The `ci-operator` can assemble a release payload by building and using images from multiple PRs in OCP component repos.
-In order to do this, refs for each PR must be provided in the `PRPQR` spec:
-
-```yaml
-...
-spec:
-  jobs:
-    ...
-  pullRequests:
-    - baseRef: master
-      baseSHA: 270de19d62fc7275f22de22a7eca270bd77dd05d
-      org: openshift
-      pr:
-        author: developer
-        number: 1575
-        sha: c9817bfb09b48bc84ef20a1cf5a01cac36c2687d
-        title: 'A Pull Request'
-      repo: kubernetes
-    - baseRef: master
-      baseSHA: dcf812295b06c9463cb7c8d8126a337334049234
-      org: openshift
-      pr:
-        author: developer
-        number: 7640
-        sha: 7d5da4ce183886b6de33172e7af2a01ca2e46708
-        title: 'Another Pull Request'
-      repo: installer
-...
+./job-run-aggregator analyze-test-case
+  --google-service-account-credential-file=credential.json
+  --test-group=install
+  --platform=metal
+  --network=sdn
+  --infrastructure=upi
+  --payload-tag=4.11.0-0.nightly-2022-04-28-102605
+  --job-start-time=2022-04-28T10:28:48Z
+  --minimum-successful-count=2
 ```
+Key Command Arguments
+- test-group is a mandatory argument used to match to one or a subset of tests. As of now, only "install" is supported, and it matches to the test "install should succeed: overall" from suite "cluster install"
+- platform is used to select job variants. Supported values are aws, azure, gcp, libvert, metal, overt, and vsphere.
+- network is used to select job variants. It chooses between sdn and ovn jobs.
+- infrastructure is used to select job variants. It is used to choose ipi or upi jobs.
+- payload-tag is used to select job runs produced by CI or nightly payload runs.
+- job-start-time is used to narrow down the scope of job runs based on job start time.
+- minimum-successful-count defines the minimum required passes for install steps among all the candidate job runs.
 
-#### Overriding the Default Payload PullSpecs
-It is possible to override the pull-spec used for both the `initial` and `latest` release payloads by manually submitting a `PRPQR`.
-This is done by supplying the `spec.initial` and `spec.payload.base` fields respectively:
-```yaml
-...
-spec:
-  # useful for supplying a different pull-spec for the initial payload during 'upgrade' jobs
-  initial: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-01-213342 
-  payload:
-    # images built using PR code will be layered on top of the base
-    base: registry.ci.openshift.org/ocp/release:4.13.0-0.nightly-2024-02-06-120750
-...
-```
+In a typical use case, payload-tag and job-start-time are used to scope the job runs to one particular payload run.
+Then a combination of different variant arguments (platform, network, infrastructure) can be used to select interesting job runs for analysis.
 
-#### Overriding Specific Image Tags in the Payload
-It is also possible to override a specific image tag in the payload to any tag contained in an `ocp` ImageStream. Doing so requires manually submitting a `PRPQR`.
-This can be done by providing the tag overrides in the `spec.payload.tags` list:
-```yaml
-...
-spec:
-  payload:
-    tags:
-      - name: "machine-os-content" # name of the tag to be overridden
-        tag: "4.13-2024-02-04-192545" # ImageStream name in the 'ocp' namespace to override to
-...
-```
 
-#### Sourcing Components from Specific Base
-A `PRPQR` can be submitted without referencing an open PR. This is useful to pin one or more component repos to a specific `baseRef` and `baseSHA` in order to test the state of things at that point.
-Doing so requires manually applying the `PRPQR` CR:
-```yaml
-...
-spec:
-  jobs:
-    ...
-  pullRequests:
-    - baseRef: master 
-      baseSHA: 270de19d62fc7275f22de22a7eca270bd77dd05d
-      org: openshift
-      repo: kubernetes
-...
-```
+### overall-analysis-all
+
+This job checks that at least one job for specific variant combinations fully passed.
+
+
+
