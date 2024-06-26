@@ -11,7 +11,7 @@ description: Links and descriptions for various tools available for analyzing CI
 
 [Component Readiness](https://sippy.dptools.openshift.org/sippy-ng/component_readiness/main) is one of the newest and most important portions of Sippy. Component Readiness analyzes huge quantities of test data comparing the last week (by default) of the current dev release, against the last month leading up to GA for the most recent stable release. It uses [Fisher's Exact Test](https://en.wikipedia.org/wiki/Fisher%27s_exact_test) to determine if any test is failing statistically more often.
 
-See the [Component Readiness](component-readiness.md) page for more documentation.
+See the [Component Readiness](../component-readiness/) page for more documentation.
 
 
 ## Sippy Classic
@@ -61,7 +61,7 @@ The Release Controller status page is always our top priority, to keep the paylo
 
 Payloads do get cleaned out of the Release Controller regularly, however [Sippy’s Payload Streams UI](https://sippy.dptools.openshift.org/sippy-ng/release/4.17/streams) provides a permanent record, as well as some interesting tooling around viewing the test failures across multiple jobs in the payload run, and trying to identify if a test appears to be a problem across multiple consecutive payloads. There is a slight delay before payloads appear in Sippy, typically within an hour of the last job completing on the payload.
 
-For more on the Release Controller, see [Payload Testing](payload-testing.md).
+For more on the Release Controller, see [Payload Testing](../payload-testing/).
 
 
 ## Search.CI
@@ -79,7 +79,7 @@ The tool also features the ability to chart [metrics](https://search.ci.openshif
 
 ## ProwJob Tools and Artifacts
 
-The prow interface for a job run contains an immense number of tools and artifacts, see [Troubleshooting Job Failures](troubleshooting-failures.md) for details.
+The prow interface for a job run contains an immense number of tools and artifacts, see [Troubleshooting Job Failures](../troubleshooting-failures/) for details.
 
 ## BigQuery
 

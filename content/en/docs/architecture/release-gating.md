@@ -63,7 +63,7 @@ A CI job may gate a release once it has reached the following milestones:
 
 Good candidates include:
 
-* Jobs that verify [upgrade success](/docs/release-oversight/the-technical-release-team/#how-we-do-it)
+* Jobs that verify upgrade success
 * Jobs with a high signal-to-noise ratio (high pass rates)
 * Products that will ship on top of OpenShift
 * Projects or internal tools that depend on OpenShift APIs heavily

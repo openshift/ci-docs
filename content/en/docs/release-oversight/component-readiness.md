@@ -32,5 +32,5 @@ TRT currently has a manual triage tool available which can (a) scan for runs aff
 
 ## Alerting on Component Regressions
 
-TRT has implemented tooling that allows component teams to have alerts sent to a Slack channel of their choice when their component goes regressed. See [tooling](tooling.md) for more details.
+TRT has implemented tooling that allows component teams to have alerts sent to a Slack channel of their choice when their component goes regressed. See [tooling](./tooling.md) for more details.
 

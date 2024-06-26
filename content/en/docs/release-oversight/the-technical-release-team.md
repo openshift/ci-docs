@@ -13,9 +13,9 @@ Originally staffed by volunteers from across OpenShift Engineering, with OpenShi
 
 The TRT can be thought of as a form of Site Reliability Engineering for OpenShift quality.  Our goal is to ensure the highest sustainable rate of development, but no higher.  We define sustainable as not letting regressions compound and therefore our aim is to catch them as quickly as possible.  In the same way a SRE might need to revert a change or apply a patch to disable a feature in light of an outage, we work with teams to revert changes that can be proven to have introduced a regression. We allow an error budget based on historical pass rates, and once in violation of that budget components are flagged as regressed, alerts start firing, and TRT becomes engaged to attempt to find the source of the problem.
 
-TRT focuses heavily on keeping the Release Controller [Payloads](./payload-testing.md) green, which keeps the size of the changelog reasonable and helps us identify and revert new regressions quickly.
+TRT focuses heavily on keeping the Release Controller [Payloads](../payload-testing/) green, which keeps the size of the changelog reasonable and helps us identify and revert new regressions quickly.
 
-TRT also spends a lot of time analyzing CI signal for regressions, and to assist in this we focus heavily on automating analysis and the development of tools like [Sippy](https://sippy.ci.openshift.org/), and alerting ourselves and component teams when problems are detected. See the [tooling](./tooling.md) page for a full listing of the various tools we use and/or maintain to help analyze CI signal.
+TRT also spends a lot of time analyzing CI signal for regressions, and to assist in this we focus heavily on automating analysis and the development of tools like [Sippy](https://sippy.ci.openshift.org/), and alerting ourselves and component teams when problems are detected. See the [tooling](../tooling/) page for a full listing of the various tools we use and/or maintain to help analyze CI signal.
 
 ### Revert First, Ask Questions Later
 
@@ -27,8 +27,8 @@ This takes pressure off everyone quickly, and helps keep the green payloads flow
 
 ### Why are regressions happening anyway?  Why not catch them pre-merge?
 
-Whenever possible we hope to catch regressions before merging (see [presubmit testing](./presubmit-testing.md)), however there is a large class of regressions that make this financially and computationally infeasible. OpenShift supports many platforms and configurations which we cannot run jobs for on every repo and pull request. Additionally a large subset of regressions are intermittent, they can easily pass on a given run but fail 5-10% of the time (or perhaps 5-10% *worse* than they were previously failing).
+Whenever possible we hope to catch regressions before merging (see [presubmit testing](../presubmit-testing/)), however there is a large class of regressions that make this financially and computationally infeasible. OpenShift supports many platforms and configurations which we cannot run jobs for on every repo and pull request. Additionally a large subset of regressions are intermittent, they can easily pass on a given run but fail 5-10% of the time (or perhaps 5-10% *worse* than they were previously failing).
 
-These more subtle regressions thus have to be detected and acted on post-merge via [Payload Testing](./payload-testing.md) and [Component Readiness](./component-readiness.md).
+These more subtle regressions thus have to be detected and acted on post-merge via [Payload Testing](../payload-testing) and [Component Readiness](../component-readiness/).
 
 
