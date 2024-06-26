@@ -194,7 +194,12 @@
                     "defaultContent": ''
                 },
                 {"data": "question.topic"},
-                {"data": "question.subject"},
+                {
+                    "data": "question.subject",
+                    "render": function (data, type, row, meta) {
+                        return formatLinks(data)
+                    }
+                },
                 {
                     "data": "question.body",
                     "render": function (data, type, row, meta) {
