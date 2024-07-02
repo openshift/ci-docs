@@ -52,16 +52,27 @@ This is done to reduce the effort of managing users in different places.
 The access to QCI has to be through a reverse proxy serving `quay-proxy.ci.openshift.org` and only pull permission is granted.
 
 ### Human Users
-Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). The change will be applied automatically to `app.ci` after merging. Note that the group has to be on `app.ci`, i.e., `app.ci` is included `clusters` if it
+Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). 
+```console
+- kind: Group
+  name: <rover-group>
+  apiGroup: rbac.authorization.k8s.io
+```
+The change will be applied automatically to the `app.ci` cluster after merging. Note that the group has to be on `app.ci` cluster, i.e., `app.ci` is included `clusters` if it
 is specified in [this config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml).
-
-Provided that `oc` has logged in to `app.ci`, the user may pull images from QCI such as `quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest`
+```console
+  <rover-group>:
+    clusters:
+    - app.ci
+```
+Provided that `oc` has logged in to the [app.ci](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/) cluster and context set as app.ci, the user may pull images from QCI such as `quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest`
 by the following commands:
 
 ```console
 $ podman login -u=$(oc --context app.ci whoami) -p=$(oc --context app.ci whoami -t) quay-proxy.ci.openshift.org --authfile /tmp/t.c
 $ podman pull quay-proxy.ci.openshift.org/openshift/ci:ci_ci-operator_latest --authfile /tmp/t.c --platform linux/amd64
 ```
+Note: if you do not wish to set/rename the context to `app.ci`, you will need to remove `--context app.ci` from above command.
 
 ### Token For Programmatic Access to QCI
 If you're developing an integration with QCI, an OpenShift `ServiceAccount` on `app.ci` should be used. Write a
