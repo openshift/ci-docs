@@ -27,7 +27,7 @@ This takes pressure off everyone quickly, and helps keep the green payloads flow
 
 ### Why are regressions happening anyway?  Why not catch them pre-merge?
 
-Whenever possible we hope to catch regressions before merging (see [presubmit testing](../presubmit-testing/)), however there is a large class of regressions that make this financially and computationally infeasible. OpenShift supports many platforms and configurations which we cannot run jobs for on every repo and pull request. Additionally a large subset of regressions are intermittent, they can easily pass on a given run but fail 5-10% of the time (or perhaps 5-10% *worse* than they were previously failing).
+Whenever possible we hope to catch regressions before merging (see [presubmit testing](../pull-request-testing/)), however there is a large class of regressions that make this financially and computationally infeasible. OpenShift supports many platforms and configurations which we cannot run jobs for on every repo and pull request. Additionally a large subset of regressions are intermittent, they can easily pass on a given run but fail 5-10% of the time (or perhaps 5-10% *worse* than they were previously failing).
 
 These more subtle regressions thus have to be detected and acted on post-merge via [Payload Testing](../payload-testing) and [Component Readiness](../component-readiness/).
 

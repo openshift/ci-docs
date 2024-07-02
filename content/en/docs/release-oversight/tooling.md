@@ -29,7 +29,7 @@ An older portion of Sippy offers many tools that are still helpful in analyzing 
 
 TRT’s tooling can send your team Slack alerts on [metrics that Sippy publishes](https://sippy.dptools.openshift.org/metrics). This includes job pass rates over the past days/week, and Component Readiness regressions for your component.
 
-[Alerts are defined](https://github.com/openshift/continuous-release-jobs/blob/master/config/clusters/dpcr/services/trt-monitoring/prometheus-trt-rules.yaml) in the gitops repo for the DPCR cluster and should be self-servicable.
+Alerts are defined in the private continuous-release-jobs repo for the DPCR cluster.
 
 When an alert fires in your slack channel, following the link provided will take you to Alert Manager. Here the alert can be silenced if you feel it is correct and safe to do so. Choose an appropriate timeframe to silence for as the problem is worked on, and identify yourself as the creator.
 
