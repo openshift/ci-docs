@@ -225,9 +225,13 @@ contains a dependency on the `OO_BUNDLE` image. The example provided in the [pre
 section](#simple-operator-installation) would work for Cluster Bot. If a launch command with a PR to an
 optional-operator repo is made, the Cluster Bot will install a cluster as it normally would and then use the `install`
 step from the ci-operator config to install the built operator.  Here is an example of a command to the Cluster Bot that
-builds PR 12 from `myOrg/myRepo`:
+builds PR 12 from `myOrg/myRepo` and installs the built operator on a `4.16` cluster on `aws`:
 
-```launch myOrg/myOperator#12```
+```launch 4.16,myOrg/myOperator#12 aws```
+
+Note that removing `4.16` or `aws` in the command instructs the Cluster Bot to use their default values which are
+the current [dev branch of OpenShift](/docs/architecture/branching/#branching-phases) and a cluster [hosted by HyperShift](/docs/architecture/ci-operator/#testing-with-a-cluster-from-hypershift).
+Depending on the progress of [OCPBUGS-35252](https://issues.redhat.com/browse/OCPBUGS-35252), the violation on PodSecurity of the containers such as `registry-grpc-init` and `registry-grpc` created by `operator-sdk` might lead to failures on executing the `operator-sdk run bundle` command with the built bundle image for the default values taken by the Cluster Bot.
 
 # Building a Catalog for an Operator built from PR via Cluster Bot
 
