@@ -36,9 +36,9 @@ In order to backport a bugfix to more then one past release, it must be done ser
 is important because a bugfix must always been made in newer releases first, otherwise openshift cluster upgrades can
 lead to running into already fixed bugs which should never happen.
 
-When backporting to more than one release, users may specify all releases they which to backport to separated by commas
+When backporting to more than one release, users may specify all releases they which to backport to separated by spaces
 in their comment. For instance, if a bugfix needs to be backported to `release-4.15`, `release-4.14`, and `release-4.13`,
-the comment `/cherrypick release-4.15,release-4.14,release-4.13` can be made. When this is done, the automation will create
+the comment `/cherrypick release-4.15 release-4.14 release-4.13` can be made. When this is done, the automation will create
 a cherrypick for the first listed branch and include the remaining branches in the description. Once the new cherrypick is merged,
 the next branch will be handled the same and so on, without need for further cherrypcik comments to be manually made.
 
