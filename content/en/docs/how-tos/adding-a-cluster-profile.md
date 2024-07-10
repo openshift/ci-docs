@@ -27,12 +27,13 @@ Generally, the major difference between `cluster_profile`s is the content of the
 ## Prepare the cloud account
 In order for most workflows to operate with the cluster profile, the cloud account must be prepared, including creating a new IAM user as described in the OCP document ([AWS](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-account.html), [GCP](https://docs.openshift.com/container-platform/4.14/installing/installing_gcp/installing-gcp-account.html)).
 
-Some common roles might needed in addition to the ones created by the OCP document:
+In addition to the permissions specified by the OCP documentation, include the following which are required for running tests in the environment:
 
-AWS:
+AWS Policies:
 - `CloudFormationFullAccess`
+- `AmazonEC2ContainerRegistryFullAccess`
 
-GCP:
+GCP Roles:
 - `Deployment Manager Editor`
 - `Compute Image User`
 - `Role Administrator`
