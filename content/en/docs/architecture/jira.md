@@ -42,6 +42,15 @@ the comment `/cherrypick release-4.15 release-4.14 release-4.13` can be made. Wh
 a cherrypick for the first listed branch and include the remaining branches in the description. Once the new cherrypick is merged,
 the next branch will be handled the same and so on, without need for further cherrypcik comments to be manually made.
 
+Another option for backporting is the `/jira backport` command. This is similar to the above command but will instead
+create all of the backport issues immediately and then queue the cherrypick bot to create all specified cherrypick
+branches after the PR is merged, instead of one by one. This can be useful for repositories with very long running
+tests, as the tests for all backports will start immediately once the original PR is merged. These individual PRs must
+still be merged in the correct order. To be able to merge PRs for older releases after the release above it has merged,
+you will need to run `/jira refresh` on the PR to have the PR be marked as containing a valid issue. The format for the
+backport command is slightly different than the `/cherrypick` command, as instead of using spaces, the branches must be
+comma separated.  And example of a valid command is `/jira backport release-4.15,release-4.14,release-4.13`.
+
 If the `/cherrypick` command fails to run correctly due to conflicts, the Jira automation can still be used to assist in
 backporting. After manually creating the cherrypick PR, you can comment `/jira cherrypick OCPBUGS-XXX` to cherrypick a
 bug and link it to the PR. The automation will clone the provided bug and link the clone to the PR by adding it to the
