@@ -29,7 +29,7 @@ For example, by the above snippet, a Slack alert will be sent out to `#forum` ch
 
 ## Setting up Slack notifications with Prowgen
 `Prowgen` is the tool that is used to generate `ProwJobs` from `ci-operator` configuration. It is possible to instruct `Prowgen` to add a `reporter_config` to specific jobs.
-Doing so requires creating or updating the repo (or organization) in question's `.prowgen.config` file. This YAML configuration file is stored in the repo's `ci-operator` folder.
+Doing so requires creating or updating the repo (or organization) in question's `.config.prowgen` file. This YAML configuration file is stored in the repo's `ci-operator` folder.
 For example, `ci-tools` configuration file is found at `ci-operator/config/openshift/ci-tools/.config.prowgen`. The following example illustrates how to utilize this config to add slack notifications for jobs:
 
 ```yaml
