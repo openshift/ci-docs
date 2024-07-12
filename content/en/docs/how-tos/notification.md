@@ -1,9 +1,15 @@
 ---
-title: "Set Up Slack Alerts for Periodic Job Results"
+title: "Set Up Slack Alerts for Job Results"
 description: How to set up alerting to Slack for a CI job.
 ---
 
-We can set up Slack alerts for job results by defining `reporter_config` in the job definition.
+We can set up Slack alerts for job results by defining `reporter_config` in the job definition. This is possible for all job types: `periodics`, `presubmits`, and `postsubmits`.
+`Prowgen` is [capable](https://docs.ci.openshift.org/docs/how-tos/notification/#setting-up-slack-notifications-with-prowgen) of adding this to the job definition.
+
+{{< alert title="Warning" color="warning" >}}
+Currently, it is still possible to manually add the `reporter_config` to periodic jobs. This functionality is deprecated, and using `Prowgen` is preferred.
+Once a significant number of jobs have migrated to use `Prowgen`, the ability to manually edit the periodics will be removed.
+{{< /alert >}}
 
 ```yaml
 reporter_config:
@@ -21,20 +27,33 @@ For example, by the above snippet, a Slack alert will be sent out to `#forum` ch
 * The state in `job_states_to_report` has to be a valid Prow job state. See [upstream documentation](https://pkg.go.dev/sigs.k8s.io/prow/pkg/apis/prowjobs/v1#ProwJobState).
 * The value of `report_template` is a [Go template](https://golang.org/pkg/text/template/) and it will be applied to the Prow job instance. The annotations such as `{{.Spec.Job}}` will be replaced by the job name when the alert is received in Slack. See [upstream documentation](https://pkg.go.dev/sigs.k8s.io/prow/pkg/apis/prowjobs/v1#ProwJob) for more fields of a Prow job. Note that no alerts will be sent out if the template is broken, e.g., cannot be parsed or applied successfully.
 
-The following snippet shows an example of embedding the `reporter_config` into a job definition:
+## Setting up Slack notifications with Prowgen
+`Prowgen` is the tool that is used to generate `ProwJobs` from `ci-operator` configuration. It is possible to instruct `Prowgen` to add a `reporter_config` to specific jobs.
+Doing so requires creating or updating the repo (or organization) in question's `.prowgen.config` file. This YAML configuration file is stored in the repo's `ci-operator` folder.
+For example, `ci-tools` configuration file is found at `ci-operator/config/openshift/ci-tools/.config.prowgen`. The following example illustrates how to utilize this config to add slack notifications for jobs:
 
 ```yaml
-agent: kubernetes
-cron: 0 */6 * * *
-decorate: true
-name: periodic-job-name
-reporter_config:
-  slack:
-    channel: '#forum'
-    job_states_to_report:
-    - failure
-    report_template: Job {{.Spec.Job}} failed.
-spec: {}  # Valid Kubernetes PodSpec.
+slack_reporter:
+- channel: "#slack-channel"
+  job_states_to_report: #Accepts any ProwJob status
+  - success
+  - failure
+  - error
+  report_template: '{{if eq .Status.State "success"}} :rainbow: Job *{{.Spec.Job}}*
+                           ended with *{{.Status.State}}*. <{{.Status.URL}}|View logs> :rainbow: {{else}}
+                           :volcano: Job *{{.Spec.Job}}* ended with *{{.Status.State}}*. <{{.Status.URL}}|View
+                           logs> :volcano: {{end}}'
+  job_names: # Listing of job names (ci-operator's 'as' field) that this configuration applies to
+  - unit
+  - upload-results
+  - lint
+  excluded_variants: # It is possible to exclude notifications from specific variants, for example, when you don't require them from older releases
+  - some-old-release
 ```
 
-_Note_ that we have to modify the job yaml directly even if the job is generated from a `ci-operator`'s config and regenerating the jobs does not change the existing `reporter_config`. Moreover, we do not support `reporter_config` for **generated** presubmits and postsubmits.
+{{< alert title="Note" color="info" >}}
+Note that it is possible to include multiple `slack_reporter` entries in this config, but each `job_name` should only be included in, at most, one.
+{{< /alert >}}
+
+Once the configuration is added, simply use the `make jobs` target to generate the new job definitions containing the `reporter_config`.
+The `SlackReporterConfig` is provided for [reference](https://github.com/openshift/ci-tools/blob/6810ce942bbe25a06c092af8098fd2d071604a04/pkg/config/load.go#L49-L57).
