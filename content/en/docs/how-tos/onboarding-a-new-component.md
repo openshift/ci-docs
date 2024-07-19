@@ -162,6 +162,11 @@ approved by [root approvers](https://github.com/openshift/release/blob/master/OW
 place, it should be owned by the component team. To achieve this, an `OWNERS` file mirroring what exists upstream should
 be placed into both `ci-operator/config/$org/$repo` and `ci-operator/jobs/$org/$repo` directories.
 
+Shortly following the merge of the onboarding PR, the `periodic-prow-auto-owners` job will sync the `OWNERS` file from the component repository to the relevant directories.
+Assumming this file exists in the repo's base directory, this sync is performed periodically, and will sync all members in that file that are also members of the `openshift` GitHub org.
+This means that the component's `OWNERS` file is the only one that needs to be manually updated.
+See `#forum-pge-cloud-ops` to gain membership in the `openshift` org.
+
 ### Enabling Automatic Merges
 
 Prow’s [`tide`](https://github.com/kubernetes-sigs/prow/tree/main/pkg/tide) component
