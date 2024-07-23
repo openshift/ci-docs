@@ -13,7 +13,8 @@ There are the following kinds images in `QCI`:
 - [promoted](/docs/architecture/ci-operator/#publishing-container-images) by CI jobs, or
 - [mirrored from external repositories](/docs/how-tos/external-images/).
 
-Any reference of an image stream tag in CI will be resolved _eventually_ by the image in `QCI` at the runtime of `ci-operator`.
+During runtime, `ci-operator` will _eventually_ resolve any reference 
+of an image stream tag in CI with the image in `QCI`.
 For example, the tag `ocp/4.5:base` in the following `ci-operator`'s configuration
 is meant actually to use `quay.io/openshift/ci:ocp_4.5_base`.
 
