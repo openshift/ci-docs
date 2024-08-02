@@ -159,7 +159,7 @@ and will not swamp TRT or unreasonably prevent us from getting green payloads.
 
 However, in some scenarios, it may be possible to shortcut this process. We
 have recently gained the ability to run specific jobs an arbitrary number of
-times via [Gangway](https://github.com/stbenjam/gangway-cli). This allows us to
+times via [Gangway](https://github.com/stbenjam/gangway-cli), [document](https://docs.google.com/document/d/1x82wtDkEaWmqx627K2mpcWpIaP5PYsCoutenhMqkXVU/edit#heading=h.jy0krrkvq90t) on how to use Gangway. This allows us to
 accumulate more data in a shorter window of time, and see if a job is stable
 enough to go blocking. If you feel this is necessary, please get in touch with
 TRT and we can try to work out budget concerns and amount of data runs
