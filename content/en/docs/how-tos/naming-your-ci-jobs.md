@@ -73,6 +73,15 @@ included here. For example, "serial" or "csi".  Upgrade jobs should
 specify "upgrade" at the end of the job name, whether it be a micro or
 minor upgrade.
 
+### Multiarch Payload fields
+
+When creating a job that utilizes the multiarch payload, there are many
+different architectures and configurations that can be used for deploying
+a cluster.  Creating the job name with a specific pattern will help others
+understand more about the deployment structure with just a glance. See this
+[README](https://github.com/openshift/release/blob/master/ci-operator/config/openshift/multiarch/README.md)
+for more information on appropriate formatting.
+
 ### Example job names
 
 - periodic-ci-openshift-release-master-nightly-4.13-console-aws
