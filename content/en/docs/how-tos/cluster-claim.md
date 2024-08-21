@@ -252,6 +252,10 @@ document.
 
 ## Troubleshooting Cluster Pools
 
+See the [upstream documentation](https://github.com/openshift/hive/blob/master/docs/troubleshooting.md#clusterpools) for general troubleshooting information for ClusterPools.
+
+For information specific to ClusterPools in OpenShift CI, read on.
+
 ### Accessing Cluster Installation logs
 The cluster pools are maintained by Hive behind the scenes, so installation failures, cloud platform account
 misconfigurations and similar issues are not exposed to actual CI jobs: the jobs will simply never successfully claim a
