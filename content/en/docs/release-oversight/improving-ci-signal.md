@@ -68,18 +68,24 @@ Our corpus/history (n) will be well over 250, so use that line.  Our sample size
 If you are making a large change, and are concerned about breaking job flavors that are not covered by your repository's usual presubmits, consider running [`/payload ...` testing](/docs/release-oversight/payload-testing) before merging your change.
 
 #### Who is watching for payload regressions and opening reverts?
-For now, the [Technical Release Team](/docs/release-oversight/the-technical-release-team) watches payload results on the current release branch.  They will open the revert PRs and engage the involved teams (any team that contributed a PR to the payload that regressed).
+After your code merges, your work isn't complete until it's part of two accepted payloads. This ensures your code works, and is upgradeable. If a payload fails after your change merges, check if your code is the cause and, if so, revert that change.
+
+The [Technical Release Team](/docs/release-oversight/the-technical-release-team) acts as a safety net, identifying and reverting breaking changes that aren’t already found.
 
 #### How will we be contacted if our PR is part of a regressed payload?
-TRT will ping the relevant team slack aliases in #forum-release-oversight.  
+TRT will ping the relevant team slack aliases in #forum-release-oversight.
 
 #### Who approves the revert for merge?
-In order to ensure they are included in the conversation/resolution, we would like the team that delivered the original PR to /approve the reversion.  However, if they are unavailable or unresponsive this may be escalated to the staff-engineering team to ensure we do not remain in a regressed state longer than necessary.
+TRT has authority to apply the approved label to any revert in the OpenShift org, even for repositories they are not in OWNERS.  They will notify the original author on Slack and in the revert PR, but to avoid staying regressed any longer than necessary, will not wait for acknowledgement. This also means if you're reverted, you don't need to respond until your normal working hours.
+
+If the repository is returning to a previously tested state (i.e. the reverted commit is the most recent), or the change is relatively isolated or simple, TRT may also `/override` certain CI jobs to expedite the revert. Generally, unit tests, lint, verify, image and other fast running jobs should not be overriden.
+
+The goal of fast reverts is to increase calmness, not chaos.  Reverts get the org restored to working, and you have time and space to think about the best fix for the problem.
 
 #### What happens if a giant change like a rebase with high business value and on the critical path of the release regresses the pass rate? Will it be reverted? Will we work on it until it passes good enough? What if the kubelet build hours or days later causes the regression?
 Since we have a way to run the payload promotion checks before a PR merges, we encourage high risk changes to run the payload acceptance before they merge.  If that payload acceptance test fails, then it is 95% likely (math, not gut) that the PR is reducing our reliability.  That signal is enough to engage other teams if necessary, but since most repos other than openshift/kubernetes are owned by a single team and that team is the local expert, in the majority of cases the expert should be local.
 
-If the PR isn’t pre-checked and we catch it during payload promotion, then even a high business value PR is subject to reversion.  The unrevert PR is the place to talk about expected and observed impact to reliability versus the new feature.  Both the revert and the unrevert are human processes, so there is room for discussion.
+If the PR isn’t pre-checked and we catch it during payload promotion, then even a high business value PR is subject to reversion.  The unrevert PR is the place to talk about expected and observed impact to reliability versus the new feature.
 
 #### What does an “identified fix” look like?
 To avoid merging the revert, teams will need to be able to point to an open PR that contains a fix, and which has passed the payload acceptance checks.
@@ -92,7 +98,6 @@ We are biased toward passing and only fail when we are 95% confident (mathematic
 Given the timing of these events, it’s understandable that many teams aren’t going to bother investigating if it was their PR that caused the issue until there is definitive proof (in the form of a revert PR that passes the check).  And even if they do immediately investigate and open a fix PR, they will be racing against the checks being run against the revert PRs.  We will allow some small amount of flexibility here: if the team has a fix PR open, we’ll wait for the check to finish against that PR before merging the revert.  But if the checks on the fix PR fail, the team will need to merge the revert and then land the unrevert along with their fix.
 
 Remember, anytime our payloads are regressed, the entire org is being impacted.  While there may be a small cost to a single team to land an un-revert, it avoids a greater cost to the org as a whole.  We want to get back to green as quickly as possible and avoid a slippery slope of a team wanting to try “one more fix” before we revert.  Teams can also optionally run the acceptance checks on their original PR before merging it, to reduce the risk that the PR will have to be reverted.
-
 
 #### What if these new checks are wrong?
 We will need to carefully study the outcomes of this process to ensure that we are getting value from it (finding actual regressions) and not causing unnecessarily churn (raising revert PRs due to false positives when nothing has actually regressed, or the regression actually happened in an earlier payload but went undetected at the time). TRT will track data on how many times this reversion process gets triggered and the outcomes of each incident and then do a retrospective after the 4.10 release.
