@@ -145,7 +145,7 @@ You can also invoke this command with multiple PRs:
 > `/payload-aggregate-with-prs <periodic_ci_openshift_release_some_job> <aggregated_count> <org/repo#number> [<org/repo#number ...]`
 
 {{% alert title="NOTE" color="warning" %}}
-`/payload-with-prs`, `/payload-aggregate`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
+`/payload-with-prs`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
 {{% /alert %}}
 
 ### /payload-abort
