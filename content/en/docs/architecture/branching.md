@@ -10,42 +10,30 @@ The number of repositories and branches involved in assembling an OpenShift rele
 Every OCP release travels through four phases - normal development, feature freeze, code freeze, and general availability. This section details what to expect from each of these phases and the types of merge requirements that exist for PRs in each phase.
 
 ## Normal Development For 4.x Release
-During normal development, active development branches are open to all changes.
+The vast majority of the time active development branches are open to all changes.
 
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
 |`master/main`|`ocp/4.x`|`lgtm`, `approved`|no|
-|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
+|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `jira/valid-bug`, `cherry-pick-approved`|no|
 |`release-4.x`|nowhere|merges blocked|yes|
 |`release-4.x+1`|`ocp/4.x+1`|merges blocked|yes|
 
-## Feature Freeze For 4.x Release
-During feature freeze, the expectation is that merges to the active development branch are fixing bugs, so we require that all PRs that land have a valid bug label.
+The primary exception to this rule is when the [Technical Release Team](/docs/release-oversight/the-technical-release-team) decides to enable the `/acknowledge-critical-fixes-only` label.
 
-|*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
-|-|-|-|-|
-|`master/main`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`|no|
-|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
-|`release-4.x`|nowhere|merges blocked|yes|
-|`release-4.x+1`|`ocp/4.x+1`|merges blocked|yes|
-
-### No-Feature-Freeze Process Pilot
-
-Some teams are participating in a pilot of a different process where Feature Freeze phase does not affect merge criteria on the `master/main` branch. Repositories that belong to these teams merge pull requests to their `master/main` branches if they are labelled with one of the following sets of labels:
-
-- `lgtm`, `approved`, `bugzilla/valid-bug` (for bugfix pull requests)
-- `lgtm`, `approved`, `px-approved`, `docs-approved`, `qe-approved` (for feature pull requests)
-
-These criteria stay the same in both normal development and feature freeze phases (as opposed to standard process where such PRs require `bugzilla/valid-bug` during feature freeze and not during normal development). Pull requests to `release-*` branches are not affected by this process. They use the criteria specified in the respective sections of this document.
-
-## Code Freeze For 4.x Release
-During code freeze, the active development branch opens to contributions that target the future release. Contributions to the release branch require staff engineer approval as they’re landing so close to the moment we are publishing the release publicly.
+## Final Stabilization For Soon-To-Be-Released Minor Versions
+While we no longer have official code freeze windows, the final two weeks
+before a minor release becomes generally available are still special.  Any
+delays during this period cause costly communication overhead.  As such, we
+require Staff Engineers to sign off on code that will be backported to make
+sure it's something that needs to be released immediately (ie, not something
+that could ship a week or two later.)
 
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
 |`master/main`|`ocp/4.x+1`|`lgtm`, `approved`|no|
-|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
-|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `staff-eng-approved`|no|
+|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `jira/valid-bug`, `cherry-pick-approved`|no|
+|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `jira/valid-bug`, `cherry-pick-approved`, `staff-eng-approved`|no|
 |`release-4.x+1`|nowhere|merges blocked|yes|
 
 ## General Availability For 4.x Release
@@ -54,8 +42,8 @@ After a release is generally available, we do not require staff engineer lead ap
 |*Branch*|*Promotes To*|*Merge Criteria*|*Fast-Forwarded?*|
 |-|-|-|-|
 |`master/main`|`ocp/4.x+1`|`lgtm`, `approved`|no|
-|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
-|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `bugzilla/valid-bug`, `cherry-pick-approved`|no|
+|`release-4.x-n`|`ocp/4.x-n`|`lgtm`, `approved`, `jira/valid-bug`, `cherry-pick-approved`|no|
+|`release-4.x`|`ocp/4.x`|`lgtm`, `approved`, `jira/valid-bug`, `cherry-pick-approved`|no|
 |`release-4.x+1`|nowhere|merges blocked|yes|
 
 
@@ -91,5 +79,25 @@ Yes. When final freeze happens for release X.Y, the release branch for that vers
 
 ## Do I need to make sure branched CI Operator configs are up to date for release branches?
 No. When the branch is cut and goes live, the current CI Operator configuration for the development branch is used to seed the configuration for the release branch. These are not DRY intentionally to allow for drift between CI for branches.
+
+## What was the No-Feature-Freeze Process?  I hear my team still uses it.
+
+As the name suggests No-Feature-Freeze refers to a time when we used to have a
+Feature Freeze.  During the legacy feature freeze we had not yet branched to
+allow for development to start on the N+1 minor release but we enforced all PRs
+to reference bug fixes.
+
+A few years ago a few teams participated in a pilot process that allowed them
+to continue developing past the Feature Freeze phase.  Repositories that belong
+to these teams merge pull requests to their `master/main` branches if they are
+labelled with one of the following sets of labels:
+
+- `lgtm`, `approved`, `bugzilla/valid-bug` (for bugfix pull requests)
+- `lgtm`, `approved`, `px-approved`, `docs-approved`, `qe-approved` (for feature pull requests)
+
+The thing to know is that we don't offer this to new repositories.  These days
+we don't have a Feature Freeze as in years past.  We continue to allow the
+original teams that signed up for it to continue using these labels if they
+desire.
 
 [default-branch]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch
