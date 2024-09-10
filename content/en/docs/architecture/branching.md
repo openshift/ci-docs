@@ -95,9 +95,11 @@ labelled with one of the following sets of labels:
 - `lgtm`, `approved`, `bugzilla/valid-bug` (for bugfix pull requests)
 - `lgtm`, `approved`, `px-approved`, `docs-approved`, `qe-approved` (for feature pull requests)
 
-The thing to know is that we don't offer this to new repositories.  These days
-we don't have a Feature Freeze as in years past.  We continue to allow the
-original teams that signed up for it to continue using these labels if they
-desire.
+The thing to know is that we don't offer this to new repositories since we no
+longer have a Feature Freeze as in years past. Some teams may use these labels
+to encourage pre-merge review of features, based on their own assessment of
+that pre-merge review by PX, docs, and QE generates a faster overall velocity.
+This assessment is expected to be a per-team call, depending on the quality or
+pre-merge review and the usual turnaround time needed to deliver it.
 
 [default-branch]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch
