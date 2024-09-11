@@ -624,6 +624,34 @@ Test owners are encouraged to migrate from the [`ipi-aws`](https://steps.ci.open
 the [hypershift-hostedcluster-workflow](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow)
 which can be achieved simply by renaming the name of the workflow.
 
+### Allowing Tests to Access Red Hat Intranet
+{{% alert title="LIMITED SUPPORT" color="warning" %}}
+`Accessing Red Hat Intranet` is a pilot project, and support from the Test Platform is limited.
+{{% /alert %}}
+
+To enable tests to access the Red Hat intranet, the `restrict_network_access` flag must be set to `false` within the test section.
+
+```yaml
+- as: my-e2e
+  cluster: build10 # if your test is not scheduled to one of the clusters in the list below, you can choose to pin your test to a specific cluster
+  commands: curl -XPOST https://devservices.dpp.openshift.com/support/general_request
+  from: stable:cli
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  restrict_network_access: false # explicitly allow the test to access the Red Hat intranet
+```
+
+There are two levels of network access control for accessing the Red Hat intranet: the `restrict_network_access` flag, and network ACL maintained by IT.
+
+The network ACL can be tested with the [simulator](https://netsec.corp.redhat.com/). In case the resources your tests need are blacklisted by the ACL, please contact #forum-ocp-testplatform.
+
+Only selected build farm clusters can access the Red Hat intranet at this moment. The clusters include:
+* `build05`
+* `build10`
+* `hosted-mgmt`
+
 ## Declaring Tests
 
 Tests as executed by `ci-operator` run a set of commands inside of a container; this is implemented by scheduling a `Pod`
