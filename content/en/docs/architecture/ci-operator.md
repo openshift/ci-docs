@@ -649,8 +649,12 @@ The network ACL can be tested with the [simulator](https://netsec.corp.redhat.co
 
 Only selected build farm clusters can access the Red Hat intranet at this moment. The clusters include:
 * `build05`
-* `build10`
 * `hosted-mgmt`
+
+{{% alert title="LIMITED SUPPORT" color="warning" %}}
+`Accessing Red Hat Intranet` is a not available from `rehearsal` tests. In order to try the functionality, the PR must be reviewed and merged.
+In the future, it will be possible to rehearse workflows that utilize this config in subsequent PRs **only after** it has been initially enabled.
+{{% /alert %}}
 
 ## Declaring Tests
 
