@@ -651,9 +651,9 @@ Only selected build farm clusters can access the Red Hat intranet at this moment
 * `build05`
 * `hosted-mgmt`
 
-{{% alert title="REHEARSALS DISABLED" color="warning" %}}
-`Accessing Red Hat Intranet` is not available from `rehearsal` tests. In order to verify the functionality, the PR must be reviewed and merged.
-In the future, it will be possible to rehearse workflows that utilize this config in subsequent PRs **only after** it has been initially enabled.
+{{% alert title="LIMITED REHEARSALS" color="warning" %}}
+`Accessing Red Hat Intranet` is only available from `rehearsal` tests where the `restrict_network_access` field is already set to `false` in the merged configuration. In order to verify the functionality in rehearsals, a PR must be first approved and merged enabling this flag. 
+Subsequent PRs modifying the test will be able to be rehearsed as normal.
 {{% /alert %}}
 
 ## Declaring Tests
