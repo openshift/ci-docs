@@ -129,7 +129,7 @@
                         if (item['cluster'] === 'app.ci') {
                             description = description + ' containing most Prow services.';
                         } else if (item['cluster'] === 'hosted-mgmt') {
-                            description = description + ' containing containing a Hive control plane.';
+                            description = description + ' containing a Hive control plane.';
                         } else if (!item['cluster'].startsWith('build')) {
                             description = description + ' used for ' + item['cluster'].replace(/\d+/g, '').toUpperCase() + ' tests, not managed by DPTP.';
                         } else {
