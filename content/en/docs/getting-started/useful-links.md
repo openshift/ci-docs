@@ -58,7 +58,7 @@ DPTP maintains several means of contact:
     * [Consulting template](https://issues.redhat.com/browse/DPTP-897) for long-term, asynchronous discussion.
 * Google Chat (Only for use when Slack is down):
     * [`announce-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAC1kVXs8) backup space for Slack `#announce-testplatform`
-    * [`forum-ocp-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAbH-Fq3g) backup space for Slack `#forum-testplatform`
+    * [`forum-ocp-testplatform`](https://mail.google.com/chat/u/0/#chat/space/AAAAbH-Fq3g) backup space for Slack `#forum-ocp-testplatform`
 
 ## Presentations
 
