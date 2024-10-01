@@ -62,8 +62,6 @@ The process of creating a new cluster profile involves adding:
   a new type is being added (this is only used for legacy template tests).
 - `ClusterProfile::ConfigMap()`: a `switch` label if the profile requires its
   own `ConfigMap`.
-- `ClusterProfile::Secret()`: a `switch` label if the profile shares
-  [credentials]({{< relref "#providing-credentials" >}}) with another.
 
 ### Cluster type
 
@@ -83,28 +81,46 @@ In the pull request to `openshift/ci-tools`, the mapping between a `cluster_prof
 
 ### Providing Credentials
 
-The credentials provided to tests that declare a `cluster_profile` are a mix of content owned by the test platform and content owned by the users adding a new `cluster_profile`. The secret used to hold this content is `cluster-secrets-<name>`, so the `aws` profile uses `cluster-secrets-aws`. When adding a new profile, a pull request must change the `ci-secret-bootstrap` configuration to seed this credential with content owned by the platform, like central pull secrets for image registries ([example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd)). In addition, any user-provided secrets must be added using the [self-service portal](/docs/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) to add it to the clusters, using the following keys in Vault (the destination namespace/name needs to match the item added to the `ci-secret-bootstrap` config):
+The credentials provided to tests that declare a `cluster_profile` are a mix
+of content owned by the test platform and content owned by the users adding 
+a new `cluster_profile`. The secret used to hold this content is 
+`cluster-secrets-<name>`, so the `aws` profile uses `cluster-secrets-aws`. 
+When adding a new profile, a pull request must change the `ci-secret-bootstrap` 
+configuration to seed this credential with content owned by the platform, 
+like central pull secrets for image registries ([example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd)). 
+In addition, any user-provided secrets must be added using 
+the [self-service portal](/docs/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) 
+to add it to the clusters, using the following keys in Vault (the destination 
+namespace/name needs to match the item added to the `ci-secret-bootstrap` config):
 
 {{< highlight yaml >}}
 secretsync/target-namespace: "ci"
 secretsync/target-name: "cluster-secrets-<name>"
 {{< / highlight >}}
 
-The `openshift/ci-tools` pull request should also include instructions on how
-the data provided should be assembled into a volume mount for the test
-containers.  The code is structured so that common cases require few or no
-changes.  These are:
-
+Credentials provided for the test containers fall into two categories:
 - Credentials are mounted using a simple `Secret` mount.
-  - The convention is for the secret to be named `cluster-secrets-<name>`, in
-    which case no change is required.
-  - In some cases, derivative profiles may want to use the same credentials as
-    the original.  All existing profiles follow the convention of being named
-    after their `CLUSTER_TYPE`, so usually a single new `switch` label is
-    required in this case.
-- A `ConfigMap` is required for the profile.  The convention is for it to be
-  named `cluster-profile-<name>`, in which case a single new `switch` label is
-  required.
+  - If the convention for the secret to be named `cluster-secrets-<name>` is 
+    followed, no other action is required.
+  - To use a custom secret name for the new cluster profile, 
+    e.g. when the new profile shares credentials with another profile,
+    a new field must be added to the [cluster profiles configuration file](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml) to override the default naming:
+    ```
+    - profile: <name>
+      secret: custom-cluster-profile-secret
+    ```
+  - The secret name must match the item in the `ci-secret-bootstrap` configuration.
+
+- A `ConfigMap` is required for the profile.
+  - In the `openshift/ci-tools` pull request, the `ClusterProfile::ConfigMap()` 
+    function must be modified. The convention is for it to be named 
+    `cluster-profile-<name>`, in which case a single new `switch` label is required.
+
+{{< alert title="Note" color="info" >}}
+It is recommended to provide credentials using a Secret. 
+The use of ConfigMaps for credentials is considered legacy 
+and is planned for deprecation.
+{{< /alert >}}
 
 #### Storing AWS credentials as secrets
 
@@ -147,7 +163,7 @@ to allow your test's ephemeral clusters to utilize configured IP Pools for cost 
 
 To restrict the usage of your cluster profile to specific organizations and repositories, 
 you can create a pull request in the `openshift/release` repository.
-Within the pull request, add your repository or organization to the [allowlist](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
+Within the pull request, add your repository or organization to the [cluster profiles configuration file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
 
 For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/README.md).
 
