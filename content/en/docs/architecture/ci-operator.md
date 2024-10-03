@@ -651,9 +651,9 @@ Only selected build farm clusters can access the Red Hat intranet at this moment
 * `build05`
 * `hosted-mgmt`
 
-{{% alert title="LIMITED REHEARSALS" color="warning" %}}
-`Accessing Red Hat Intranet` is only available from `rehearsal` tests where the `restrict_network_access` field is already set to `false` in the merged configuration. In order to verify the functionality in rehearsals, a PR must be first approved and merged enabling this flag. 
-Subsequent PRs modifying the test will be able to be rehearsed as normal.
+{{% alert title="REHEARSAL WORKFLOW" color="warning" %}}
+Tests where `restrict_network_access` is set to `false` require both the `approved` and `network-access-rehearsals-ok` label to be present on the PR. The latter is only possible to add by an `openshift` org member who is **not** the author of the PR, and is removed on each push.
+The label can be added by utilizing the `/pj-rehearse network-access-allowed` command. If these requirements aren't met, `pj-rehearse` will not trigger the tests, regardless of command.
 {{% /alert %}}
 
 ## Declaring Tests
