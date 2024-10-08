@@ -78,7 +78,7 @@ However, if there **is not** a required Prow job on a branch, `protect: false` c
 to ensure the branch protection is disabled on the branch (and therefore, the `openshift-merge-robot`
 account needs the admin permissions that are necessary for this operation).
 
-If your goal is to not have Prow manage the branch proection, please use `unmanaged: true` instead of
+If your goal is to not have Prow manage the branch protection, please use `unmanaged: true` instead of
 `protect: false`.
 
 | Required jobs | `protect:` stanza  | What `branchprotector` does  | Requires admin |
