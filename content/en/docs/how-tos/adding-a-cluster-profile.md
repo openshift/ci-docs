@@ -100,16 +100,19 @@ secretsync/target-name: "cluster-secrets-<name>"
 
 Credentials provided for the test containers fall into two categories:
 - Credentials are mounted using a simple `Secret` mount.
+  - The secret name must match the item in the `ci-secret-bootstrap` configuration.
   - If the convention for the secret to be named `cluster-secrets-<name>` is 
     followed, no other action is required.
   - To use a custom secret name for the new cluster profile, 
     e.g. when the new profile shares credentials with another profile,
-    a new field must be added to the [cluster profiles configuration file](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml) to override the default naming:
+    a new field must be added to the [cluster profiles configuration](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml) to override the default naming:
     ```
     - profile: <name>
       secret: custom-cluster-profile-secret
     ```
-  - The secret name must match the item in the `ci-secret-bootstrap` configuration.
+    In this case, **two pull requests are required**; the first pull request should modify 
+    the `ci-secret-bootstrap` configuration and must be merged before proceeding with the second
+    pull request, which modifies the [cluster profiles configuration](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
 
 - A `ConfigMap` is required for the profile.
   - In the `openshift/ci-tools` pull request, the `ClusterProfile::ConfigMap()` 
