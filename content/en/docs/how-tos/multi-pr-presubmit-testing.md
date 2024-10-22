@@ -4,7 +4,7 @@ description: Testing changes from multiple pull requests
 ---
 
 ## Testing Dependent Changes Prior to Merge
-The `multi-pr-prow-plugin` allows for the merging and testing of changes from either the same or distinct repositories via triggering `presubmits`.
+The `multi-pr-prow-plugin` allows for the merging and testing of changes from either the same or dependent repositories via triggering `presubmits`.
 
 ### Prerequisites
 In order to utilize the plugin, you must ensure that it is added to your org or repo configuration as in the `openshift` [_pluginconfig.yaml](https://github.com/openshift/release/blob/29721a824a755f2ec8b2e3cd94f7d4ac35a2a4b6/core-services/prow/02_config/openshift/_pluginconfig.yaml#L41-L44).
