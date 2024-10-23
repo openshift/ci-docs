@@ -24,7 +24,7 @@ Note that it is required for at least one of the included PRs to originate from 
 The plugin will trigger the test, and then create a GitHub [check_run](https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28) to track its progress and provide a link to the `spyglass` logs within it. This check run is **never** required to succeed in order to merge the originating PR.
 
 #### Examples
-The following command would trigger the `e2e` test from the `openshift/kubernetes` `master` configuration against sources built from the originating PR and `openshift/installer#999`:
+The following command would trigger the `e2e` test from the `openshift/kubernetes` `master` configuration against sources built from: the originating PR, `openshift/kubernetes#1234`, and `openshift/installer#999`:
 ```
 /testwith openshift/kubernetes/master/e2e openshift/kubernetes#1234 openshift/installer#999
 ```
