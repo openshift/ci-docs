@@ -28,3 +28,6 @@ The following command would trigger the `e2e` test from the `openshift/kubernete
 ```
 /testwith openshift/kubernetes/master/e2e openshift/kubernetes#1234 openshift/installer#999
 ```
+
+#### Abort Active Multi-PR Presubmits
+In order to abort all active multi-pr presubmit jobs for a given _orign_ PR, the command: `/testwith abort` can be utilized.
