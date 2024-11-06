@@ -1,6 +1,5 @@
 approvers:
 - droslean
-- hongkailiu
 - jmguzik
 - smg247
 - bear-redhat
@@ -11,7 +10,6 @@ approvers:
 - hector-vido
 reviewers:
 - droslean
-- hongkailiu
 - jmguzik
 - smg247
 - bear-redhat
