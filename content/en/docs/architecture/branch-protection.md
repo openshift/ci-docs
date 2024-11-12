@@ -71,7 +71,7 @@ branch-protection:
               unmanaged: true
 {{< / highlight >}}
 
-An overview of all available settings and a more detailled explanation can be found in the
+An overview of all available settings and a more detailed explanation can be found in the
 [upstream documentation.](https://docs.prow.k8s.io/docs/components/optional/branchprotector/)
 
 ### Notes on `protect: false`
