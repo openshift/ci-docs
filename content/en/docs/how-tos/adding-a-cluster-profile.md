@@ -48,6 +48,9 @@ The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas)
 * Amazon Virtual Private Cloud (Amazon VPC): Internet gateways per Region: 200
 * Elastic Load Balancing (ELB): Classic Load Balancers per Region: 250
 
+For GCP, we need to increase the following quotas:
+* Cloud Filestore API: Basic HDD (Standard) capacity (GB) per region: 20 TB
+
 ## Adding a New Cluster Profile
 
 When adding a new `cluster_profile`, three major steps must be taken: registering the profile inside of `ci-operator`, adding the new leases to `Boskos`, and providing the credentials.
