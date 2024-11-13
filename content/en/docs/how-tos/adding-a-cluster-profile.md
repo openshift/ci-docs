@@ -60,8 +60,6 @@ The process of creating a new cluster profile involves adding:
   [lease type]({{< relref "#adding-new-leases" >}}).
 - `LeaseTypeFromClusterType()`: a mapping from cluster type to lease type, if
   a new type is being added (this is only used for legacy template tests).
-- `ClusterProfile::ConfigMap()`: a `switch` label if the profile requires its
-  own `ConfigMap`.
 
 ### Cluster type
 
@@ -98,8 +96,7 @@ secretsync/target-namespace: "ci"
 secretsync/target-name: "cluster-secrets-<name>"
 {{< / highlight >}}
 
-Credentials provided for the test containers fall into two categories:
-- Credentials are mounted using a simple `Secret` mount.
+Credentials provided for the test containers are mounted using a simple `Secret` mount.
   - The secret name must match the item in the `ci-secret-bootstrap` configuration.
   - If the convention for the secret to be named `cluster-secrets-<name>` is 
     followed, no other action is required.
@@ -114,16 +111,6 @@ Credentials provided for the test containers fall into two categories:
     the `ci-secret-bootstrap` configuration and must be merged before proceeding with the second
     pull request, which modifies the [cluster profiles configuration](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
 
-- A `ConfigMap` is required for the profile.
-  - In the `openshift/ci-tools` pull request, the `ClusterProfile::ConfigMap()` 
-    function must be modified. The convention is for it to be named 
-    `cluster-profile-<name>`, in which case a single new `switch` label is required.
-
-{{< alert title="Note" color="info" >}}
-It is recommended to provide credentials using a Secret. 
-The use of ConfigMaps for credentials is considered legacy 
-and is planned for deprecation.
-{{< /alert >}}
 
 #### Storing AWS credentials as secrets
 
