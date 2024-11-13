@@ -38,6 +38,16 @@ GCP Roles:
 - `Compute Image User`
 - `Role Administrator`
 
+The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.openshift.com/container-platform/4.17/installing/installing_aws/installing-aws-account.html#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations:
+
+* Simple Storage Service (S3): Bucket Limit: 1000
+* Amazon Elastic Compute Cloud (Amazon EC2): EC2-VPC Elastic IPs: 500
+* Amazon Elastic Compute Cloud (Amazon EC2): Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances: 3700
+* Amazon Virtual Private Cloud (Amazon VPC): VPCs per Region: 250
+* Amazon Virtual Private Cloud (Amazon VPC): NAT gateways per Availability Zone: 200
+* Amazon Virtual Private Cloud (Amazon VPC): Internet gateways per Region: 200
+* Elastic Load Balancing (ELB): Classic Load Balancers per Region: 250
+
 ## Adding a New Cluster Profile
 
 When adding a new `cluster_profile`, three major steps must be taken: registering the profile inside of `ci-operator`, adding the new leases to `Boskos`, and providing the credentials.
