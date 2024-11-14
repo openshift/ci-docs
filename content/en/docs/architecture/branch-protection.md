@@ -8,6 +8,12 @@ Branch protection is a repository setting that enforces certain rules when tryin
 the [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/about-protected-branches)
 for more details.
 
+{{< alert title="Note" color="info" >}}
+Branch protection cannot be configured for private repositories. 
+Private repositories must have `unmanaged: true` set in the 
+[prow configuration](#is-it-possible-to-disable-the-branch-protection-for-my-repository-or-require-jobs-that-are-not-managed-by-prow).
+{{< /alert >}}
+
 ## What Do We Use It For?
 
 We use it to enforce that mandatory jobs succeed before allowing a merge. These jobs are marked as `Required` in their GitHub
@@ -65,7 +71,7 @@ branch-protection:
               unmanaged: true
 {{< / highlight >}}
 
-An overview of all available settings and a more detailled explanation can be found in the
+An overview of all available settings and a more detailed explanation can be found in the
 [upstream documentation.](https://docs.prow.k8s.io/docs/components/optional/branchprotector/)
 
 ### Notes on `protect: false`
