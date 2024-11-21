@@ -21,8 +21,6 @@ good install across each platform, each CNI, each IP stack, etc.  `overall-analy
 effectively acting as a proxy for "the job passes entirely."  For example, we require that techpreview jobs pass all serial
 and parallel conformance tests at least once on any platform.
 
-TRT will also typically revert changes found to break informing jobs.
-
 {{< alert title="Note" color="info" >}}
 TRT will typically not see or revert changes that break jobs which are not release informing or blocking.
 For changes which break these jobs, the decision to revert or fix will need to be handled between the affected
