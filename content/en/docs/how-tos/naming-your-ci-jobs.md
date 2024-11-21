@@ -112,7 +112,7 @@ In order to work with most tooling (Sippy, Component Readiness, Feature
 Gate Analyzer, etc), periodics must be tied to a specific OpenShift
 release. That means the job should contain the release (e.g. "4.18") in
 the name and have a [`"job-release"`
-label](https://github.com/openshift/release/blob/master/ci-operator/jobs/openshift/cluster-control-plane-machine-set-operator/openshift-cluster-control-plane-machine-set-operator-release-4.19-periodics.yaml#L15)
+label](https://github.com/openshift/release/blob/53877a36dbced58e4ab9027699233d165d35b6ee/ci-operator/jobs/openshift/cluster-control-plane-machine-set-operator/openshift-cluster-control-plane-machine-set-operator-release-4.19-periodics.yaml#L15)
 in its configuration.  The `job-release` label is automatically added to a job by
 properly setting the [`release` configuration
 option](https://docs.ci.openshift.org/docs/architecture/ci-operator/#testing-with-an-existing-openshift-release).
