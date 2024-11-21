@@ -106,26 +106,37 @@ Once the default changes the process should be to:
 - Remove the `crun`-specific jobs
 - Create `runc` jobs, if needed, to test the older functionality
 
-## Periodics outside of openshift/release
+## Configuration for periodic jobs
 
-Typically, release payload informing and blocking jobs are configured in
-the `openshift/release` repo under the
-[openshift/release](https://github.com/openshift/release/tree/master/ci-operator/config/openshift/release)
-configuration directory.  However, because teams may want more control over their
-periodics, they may want to place them in their own repository's
-configuration. Periodics should be placed in their
-own configuration YAML file away from presubmit configuration, and the
-release information should be set to the appropriate release version and
-stream.  You may have multiple configurations per release branch by
-using the [variants feature of ci-operator](https://docs.ci.openshift.org/docs/how-tos/contributing-openshift-release/#variants).
+In order to work with most tooling (Sippy, Component Readiness, Feature
+Gate Analyzer, etc), periodics must be tied to a specific OpenShift
+release. That means the job should contain the release (e.g. "4.18") in
+the name and have a [`"job-release"`
+label](https://github.com/openshift/release/blob/master/ci-operator/jobs/openshift/cluster-control-plane-machine-set-operator/openshift-cluster-control-plane-machine-set-operator-release-4.19-periodics.yaml#L15)
+in its configuration.  The `job-release` label is automatically added to a job by
+properly setting the [`release` configuration
+option](https://docs.ci.openshift.org/docs/architecture/ci-operator/#testing-with-an-existing-openshift-release).
+Periodics should not be mixed with presubmits in the same file.
+Additionally, because this is a per-file option, that means you would
+have one file dedicated to periodics *per release*.
 
 An example of this configuration is available
 [here](https://github.com/openshift/release/tree/c1cf20f480b19e010e6581774452d579a60a92ed/ci-operator/config/openshift/cluster-control-plane-machine-set-operator),
 where you can see the periodics are stored in the `__periodics.yaml`
-files.
+files per release branch. This is using the [variants feature of
+ci-operator](https://docs.ci.openshift.org/docs/how-tos/contributing-openshift-release/#variants)
+to have more than one file per branch.
 
-For these jobs to show up in [TestGrid](https://testgrid.k8s.io/) and
+If your repo does not have release-X.Y branches, you can attach the jobs to
+the main branch, while still creating one file per release (e.g.
+`__4.18.yaml` suffix). An example of this configuration is available in
+this
+[PR](https://github.com/openshift/release/pull/59043/files#diff-331a89cddd402bc6ffb7a056557b9eb07b47cd84f5ac62d98b4380361901f764).
+
+Lastly, for these jobs to show up in
+[TestGrid](https://testgrid.k8s.io/) and
 [Sippy](https://sippy.dptools.openshift.org/), the ci-tools
-[configuration needs to be updated manually](https://github.com/openshift/ci-tools/pull/3261).
-
+[configuration needs to be updated
+manually](https://github.com/openshift/ci-tools/pull/3261) to allowlist
+your repository.
 
