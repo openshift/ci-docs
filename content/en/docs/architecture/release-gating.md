@@ -22,7 +22,7 @@ effectively acting as a proxy for "the job passes entirely."  For example, we re
 and parallel conformance tests at least once on any platform.
 
 {{< alert title="Note" color="info" >}}
-TRT will typically not see or revert changes that break jobs which are not release informing or blocking.
+TRT will typically not see or revert changes that break jobs which are not release blocking.
 For changes which break these jobs, the decision to revert or fix will need to be handled between the affected
 team and the team that made the change.
 {{< /alert >}}
