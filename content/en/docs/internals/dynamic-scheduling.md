@@ -22,6 +22,33 @@ The dispatcher maintains its own copy of the job-to-cluster assignments. After s
 
 The dispatcher functions as a REST server that responds to requests containing job names. If a matching job is found in the database, the dispatcher returns the cluster assignment. The job-to-cluster assignment data is also stored in a Persistent Volume Claim (PVC) to prevent data loss in case of pod failures.
 
+### Cluster Configuration File
+
+```
+aws:
+  - name: build01
+  - name: build03
+  - name: build05
+    capabilities:
+      - vpn
+  - name: build09
+  - name: build10
+    capabilities:
+      - arm64
+    capacity: 20
+gcp:
+  - name: build02
+  - name: build04
+    blocked: true
+```
+
+The cluster configuration file supports several additional configuration fields:
+
+- `blocked: true` completely eliminates the cluster from scheduling. An alternative is to remove the cluster from the configuration; in this case, manual assignments will still be respected.
+- `capacity` is a number from 1 to 100 (default: 100) that indicates the desired capacity percentage for the cluster's load. The algorithm considers this value but may not always strictly adhere to it due to other factors, such as manual assignments, capacity, and job distribution. It has been observed that values between 1-25 significantly reduce the cluster's load, values between 26-50 reduce it slightly, and anything above 50 does not guarantee a noticeable decrease in load.
+- `capabilities` is a list of capabilities assigned to the cluster. Some jobs may use these capabilities to be scheduled on the appropriate cluster.
+
+
 ## External Plugin for the Scheduler
 
 The [external plugin](https://github.com/kubernetes-sigs/prow/blob/main/pkg/scheduler/strategy/external.go), queries a specified URL (in the case of the Test Platform deployment, it's the dispatcher) to determine the cluster assignment for a given job name. The plugin includes a configurable cache to avoid querying the same data multiple times in a short period.
@@ -38,8 +65,14 @@ At this time, it's not possible without using hacks. The dispatcher's database t
 ### I want to merge a PR created by the dispatcher, but merging is blocked due to a conflict in `openshift/release`. What should I do?
 Restart the dispatcher pod. This will trigger the dispatcher to update the PR on the latest `openshift/release` main branch.
 
-### What does the `blocked` category mean in the cluster config?
-`blocked` means that the cluster is entirely inaccessible, and the dispatcher will not honor manual assignments to that cluster. Sanitizer presubmit checks may fail in some edge cases due to this (this is only an assumption, as existing issues have been addressed).
-
 ### How can I re-trigger a dispatching event without causing an outage?
-Simply edit the configuration. You can hack it by adding a non-existent `dummy` cluster (or remove one) in the `blocked` category.
+Try to execute following comands:
+```
+$ oc get pods -n ci | grep dispatcher
+prowjob-dispatcher-574d7744f9-j2kll                                         2/2     Running                  1 (25h ago)      4d2h
+$ oc exec -n ci -it prowjob-dispatcher-574d7744f9-j2kll -c prowjob-dispatcher -- /bin/sh
+```
+After logging to a pod's container, execute curl command which will force dispatch event:
+```
+$ curl -X GET "http://localhost:8080/event?dispatch=true"
+```
