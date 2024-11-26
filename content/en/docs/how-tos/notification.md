@@ -55,5 +55,9 @@ slack_reporter:
 Note that it is possible to include multiple `slack_reporter` entries in this config, but each `job_name` should only be included in, at most, one.
 {{< /alert >}}
 
+{{< alert title="Note" color="info" >}}
+It is possible to add slack reporting for the `images` postsubmit job by adding the "images" entry to `job_names`.
+{{< /alert >}}
+
 Once the configuration is added, simply use the `make jobs` target to generate the new job definitions containing the `reporter_config`.
 The `SlackReporterConfig` is provided for [reference](https://github.com/openshift/ci-tools/blob/6810ce942bbe25a06c092af8098fd2d071604a04/pkg/config/load.go#L49-L57).
