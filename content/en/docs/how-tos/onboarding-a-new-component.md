@@ -6,7 +6,7 @@ description: How to onboard a new component repository to the CI system for test
 ## Overview
 
 This document overviews the workflow for onboarding new public component repositories to the Openshift CI. Private
-repositories are not supported at this time, but will be in the future.
+repositories are also supported with a few caveats. More information can be found [here](/docs/architecture/private-repositories).
 
 If you are thinking about adding new images to OpenShift release payloads, read [this section](#product-builds-and-becoming-part-of-an-openshift-release) first, to avoid doing work you might have to adjust later.
 
