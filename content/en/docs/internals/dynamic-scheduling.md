@@ -66,11 +66,9 @@ At this time, it's not possible without using hacks. The dispatcher's database t
 Restart the dispatcher pod. This will trigger the dispatcher to update the PR on the latest `openshift/release` main branch.
 
 ### How can I re-trigger a dispatching event without causing an outage?
-Try to execute following comands:
+Try to execute the following command:
 ```
-$ oc get pods -n ci | grep dispatcher
-prowjob-dispatcher-574d7744f9-j2kll                                         2/2     Running                  1 (25h ago)      4d2h
-$ oc exec -n ci -it prowjob-dispatcher-574d7744f9-j2kll -c prowjob-dispatcher -- /bin/sh
+$ oc exec -n ci -it deploy/prowjob-dispatcher -c prowjob-dispatcher -- /bin/sh
 ```
 After logging to a pod's container, execute curl command which will force dispatch event:
 ```
