@@ -44,8 +44,6 @@ tests:
   node_architecture: arm64
 ```
 
-This test uses src as a base image to run the unit test. ci-operator will determine that the src image needs to be built for arm64 architecture and will resolve the image build graph based on this information. Learn more about image lifecycle in #image-pipeline.
-
 This test uses `src` as a base image to run the `unit` test. Ci-operator will determine that the `src` image needs to be build for `arm64` architecture
 will resolve the image build graph based on this information. Learn more about image lifecycle in [#image-pipeline](https://docs.ci.openshift.org/docs/internals/#image-pipeline)
 
