@@ -3,10 +3,6 @@ title: "Multi Architecture"
 description: "Configure ci-operator to build container images and run tests across multiple CPU architectures"
 ---
 
-# Multi Architecture
-
-Configure ci-operator to build container images and run tests across multiple CPU architectures.
-
 ## Building Multi-Architecture Images
 
 To build an image for the default `amd64` architecutre, no extra configuration is needed.
