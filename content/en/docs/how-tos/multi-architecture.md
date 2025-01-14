@@ -9,7 +9,10 @@ Configure ci-operator to build container images and run tests across multiple CP
 
 ## Building Multi-Architecture Images
 
-To build an image for multiple architectures, add the `additional_architectures` field under the image configuration:
+To build an image for the default `amd64` architecutre, no extra configuration is needed.
+For adding multiple architectures, add the `additional_architectures` field under the image configuration.
+
+The following example will build the `my-image` for `amd64` (default) and `arm64`.
 
 ```yaml
 base_images:
