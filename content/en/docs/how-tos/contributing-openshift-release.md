@@ -110,7 +110,6 @@ The following changes are considered when triggering rehearsals:
 1. Changes to Prow jobs themselves (`ci-operator/jobs`)
 1. Changes to `ci-operator` configuration files (`ci-operator/config`)
 1. Changes to multi-stage steps (`ci-operator/step-registry`)
-1. Changes to templates (`ci-operator/templates`)
 1. Changes to cluster profiles (`cluster/test-deploy`)
 
 Rerunning rehearsals can be done by re-triggering the plugin: `/pj-rehearse`, which then triggers all rehearsals of jobs currently
