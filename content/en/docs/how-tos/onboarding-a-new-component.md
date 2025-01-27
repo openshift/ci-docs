@@ -16,7 +16,7 @@ In order to add labels, move PRs and issues into milestones, merge PRs, etc, the
 
 If your repository is in the OpenShift github organization and it was created by the 'Products & Global Engineering Cloud Operations' team, it probably has Team
 OpenShift Robots added by default as part of the repo creation process. To check if your repo has the robots added,
-please ask in slack in #forum-pge-cloud-ops or open a ticket in the DPP [JIRA project](https://issues.redhat.com/projects/DPP/summary). If your repo is managed by DPP, but does not have robots, then open a new ticket
+please ask in slack in #forum-pge-cloud-ops or open a ticket in the DPP JIRA project via their [GitHub Support Portal](https://devservices.dpp.openshift.com/support/#id_github_support_section). If your repo is managed by DPP, but does not have robots, then open a new ticket
 in that Jira Project with the details about the missing bots.
 
 If your component repository is **not** in the OpenShift github organization:
