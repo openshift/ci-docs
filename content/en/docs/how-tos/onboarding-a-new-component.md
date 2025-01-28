@@ -14,12 +14,12 @@ If you are thinking about adding new images to OpenShift release payloads, read 
 
 In order to add labels, move PRs and issues into milestones, merge PRs, etc, the robots will need write access to your repository.
 
-If your repository is in the OpenShift organization and it was created by Dev Productivity team, it probably has Team
+If your repository is in the OpenShift github organization and it was created by the 'Products & Global Engineering Cloud Operations' team, it probably has Team
 OpenShift Robots added by default as part of the repo creation process. To check if your repo has the robots added,
-please ask in slack in #forum-dp-platform or open a ticket. If your repo does not have robots, then open a new ticket
-in their [JIRA project](https://issues.redhat.com/projects/DPP/summary) with the details.
+please ask in slack in #forum-pge-cloud-ops or open a ticket in the DPP JIRA project via their [GitHub Support Portal](https://devservices.dpp.openshift.com/support/#id_github_support_section) [VPN Required]. If your repo is managed by DPP, but does not have robots, then open a new ticket
+in that Jira Project with the details about the missing bots.
 
-If your component repository is **not** in this organization:
+If your component repository is **not** in the OpenShift github organization:
 
 1. Invite `openshift-ci-robot` and `openshift-merge-robot` into your organization or add them as [collaborators](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository) for the repository.
 1. The invitations will be accepted automatically via the `periodic-openshift-release-master-accept-invitations-ci-robot` and `periodic-openshift-release-master-accept-invitations-merge-robot` jobs in _no more_ than 4 hours.
