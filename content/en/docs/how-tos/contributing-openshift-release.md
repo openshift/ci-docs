@@ -77,6 +77,12 @@ whenever a pull request would affect one or more CI jobs. Jobs affected by such 
 target component repository after the changes would be merged. This provides pull request authors early feedback about
 how config changes impact CI setup.
 
+#### Rehearse a job on another cluster
+
+The [dynamic scheduler](https://docs.ci.openshift.org/docs/internals/dynamic-scheduling/) automatically defines the cluster on which the job will run, and does not always honor the `cluster` field. We can work around this by changing the `cluster` and the job `name` fields to manually create a cache miss in order for the `cluster` field to be honored.
+
+> _The `name` change is a temporary workaround only to run rehearsals and doesn't need to be merged after the rehearsals are completed._
+
 #### External Prow Plugin
 
 All pull requests trigger a `pj-rehearse` external prow plugin. It checks the changes in a pull request and comments a list of jobs that are relevant to them. It also supplies directions for interacting with itself. The user can comment, one or more of the following commands, in either the PR body or as a seperate comment:
