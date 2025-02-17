@@ -81,7 +81,7 @@ how config changes impact CI setup.
 
 The [dynamic scheduler](https://docs.ci.openshift.org/docs/internals/dynamic-scheduling/) automatically defines the cluster on which the job will run on, which does not honor the `cluster` field. We can work around this by changing the `cluster` and the job `name` fields to manually create a cache miss in order for the `cluster` field to be honored.
 
-> _The `name` change is a temporary workaround only to run rehearsals and doesn't need to be merged after the tests._
+> _The `name` change is a temporary workaround only to run rehearsals and doesn't need to be merged after the rehearsals are completed._
 
 #### External Prow Plugin
 
