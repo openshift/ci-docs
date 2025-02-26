@@ -3,21 +3,24 @@ title: "Private Repositories and Fixing Embargoed CVEs"
 description: An overview of the workflows surrounding embargoed CVEs and private repository forks.
 ---
 
-OpenShift CI supports setting up CI jobs for private repositories mainly to allow temporary non-public development on
+OpenShift CI supports setting up CI jobs for private repositories; originally to allow temporary non-public development on
 the forks of the otherwise public repositories. The CI jobs executed for these forks are not shown in the public Deck
 instance, and all their artifacts are not public. Access to these jobs is limited to engineers who need it.
 
-Unfortunately, such access cannot be granted to developers of other private repositories. Therefore, OpenShift CI only
-allows setting up public CI jobs for private repositories -- the logs and artifacts executed for such private repository
-will be public. **Only set up such jobs when you are absolutely sure your jobs would not leak any sensitive information.**
+The ability to use the CI with private repositories has been extended to work in a more general case.
+There are two distinct ways to surface jobs for the repo within a `deck` instance.
+1. Utilizing `qe-private-deck`; in order to do this, permission must be granted by Test Platform, and a QE representative.
+At that time, a Test Platform member will assist with creating the proper configs.
+2. When not configured to use a private `deck` instance, the logs and artifacts executed for the private repository
+will be publicly available on the `deck`. **Only set up such jobs when you are absolutely sure your jobs would not leak any sensitive information.**
 
-To allow the CI jobs to access a private repo, drop a following file to the directory in `openshift/release` holding the
+To allow the CI jobs to access a private repo, drop the following file to the directory in `openshift/release` holding the
 `ci-operator` configuration for your repository (usually `ci-operator/config/$org/$repo`):
 
 `.config.prowgen`
 {{< highlight yaml >}}
-private: true
-expose: true
+private: true # allows the source to be cloned from the private repo, without setting this: jobs will not succeed
+expose: true # allows the jobs to be displayed on the `deck` instance in which they are configured
 {{< / highlight >}}
 
 ## `openshift-priv` organization
