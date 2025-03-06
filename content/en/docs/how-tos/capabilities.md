@@ -40,3 +40,11 @@ Example job with configured capabilities:
 ```
 
 This block tells the dispatcher that the job must be executed on a cluster that has the `intranet` capability. During the next dispatch cycle, the dispatcher will review the defined capabilities and reassign the job accordingly.
+
+### Existing Capabilities:
+
+1. `arm64` - To run job on a cluster which contains arm64 + amd64 nodes.
+2. `intranet` - Allows connectivity to the redhat intranet
+3. `sshd-bastion` - For multiarch libvirt jobs, this is a temporary capability until the Multiarch can use intranet and move away from legacy bastion connectivity.
+4. `rce` - release controller elligible, any job triggered from release controller will have this capability assigned.
+***Note*: Not to be added manually on any job config.**
