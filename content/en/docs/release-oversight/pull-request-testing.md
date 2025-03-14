@@ -246,7 +246,7 @@ spec:
 ```
 
 #### Overriding Specific Image Tags in the Payload
-It is also possible to override a specific image tag in the payload to any tag contained in an `ocp` ImageStream. Doing so requires manually submitting a `PRPQR`.
+It is also possible to override a specific image tag in the payload to any arbitrary pullspec. Doing so requires manually submitting a `PRPQR`.
 This can be done by providing the tag overrides in the `spec.payload.tags` list:
 ```yaml
 ...
@@ -254,7 +254,7 @@ spec:
   payload:
     tags:
       - name: "machine-os-content" # name of the tag to be overridden
-        tag: "4.13-2024-02-04-192545" # ImageStream name in the 'ocp' namespace to override to
+        image: "quay.io/openshift-release-dev/...." # an arbitrary pullspec containing the image tag to override with
 ...
 ```
 
