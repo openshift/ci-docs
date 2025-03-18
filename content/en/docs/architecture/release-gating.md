@@ -1,61 +1,30 @@
 ---
-title: "Extending OpenShift Release Gates"
-description: An overview of how CI jobs are configured to gate OpenShift releases and how these configurations can be changed.
+title: "OpenShift Release Testing"
+description: An overview of how CI jobs are used to test OpenShift and how these configurations can be changed.
 ---
 
-### Overview
+## Overview
 
-Release Gates in OpenShift are used to run conformance tests on variations of the product (upgrades, network type, cloud
-platform, etc), run specific test suites to particular core projects, or test layered products. These jobs can either
-block promotion of a release payload entirely, or be used to provide signal as an informer.
+CI jobs are the backbone of maintaining and improving release quality. The primary 
+purpose of any CI job is to identify regressions early and reliably, preventing 
+issues from impacting customers.
 
-Blocking jobs are monitored by the [technical release team](https://docs.ci.openshift.org/docs/release-oversight/the-technical-release-team/),
-and regressions to blocking jobs trigger an incident, which in the case of breaking code changes, TRT will immediately
-revert.
+To achieve this, OpenShift employs a multi-layered approach to regression detection 
+via release blocking jobs. Each layer is designed to address different stages of the
+development and release cycle, with trade-offs in detection speed and cost.
 
-Informing jobs do not block payload promotion directly, but TRT has the ability to extract blocking signal from them using
-blocking analysis jobs. We are able to analyze a set of informers matching specific criteria, and ensure that a particular
-part of the job passes. We have two of them today, `install-analysis-all` and `overall-analysis-all`.  Install analysis
-ensures that we get at least one successful install across groups of jobs. For example, we can ensure we get at least one
-good install across each platform, each CNI, each IP stack, etc.  `overall-analysis-all` ensures that the test step succeeds,
-effectively acting as a proxy for "the job passes entirely."  For example, we require that techpreview jobs pass all serial
-and parallel conformance tests at least once on any platform.
+We have three primary ways to detect regressions: (1) pre-merge via presubmits, (2) 
+blocking release payloads jobs, and (3) component readiness.
 
-{{< alert title="Note" color="info" >}}
-TRT will typically not see or revert changes that break jobs which are not release blocking.
-For changes which break these jobs, the decision to revert or fix will need to be handled between the affected
-team and the team that made the change.
-{{< /alert >}}
+### Identifying Which Jobs Qualify
 
-For layered products that extend the control plane of the cluster, they must be able to tie into OpenShift's CI and gate
-releases.  For example, OCS is a part of the OpenShift platform, and if an upgrade breaks OCS, we have broken part of our
-platform.  Extending our testing to these components is a requirement to perform regression and early verification.
-
-We in general have four types of jobs that control the movement of code to product:
-
-1. PR gating - a set of tests that block PR merges across the entire organization. Each repository may run a different
-   set of gating jobs (such as the installer repo testing multiple platforms). Almost every repository will run a
-   standard set of consistent tests to prevent regressions. (component A breaks component B by changing an API)
-   Typically periodics which gate PRs should also be Release Gating.
-2. PR optional - a set of optional tests that can be invoked on PRs as needed by reviewers or testers to gain additional
-   coverage, but which running all the time would be inefficient or unnecessary.
-3. Release gating - these jobs prevent the publication of a new release payload and are considered the minimum bar of
-   quality before any combination of images is created. These tests also catch regressions that PR gates do not. Their
-   inclusion is the responsibility of the [technical release team](/docs/release-oversight/the-technical-release-team).
-4. Release informing - these jobs provide signal as to the health of a release and test scenarios or particular feature
-   sets. Due to the number of possible scenarios, many of these jobs start as periodics, and some are graduated to being
-   executed as optional whenever a new release is created (to provide advance warning of key regressions). We call jobs
-   triggered on a new release “release-triggered”.
-
-### Identifying Which Jobs Qualify to Gate a Release
-
-A CI job may gate a release once it has reached the following milestones:
+Candidate jobs for release blocking signal should at a minimum be:
 
 1. Useful: is testing a commonly used variation of the product that requires dedicated testing, is testing a project or
    product that will be widely used on top of OpenShift, or uses OpenShift APIs, or can provide
    useful feedback via automated testing to OpenShift about whether the project continues to work
 2. Stable: reached a maturity point where the job is expected to have a stable pattern and is known to
-   “work” (components that are prototypes or still iterating towards an “alpha” would not be gates)
+   “work” (components that are prototypes or still iterating towards an “alpha” would not be blocking)
 3. Testable: is able to create an install or upgrade job that runs a test suite that can verify the project within a
    reasonable time period (1h) with low flakiness (<1% flake rate)
 
@@ -67,12 +36,10 @@ Good candidates include:
 * Projects or internal tools that depend on OpenShift APIs heavily
 * Community projects being evaluated for inclusion into OpenShift or the portfolio
 
-Poor candidates include:
-
-* Jobs with low signal-to-noise ratio (low pass rates)
-* Random software from the internet (that may contain vulnerabilities that could be used to attack our CI
-  infrastructure)
-* Personal projects that use similar APIs and patterns to projects already being tested
+For layered products that extend the control plane of the cluster, they must be able
+to tie into OpenShift's CI and block releases. For example, OCS is a part of the OpenShift platform,
+and if an upgrade breaks OCS, we have broken part of our platform. Extending our testing to
+these components is a requirement to perform regression and early verification.
 
 {{< alert title="Note" color="info" >}}
 OpenShift CI creates thousands of clusters a week - we can certainly afford to run a few more tests. However, we want to
@@ -80,74 +47,203 @@ spread that investment to derive the maximum benefit for everyone, so having Ope
 exact same tests in slightly different configurations 4 times a day may not be the best way to test.
 {{< /alert >}}
 
-### An Introduction to Aggregated Jobs
+### Pre-merge testing
 
-Creating useful, stable and testable release gating jobs has proven to be difficult at scale. The combinatorial
-explosion of cloud providers, layered products and unique configurations means most jobs have a _>1% flake rate_. To "
-meet the tests where they are" the Technical Release Team has created a new type of job called the [_aggregated
-job_](/docs/release-oversight/improving-ci-signal#job-aggregation-in-a-little-more-detail).
+Detecting a regression before it ends up in the release payload at all is the ultimate 
+form of release testing. It is the most expensive form because each 
+change is tested in isolation. Additionally, due to the scope of OpenShift and it's 
+configurations, it is not possible to test everything against every code change.
 
-Aggregated Jobs are powerful because they allow a suite of tests to become blocking in spite of a high flake rate. This
-is accomplished by analyzing the output from numerous parallel runs to see if payload quality remains as good or better
-than the historical mean. If not, the next course of action is to isolate the changes and revert them. This allows other
-non-regressing changes to make their way into a release. More importantly it avoids the exponentially difficult task of
-debugging multiple regressions in parallel (eg, it's hard to debug a layered product regression on a platform that no
-longer installs properly).
+Repository owners should make an educated selection of the most impactful jobs that 
+have a high likelihood of detecting a problem. As the team learns, this list should 
+be modified. For example, if a change to the repository causes an incident (see below),
+the job that was affected should become a presubmit job on that repository.
 
-### Identifying Which Jobs Should Not Gate a Release
+We generally recommend you have coverage for both the parallel conformance and
+serial suites, as well as an upgrade job.
 
-Not all test scenarios and test suites are considered release gating. On a given day we may generate tens of release
-payloads, but not choose to execute or iterate the full set of suites on those jobs. Also, some scenarios (such as
-upgrade rollback) are intended to generate statistical signal (a given rollback may succeed or fail due to factors
-outside the test control). All release informing jobs should start as periodics (as described below) and some may be
-promoted to be “release-triggered” jobs.
+Typically, jobs which are present on many repositories that span multiple teams
+should also be payload blocking.
 
-### Process for Extending the Release Gating Suite
+### Payload blocking
 
-Our goal of weekly z-stream releases necessitates that release-gating tests provide stable and unambiguous signal about
-regressions in the product or the projects and projects on top. To provide this level of stability and observability,
-any new release-blocking tests must follow the below steps:
+Roughly every six hours, we produce a release payload which is a roll-up of all the 
+changes that have merged since the previous one. Each payload runs a set of blocking
+CI jobs that must succeed for the payload to be accepted. Our goal is to achieve an
+accepted nightly payload every day.
 
-#### Add A Periodic Job
+Payload blocking jobs are monitored by the [technical release team](https://docs.ci.openshift.org/docs/release-oversight/the-technical-release-team/),
+and regressions to blocking jobs trigger an incident. These jobs _must never break_.
+Regressions to these jobs are expected to be detected and reverted within hours. "Fix
+forward" is not allowed, the identified change must be reverted and reintroduced with
+payload testing confirming the fix.
 
-Create [a new multi-stage job](/docs/architecture/step-registry/) on top of latest OCP that runs as a periodic job. The
-job should reuse as much of the existing step registry as possible, and must include either the standard gather and
-gather-extra steps from the step registry, or custom steps (in rare cases) that gather as much of the same data as possible.
+Due to the disruptive nature of reverts, good candidates are jobs that have wide 
+impacts if they break -- core functionality on key platforms of the product, or jobs 
+that run as presubmits on a diverse set of repositories.
 
-This does not block the release but you can run it often enough to get a decent signal. At least once a day, but every 6
-or 12 hours is better.
+{{< alert title="Note" color="info" >}}
+TRT will typically not see or revert changes that break jobs which are not payload
+blocking. For changes which break these jobs, the decision to revert or fix will need
+to be handled between the affected team and the team that made the change.
+{{< /alert >}}
 
-The job name should follow the [naming guidelines](/docs/how-tos/naming-your-ci-jobs/).
+
+### Component readiness
+
+[Component Readiness](https://sippy.dptools.openshift.org/sippy-ng/component_readiness/main)
+provides a clear dashboard for each release. It compares historical results — the last 
+week of the selected release versus the four weeks preceding GA of the previous 
+one -- with an automatic fallback to the best a test ever was. For tests without a 
+presence in the basis (i.e., new tests), we enforce that new tests work at least 95% of the time.
+
+The goal is simple: ensure each release is as good as or better than the last.
+
+Every test in OpenShift is assigned to a Jira component (e.g. Installer,
+kube-apiserver, etc) and every job in OpenShift is assigned variants (Platform, Network,
+Topology, etc).  The grid is organized by components on the y-axis, and variants on the
+x-axis. Each grid coordinate then either has a red or green square; where red
+indicates that at least one test for that component isn't meeting the requirements for
+the dashboard.
+
+There are multiple dashboards available in Component Readiness, and new ones can be
+created for particular needs. There is always a "X.Y-main" dashboard that is used to
+determine a release's readiness to ship.
+
+{{< alert title="Note" color="info" >}}
+Regressions detected by component readiness are not candidates for automatic reverts 
+by TRT, but may be reverted by the team that made the change.
+{{< /alert >}}
+
+## Selecting a path
+
+When considering whether payload blocking or component readiness is right for you, the
+primary concerns are detection speed and cost. 
+
+![job-pyramid.png](/job-pyramid.png)
+<small style="font-size: 0.5em;">
+<a href="https://www.vecteezy.com/free-vector/pyramid-chart">Pyramid Chart Vectors by Vecteezy</a>
+</small>
+
+| Use Case            | Detection Speed | Cost | Mechanism                                |
+|---------------------|-----------------|------|------------------------------------------|
+| Must never regress  | Hours           | $$$$ | Release payload, aggregation             |
+| Must never break    | Hours           | $$$  | Release payload, once with retries       |
+| Must never regress  | Days            | $$   | Component readiness, frequent periodics  |
+| Must never regress  | Weeks           | $    | Component readiness, rarely run          |
+
+
+
+
+### Process for creating a new job
+
+Create [a new multi-stage job](/docs/architecture/step-registry/) on top of latest OCP that
+runs as a periodic job. 
+
+Periodic jobs must:
+
+- follow the [naming guidelines](/docs/how-tos/naming-your-ci-jobs/)
+- be attached to release branch (release-X.Y) - do not add periodics to your main or 
+  master branch unless unavoidable
+- kept separate from any presubmits by using the variants feature of ci-operator
+- use the release payload provided by CI in the `RELEASE_IMAGE_LATEST` and
+`RELEASE_IMAGE_INITIAL` environment variables; do not hard code any particular release
+image
+- re-use as much of the existing step registry as possible
+- include standard `gather` and `gather-extra` steps, or in rare cases custom steps 
+  that gather as much of the same data as possible
+
+You should initially run the job on a frequent basis to get a good sample to determine 
+it's reliability; at least daily. Frequency can be adjusted later depending 
+on the path for release blocking you choose. Job pass rates can be monitored in [Sippy](https://sippy.dptools.openshift.org/sippy-ng/).
 
 Where possible you should be running this same test on PRs to your project’s repos to make sure changes to your project
 don’t result in downstream breakages to the release job. We recognize this may not be an option for all projects.
 
-#### Becoming Informing
+### Becoming Blocking in Component Readiness
+
+For the current development release, update the [component readiness views](https://github.com/openshift/sippy/tree/master/config) to include your job's 
+unique variants in the candidate dashboard. If there's no candidate dashboard for that 
+release yet, create one (e.g. `4.19-candidate`). You may also create custom dashboards 
+as needed, such as those that do cross-variant comparisons.  For new platforms, 
+topologies, etc, doing cross-variant comparisons with existing blocking jobs is a good 
+strategy to not only ensure your jobs don't regress, but that they are as good as others.
+
+Monitor the dashboard(s) for the duration of the release, and ensure that all squares are 
+green prior to that release shipping.  After one release of proving your job is stable 
+enough and regressions can be fixed, you may open a PR to include it in the `X.Y-main` 
+dashboard for the following release.  This should be done no later than a month after 
+branching for the release occurs.
+
+Some jobs may go directly to the `X.Y-main` dashboard. Jobs that are blocking on payloads
+or jobs determined by business owners (for example, via their OKR's) are examples of jobs
+that may bypass the process.
+
+### Becoming Payload Blocking
+
+Our goal of weekly z-stream releases necessitates that payload blocking jobs provide 
+stable and unambiguous signal about regressions in the product or the projects and 
+projects on top. To provide this level of stability and observability, any new 
+payload blocking jobs must follow the below steps.
+
+Note: these jobs' data also feed into component readiness.
+
+#### Become informing 
 
 After at least one sprint of running the job, and success rate is at least 70%, the job will be considered stable enough
 to be considered for inclusion to the nightly informing jobs.
 
-To become an informing
-job, [file a ticket in the TRT Jira project](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323832&issuetype=17),
+To become an informing job, [file a ticket in the TRT Jira project](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323832&issuetype=17),
 containing:
 
 - The names of the jobs to become informing
+- Justification for payload blocking over component readiness
 - Links to the job history in [Sippy](https://sippy.dptools.openshift.org/) showing its historical pass rate
 - A channel to send Slack alerts, and the threshold to alert on (minimum of 70%)
 - A method for escalation of breakages to the team (jira, slack, e-mail, etc)
 - A manager backstop to contact if the job fails for a prolonged period
 
 Jobs that fail for an extended period of time without an expectation of return to stability within a reasonable timeframe
-(~1 sprint), should be evaluated for removal as an informing job.
+(~1 sprint), should be evaluated for removal as an informing job. Jobs that have 
+remained informing for 2 releases without going blocking should be removed from 
+informing status (but may continue to run as scheduled periodics). 
+
+#### Extract blocking signal
+
+An optional step along the way to become blocking would be to extract partial blocking 
+signal from informing jobs using blocking analysis jobs.
+
+We are able to analyze a set of informers matching specific criteria, and ensure that a particular
+part of the job passes. We have two of them today, `install-analysis-all` and `overall-analysis-all`. Install analysis
+ensures that we get at least one successful install across groups of jobs. For example, we can ensure we get at least one
+good install across each platform, each CNI, each IP stack, etc. `overall-analysis-all` ensures that the test step succeeds,
+effectively acting as a proxy for "the job passes entirely." For example, we require that techpreview jobs pass all serial
+and parallel conformance tests at least once on any platform.
+
 
 #### Becoming Blocking
 
 After at least 2 sprints of informing status, you may request the job become blocking by again
 [filing a ticket in the TRT Jira project](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323832&issuetype=17).
 
-Blocking jobs come with the responsibility of being responsive to breakages.  Generally, TRT expects a team that requests
+Blocking jobs come with the responsibility of being responsive to breakages. Generally, TRT expects a team that requests
 a blocking job to respond to a breakage within 4 hours during their normal working hours only. In exchange for this agreement,
 TRT will monitor the jobs, alert on them, and revert changes in the product that caused the breakage.
+
+#### Once with retries, or aggregated?
+
+There are two options for payload blocking jobs: aggregated, and once with retries.
+[_Aggregated jobs_](/docs/release-oversight/improving-ci-signal#job-aggregation-in-a-little-more-detail) give
+us _must never regress_ functionality. By running a series of jobs in parallel, we can
+do a statistical analysis of the results and not only determine if a test or job is
+permanently broken, but if there was a more subtle regression -- i.e. a test dropped from
+99% pass rate to 85%. It also allows us to make imperfect jobs blocking.
+
+The alternative, running the job once with an optional amount of retries, allows us to
+detect permanent breakages. This is much cheaper than aggregation but lets us make sure
+we never permamently break installs, or a particular test. It also requires the job itself
+to have an extremely high pass rate.
+
 
 #### Shortcuts To Becoming Informing or Blocking
 
