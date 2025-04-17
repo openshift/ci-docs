@@ -202,7 +202,7 @@ on this topic.
 
 Github’s users who are the repo’s collaborators. It is a [concept of
 github.](https://developer.github.com/v3/projects/collaborators/) Contributors should follow this
-[mojo](https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access) to become a collaborator for repositories
+[source page](https://source.redhat.com/groups/public/openshift/openshift_wiki/openshift_onboarding_checklist_for_github) to become a collaborator for repositories
 in openshift org. See [Prow’s
 doc](https://docs.prow.k8s.io/docs/components/plugins/approve/approvers/#lgtm-label) on this
 topic.
