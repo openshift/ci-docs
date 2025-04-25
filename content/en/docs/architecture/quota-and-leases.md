@@ -91,12 +91,6 @@ CONFIG = {
 
 A test may access the name of the resource that was acquired using the `${LEASED_RESOURCE}` environment variable.
 
-## Viewing Lease Activity Over Time
-
-In order to view the number of concurrent jobs executing against any specific cloud, or to view the states of resources
-in the lease system, a
-[dashboard](https://grafana-route-ci-grafana.apps.ci.l2s4.p1.openshiftapps.com/d/628a36ebd9ef30d67e28576a5d5201fd/boskos-dashboard?orgId=1)
-exists.
 
 # Directions for Job Authors
 
