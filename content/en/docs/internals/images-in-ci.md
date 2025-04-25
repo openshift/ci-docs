@@ -54,7 +54,7 @@ spec:
 ## The Cache Server for QCI
 
 For reducing the cost, [the pull-through cache server](https://github.com/openshift/release/blob/master/clusters/app.ci/quayio-pull-through-cache/qci-pull-through-cache-us-east-1.yaml) `qci-pull-through-cache-us-east-1-ci.apps.ci.l2s4.p1.openshiftapps.com` for QCI is deployed. Only Test-Platform members and their automation have access to it.
-It is used by [`ImageTagMirrorSet` and `ImageDigestMirrorSet`](https://docs.openshift.com/container-platform/4.15/openshift_images/image-configuration.html#images-configuration-registry-mirror_image-configuration) defined on all CI clusters.
+It is used by [`ImageTagMirrorSet` and `ImageDigestMirrorSet`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/images/image-configuration#images-configuration-registry-mirror-configuring_image-configuration) defined on all CI clusters.
 
 ```yaml
 apiVersion: config.openshift.io/v1
