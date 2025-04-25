@@ -34,6 +34,12 @@ curl -v -X POST -H "Authorization: Bearer $(oc whoami -t)" -d '{"job_name": "per
 
 In this example, only two parameters are required: `job_name` and `job_execution_type`. For periodic jobs, the `job_execution_type` must always be set to `"1"`.
 
+## Triggering a Periodic Job, override the payload
+
+```
+curl -v -X POST -H "Authorization: Bearer $(oc whoami -t)" -d '{"job_name": "periodic-to-trigger", "job_execution_type": "1", "pod_spec_options": {"envs":  {"RELEASE_IMAGE_LATEST": "quay.io/openshift-release-dev/ocp-release:4.18.8-x86_64"}}}' https://gangway-ci.apps.ci.l2s4.p1.openshiftapps.com/v1/executions
+```
+
 ## Triggering a Postsubmit Job
 
 Triggering a postsubmit job involves an additional requirement to define a `refs` structure. Below is an example `spec.json` file that must be created:
