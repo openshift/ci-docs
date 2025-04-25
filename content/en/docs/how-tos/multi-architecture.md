@@ -43,6 +43,44 @@ tests:
 This test uses `src` as a base image to run the `unit` test. Ci-operator will determine that the `src` image needs to be build for `arm64` architecture
 will resolve the image build graph based on this information. Learn more about image lifecycle in [#image-pipeline](https://docs.ci.openshift.org/docs/internals/#image-pipeline)
 
+## Override the Node Architecture in Workflow Steps
+
+When using a workflow you have two options for setting the architecture for the steps:
+
+1. **Workflow-level setting:**
+   You can define `node_architecture` inside the `steps` block. This setting applies to every step in the workflow. If this setting is omitted, the step registry will use the `node_architecture` defined at the test level. If neither is defined, no node architecture is set, and the cluster and the image will determine the node to run on.
+
+2. **Step-specific overrides:**
+   Instead of affecting every step, you can use the `node_architecture_overrides` field inside the `steps` block to set a different architecture for specific steps. This field adds the `node_architecture` attribute only to the designated steps, leaving the rest of the workflow using the workflow-level (or test-level) setting. If both exist, the overrides always take precedence for the steps they target.
+
+For example:
+
+```yaml
+tests:
+- as: my-test
+  steps:
+    # This setting applies to every step in the workflow.
+    node_architecture: amd64
+
+    # If the node_architecture setting above is not provided, then the node_architecture
+    # defined in the test (if any) from the step registry will be used.
+    # If neither is present then no node_architecture is applied,
+    # and the cluster with a compatible image will be used.
+
+    # Overrides for specific steps.
+    node_architecture_overrides:
+      ipi-conf: arm64      # Overrides the architecture only for 'ipi-conf'
+      other-step: arm64    # Overrides the architecture only for 'other-step'
+    cluster_profile: aws
+    test:
+      - as: test
+        cli: latest
+        commands: myscript.sh
+        from: src
+    workflow: ipi-aws
+```
+
+In this configuration, all steps in the workflow will run with `amd64` unless a step is specifically overridden by `node_architecture_overrides` (as is the case for `ipi-conf` and `other-step`). If the `node_architecture` field in steps is missing, then the step registry falls back to the test-level `node_architecture`. Finally, if neither is defined, then no specific node architecture is set, and the cluster and the image determine the node.
 
 ## Cluster selection
 
