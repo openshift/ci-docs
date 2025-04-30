@@ -30,7 +30,7 @@ aws:
   - name: build03
   - name: build05
     capabilities:
-      - vpn
+      - intranet
   - name: build09
   - name: build10
     capabilities:
