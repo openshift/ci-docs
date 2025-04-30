@@ -92,6 +92,27 @@ A sample response might be:
 }
 ```
 
+## Obtaining a Permanent Token for Automation
+
+{{< alert title="Warning" color="warning" >}}
+Permanent tokens for automation are issued only in exceptional cases. All requests must be discussed in advance in the `#forum-ocp-testplatform` Slack channel. The requesting team will own the token and its associated responsibilities.
+{{< /alert >}}
+
+To obtain a permanent token for automation, follow these steps:
+
+1. Create a rover group and add the designated token owners. Choose a descriptive, unique group name to avoid namespace collisions on the cluster.
+2. Clone the `openshift/release` repository from GitHub.
+3. Generate the token, from the repository root, run: 
+   ```shell
+   ./hack/gangway_token.py --group your-group-name
+   ```
+4. Submit a pull request with your changes.
+5. Extract the token once your PR is merged: 
+   ```shell
+   oc -n your-group-name extract secret/api-token-secret --to=- --keys=token
+   ```
+   > **Note:** It may take up to 48 hours for the token to become available.
+
 # External Client Tool
 
 Test Platform recommends [Gangway CLI](https://github.com/openshift-eng/gangway-cli) as a reliable client for running periodics. It is especially useful if you need to modify job environment variables or specify additional execution options.
