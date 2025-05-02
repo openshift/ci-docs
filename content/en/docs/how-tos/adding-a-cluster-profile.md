@@ -38,7 +38,7 @@ GCP Roles:
 - `Compute Image User`
 - `Role Administrator`
 
-The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.openshift.com/container-platform/4.17/installing/installing_aws/installing-aws-account.html#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations:
+The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.openshift.com/container-platform/4.17/installing/installing_aws/installing-aws-account.html#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations to be requested on us-east-1, us-east-2, us-west-1, us-west-2 regions separately:
 
 * Simple Storage Service (S3): Bucket Limit: 1000
 * Amazon Elastic Compute Cloud (Amazon EC2): EC2-VPC Elastic IPs: 500
@@ -73,6 +73,11 @@ The process of creating a new cluster profile involves adding:
   [lease type]({{< relref "#adding-new-leases" >}}).
 - `LeaseTypeFromClusterType()`: a mapping from cluster type to lease type, if
   a new type is being added (this is only used for legacy template tests).
+
+
+{{< alert title="Note" color="info" >}}
+Default AWS accounts for the OpenShift organization have automated periodic deprovisioning jobs in place. These are designed to clean up residual resources left behind due to failed deprovisioning steps or network interruptions, helping to prevent quota limit issues.
+{{< /alert >}}
 
 ### Cluster type
 
