@@ -382,6 +382,25 @@ promotion:
     tag: "4.15"
 {{< / highlight >}}
 
+### Excluding Images
+The `*` wildcard excludes all images of a target. The following promotes
+`cli-ocm` to `ci/cli-ocm:latest` on the first target and everything else but `cli-ocm` to `origin/4.15`
+on the second one.
+{{< highlight yaml >}}
+promotion:
+  to:
+  - namespace: "ci"
+    name: "cli-ocm"
+    excluded_images:
+    - "*"
+    additional_images:
+      latest: cli-ocm
+  - namespace: "origin"
+    name: "4.15"
+    excluded_images:
+    - cli-ocm
+{{< / highlight >}}
+
 ## Describing OpenShift Releases Involved in Tests {#describing-inclusion-in-an-openshift-release}
 
 `ci-operator` gives first-class support to repositories which need to run end-to-end tests in the context of an OpenShift
