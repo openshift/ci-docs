@@ -892,6 +892,6 @@ For example, if you need to authenticate to the `Red Hat` registry (`registry.re
 
 For further information, check configurations available in [core-services/ci-secret-bootstrap/_config.yaml](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml).
 
-If you need to authenticate to a different service, that is not available in the build cluster,
+If you need to authenticate to a different service that's not already available in the build cluster,
 then you might want to look into [Adding a New Secret to CI](/docs/how-tos/adding-a-new-secret-to-ci).
 For further information also check [Interacting With CI Image Registries](/docs/how-tos/use-registries-in-build-farm).
