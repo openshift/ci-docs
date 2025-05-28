@@ -869,7 +869,7 @@ tests:
 
 If your job needs to authenticate to a service,
 for example to pull an image from a registry, 
-you might have the configuration available in the build cluster already.
+the required credentials might already be available in the build cluster.
 
 For example, if you need to authenticate to the `Red Hat` registry (`registry.redhat.io`):
 
