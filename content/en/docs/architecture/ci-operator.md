@@ -889,6 +889,7 @@ For example, if you need to authenticate to the `Red Hat` registry (`registry.re
           requests:
             cpu: 100m
 {{< / highlight >}}
+This mounts the `ci-pull-credentials` secret into the test container and sets the path to the Docker config file so that registry authentication works as expected.
 
 For further information, check configurations available in [core-services/ci-secret-bootstrap/_config.yaml](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml).
 
