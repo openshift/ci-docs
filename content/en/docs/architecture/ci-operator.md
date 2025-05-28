@@ -867,7 +867,7 @@ tests:
 
 ### Using secrets to retrieve credentials
 
-If your job requires to authenticate to a service,
+If your job needs to authenticate to a service,
 for example to pull an image from a registry, 
 you might have the configuration available in the build cluster already.
 
