@@ -864,3 +864,35 @@ tests:
       - name: "pipeline:bin" # the original definition of ${DEP}
         env: "DEP"
 {{< / highlight >}}
+
+### Using secrets to retrieve credentials
+
+If your job needs to authenticate to a service,
+for example to pull an image from a registry, 
+the required credentials might already be available in the build cluster.
+
+For example, if you need to authenticate to the `Red Hat` registry (`registry.redhat.io`):
+
+{{< highlight yaml >}}
+- as: my-example-job
+  steps:
+    test:
+      - as: my-example-job
+        commands: |
+          REGISTRY_AUTH_FILE=/var/run/secrets/ci-pull-credentials/.dockerconfigjson make test
+        credentials:
+          - mount_path: /var/run/secrets/ci-pull-credentials
+            name: ci-pull-credentials
+            namespace: ci
+        from: src
+        resources:
+          requests:
+            cpu: 100m
+{{< / highlight >}}
+This mounts the `ci-pull-credentials` secret into the test container and sets the path to the Docker config file so that registry authentication works as expected.
+
+For further information, check configurations available in [core-services/ci-secret-bootstrap/_config.yaml](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml).
+
+If you need to authenticate to a different service that's not already available in the build cluster,
+then you might want to look into [Adding a New Secret to CI](/docs/how-tos/adding-a-new-secret-to-ci).
+For further information also check [Interacting With CI Image Registries](/docs/how-tos/use-registries-in-build-farm).
