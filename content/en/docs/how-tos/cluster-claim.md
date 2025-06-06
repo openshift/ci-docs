@@ -124,7 +124,7 @@ apiVersion: hive.openshift.io/v1
 kind: ClusterPool
 metadata:
   name: dptp-demo-cluster-pool # name is not relevant but of course must be unique
-  namespace: dptp-demo-cluster-pools
+  namespace: dptp-demo-cluster-pool # the namespace name must match the one where you instructed Vault to sync your secret
   labels: # architecture, cloud, owner, product, version are used to filter out a pool when a job claims a cluster
     architecture: amd64
     cloud: aws
@@ -192,7 +192,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: dptp-demo-install-config
-  namespace: dptp-demo-cluster-pools
+  namespace: dptp-demo-cluster-pool
 stringData:
   install-config.yaml: |
     apiVersion: v1
