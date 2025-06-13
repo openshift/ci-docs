@@ -83,7 +83,7 @@ The prow interface for a job run contains an immense number of tools and artifac
 
 ## BigQuery
 
-TRT makes heavy use of bigquery as a date warehouse for archiving test and job runs, disruption and alerts observed, etc.
+TRT makes heavy use of bigquery as a data warehouse for archiving test and job runs, disruption and alerts observed, etc.
 
 We use two projects:
 
