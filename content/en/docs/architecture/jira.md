@@ -22,6 +22,22 @@ To rerun the validations, comment `/jira refresh` on the PR. This is mostly usef
 All Openshift bugs must be made in the `OCPBUGS` project. For PRs referencing issues from other projects, a link will be
 created but the rest of the lifecycle management will not be performed for the issue.
 
+## Premerge Verification
+
+The Jira GitHub integration provides a method to mark a PR as `verified` before the PR is merged. This allows the integration
+to move the bug to the `VERIFIED` state upon merge instead of requiring a QE engineer to test and manually move an issue to the
+`VERIFIED` state after the issue moves into the `ON_QA` state. Premerge verfication is strongly preferred.
+
+To mark a PR as `verified`, comment `/verified by reason` on the PR. The reason can be the names of tests, GitHub usernames,
+documentation, or links. Multiple reasons can be listed, separated by a comma. Example: `/verified by @user` or
+`/verified by test1,test2`. If successful, the bot will comment on the PR and add the `verified` label to the PR.
+
+In certain situations, issues may need to be verified after the PR is merged. In these cases, the `/verified later` command
+can be used. The `/verified later` command takes a username as a field (example: `/verified later @username`). This will add
+the `verified-later` tag to the PR. Upon merge, the PR will be moved to the `MODIFIED` state and then `ON_QA` once a nightly
+build containing the issue is created and stay there until actioned by component team members. Notifications will be sent QE
+associates for a team to promptly verify these bugs once they enter `ON_QA`.
+
 ## Cherrypicking/Backporting
 
 The Jira automation can also assist in the backporting process by integrating with the cherrypicking automation. To
@@ -72,33 +88,6 @@ fix a typo`.
 Note: While Jira references do not get validated in the same way as `OCPBUGS` issues, the automation will still check
 whether the issue's `Target Version` matches what is expected for the branch. If it does not match, the PR will still
 get the `jira/valid-ref` label, but the mismatch will be mentioned in the comment that the automation makes on the PR.
-
-## Integration with QE verification
-
-Normally, QE will verify that a fix correctly resolves a Jira bug once the bug transitions to the `ON_QA` state, which
-happens after the PR merges and the `release-controller` has assembled a new release payload containing the code.
-
-However, if a QE engineer is assigned to the Jira bug, they will also get notified when a pull request is created to fix
-the bug. The QE engineer can add the `qe-approved` label on the pull request to indicate that the fix has been verified
-before the PR even merges. In this case, when the nightly release containing the fix is accepted, the Jira bug will
-automatically transition from the `ON_QA` state to the `VERIFIED` state.
-
-### Premerge Bugs
-
-New features may also be tracked by QE via an `OCPBUGS` issue. In these situations, the PR is created before the bug, so
-the PR will not contain a prefix when it is first created. Once QE creates a bug, they will need to retitle the PR using
-the `retitle` GitHub comment command. For instance, if a bug is called `OCPBUGS-123` and the PR's current title is `Bug
-Fix`, QE can update the title by commenting `/retitle OCPBUGS-123: Bug Fix` on the command. For PRs that have other bugs
-already linked, the bugs are listed as comma-separated values. For instance, if the title is `PROJECT-123: Bug Fix`, QE
-can commment `/retitle PROJECT-123,OCPBUGS-123: Bug Fix`.
-
-Premerge bugs have different requirements and a different lifecycle than normal `OCPBUGS` issues, so they are treated as
-jira references rather than full bugs. This means that the usual validations for `Target Version` and dependent bugs are
-not run. For a bug to be considered a premerge bug, it must have `premerge` as a value in both its `Affects Version(s)`
-and `Fix Version(s)` and the PR must be labelled as `qe-approved`. In these cases, the bugs will be immediately updated
-to `POST` upon being linked to the PR and will then be updated to `VERIFIED` once the PR is merged (this is configurable
-via the configuration file in the openshift/release repo and may change in the future if QE decides to use a different
-workflow).
 
 ## Automatic Fix Version(s)
 
