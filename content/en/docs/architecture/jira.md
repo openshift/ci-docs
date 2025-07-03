@@ -26,17 +26,19 @@ created but the rest of the lifecycle management will not be performed for the i
 
 The Jira GitHub integration provides a method to mark a PR as `verified` before the PR is merged. This allows the integration
 to move the bug to the `VERIFIED` state upon merge instead of requiring a QE engineer to test and manually move an issue to the
-`VERIFIED` state after the issue moves into the `ON_QA` state. Premerge verfication is strongly preferred.
+`VERIFIED` state after the issue moves into the `ON_QA` state. If multiple PRs are linked to a bug, only the last PR to merge
+needs to be marked as `verified` for the integration to move the bug to `VERIFIED`. Premerge verfication is strongly preferred.
 
 To mark a PR as `verified`, comment `/verified by reason` on the PR. The reason can be the names of tests, GitHub usernames,
 documentation, or links. Multiple reasons can be listed, separated by a comma. Example: `/verified by @user` or
-`/verified by test1,test2`. If successful, the bot will comment on the PR and add the `verified` label to the PR.
+`/verified by test1,test2`. If successful, the bot will comment on the PR and add the `verified` label to the PR. If the contents
+of the PR change (i.e. a new commit is added), the `verfied` label will be removed. If the `verified` label needs to be manually
+removed, comment `/verified remove` on the PR.
 
 In certain situations, issues may need to be verified after the PR is merged. In these cases, the `/verified later` command
 can be used. The `/verified later` command takes a username as a field (example: `/verified later @username`). This will add
 the `verified-later` tag to the PR. Upon merge, the PR will be moved to the `MODIFIED` state and then `ON_QA` once a nightly
-build containing the issue is created and stay there until actioned by component team members. Notifications will be sent QE
-associates for a team to promptly verify these bugs once they enter `ON_QA`.
+build containing the issue is created. It will remain in the `ON_QA` state until actioned by component team members.
 
 ## Cherrypicking/Backporting
 
