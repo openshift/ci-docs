@@ -26,7 +26,7 @@ created but the rest of the lifecycle management will not be performed for the i
 
 The Jira GitHub integration provides a method to mark a PR as `verified` before the PR is merged. This allows the integration
 to move the bug to the `VERIFIED` state upon merge instead of requiring a QE engineer to test and manually move an issue to the
-`VERIFIED` state after the issue moves into the `ON_QA` state. If multiple PRs are linked to a bug, only the last PR to merge
+`VERIFIED` state after the issue moves into the `ON_QA` state. If multiple PRs are linked to a bug, all PRs must have the `verified` label (and not `verified-later`) for it to be automatically moved to VERIFIED.
 needs to be marked as `verified` for the integration to move the bug to `VERIFIED`. Premerge verfication is strongly preferred.
 
 To mark a PR as `verified`, comment `/verified by reason` on the PR. The reason can be the names of tests, GitHub usernames,
