@@ -92,6 +92,11 @@ CONFIG = {
 A test may access the name of the resource that was acquired using the `${LEASED_RESOURCE}` environment variable.
 
 
+## Viewing Lease Activity Over Time
+
+In order to view the number of concurrent jobs executing against any specific cloud, or to view the states of resources
+in the lease system, a [dashboard](https://ci-route-ci-grafana.apps.ci.l2s4.p1.openshiftapps.com/dashboards) exists.
+
 # Directions for Job Authors
 
 Job authors should generally not be concerned with the process of acquiring a lease or the mechanisms behind it.
