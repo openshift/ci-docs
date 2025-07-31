@@ -71,6 +71,14 @@ curl -v -X POST -H "Authorization: Bearer $(oc whoami -t)" -d @spec.json https:/
 While the REST interface supports triggering presubmit jobs, it is generally unnecessary. Presubmit jobs should be automatically executed or re-triggered using Prow commands (e.g., `/test` and `/retest`) via GitHub interactions.
 {{< /alert >}}
 
+## Overriding Job Environment Variables
+
+To override multistage job environment variables, you need to enable overriding of a certain variable by adding the prefix `MULTISTAGE_PARAM_OVERRIDE_` to the variable name. You can then include the environment variable in the `pod_spec_options` field in your request. For example:
+
+```
+curl -v -X POST -H "Authorization: Bearer $(oc whoami -t)" -d '{"job_name": "periodic-to-trigger", "job_execution_type": "1", "pod_spec_options": {"envs": {"MULTISTAGE_PARAM_OVERRIDE_FOO": "bar"}}}' https://gangway-ci.apps.ci.l2s4.p1.openshiftapps.com/v1/executions
+```
+
 
 ## Querying Job Status
 
