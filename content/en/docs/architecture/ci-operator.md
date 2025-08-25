@@ -666,13 +666,20 @@ There are two levels of network access control for accessing the Red Hat intrane
 
 The network ACL can be tested with the [simulator](https://netsec.corp.redhat.com/). In case the resources your tests need are blacklisted by the ACL, please contact #forum-ocp-testplatform.
 
-Only selected build farm clusters can access the Red Hat intranet at this moment. The clusters include:
-* `build05`
-* `hosted-mgmt`
+Only selected build farm clusters can access the Red Hat intranet at this moment. The following clusters do not support intranet access:
+* `build02` (GCP)
+* `build04` (GCP)
+* `build01` (AWS Legacy)
 
 {{% alert title="REHEARSAL WORKFLOW" color="warning" %}}
 Tests where `restrict_network_access` is set to `false` require both the `approved` and `network-access-rehearsals-ok` label to be present on the PR. The latter is only possible to add by an `openshift` org member who is **not** the author of the PR, and is removed on each push.
 The label can be added by utilizing the `/pj-rehearse network-access-allowed` command. If these requirements aren't met, `pj-rehearse` will not trigger the tests, regardless of command.
+{{% /alert %}}
+
+In limited scenarios, your tests might need to access a external hosts with strict network policies, e.g., whitelisted IP addresses. We strongly recommend you to interconnect your test environment with the RedHat intranet. If this is not possible, you can request special arrangements to grant a stable outbound IP address.
+
+{{% alert title="LIMITED SUPPORT" color="warning" %}}
+Granting stable outbound IP addresses requires collaborations with IT Networking and involves significant manual effort. It is only possible in exceptional cases and is not guaranteed.
 {{% /alert %}}
 
 ## Declaring Tests
