@@ -666,7 +666,7 @@ There are two levels of network access control for accessing the Red Hat intrane
 
 The network ACL can be tested with the [simulator](https://netsec.corp.redhat.com/). In case the resources your tests need are blacklisted by the ACL, please contact #forum-ocp-testplatform.
 
-Only selected build farm clusters can access the Red Hat intranet at this moment. The following clusters do not support intranet access:
+Only selected build farm clusters cannot access the Red Hat intranet at this moment. The following clusters do not support intranet access:
 * `build02` (GCP)
 * `build04` (GCP)
 * `build01` (AWS Legacy)
