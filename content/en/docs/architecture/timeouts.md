@@ -48,9 +48,9 @@ Prow is [configured](https://github.com/openshift/release/blob/9238ee8b89c861793
 ```yaml
 default_job_timeout: 24h0m0s
 plank: # Prow's controller to launch Pods for jobs
-  pod_pending_timeout: 15m0s
-  pod_running_timeout: 48h0m0s
-  pod_unscheduled_timeout: 5m0s
+  pod_pending_timeout: 30m0s
+  pod_running_timeout: 72h0m0s
+  pod_unscheduled_timeout: 30m0s
 sinker: # Prow's garbage collector
   max_pod_age: 6h0m0s
   max_prowjob_age: 24h0m0s
