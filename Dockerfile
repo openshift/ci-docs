@@ -2,7 +2,7 @@ FROM klakegg/hugo:0.111.3-ext-ubuntu as builder
 
 COPY . /src/
 
-RUN set -x && make generate
+RUN set -x && HUGO_ENV=production make generate
 
 FROM nginxinc/nginx-unprivileged:1.18-alpine
 
