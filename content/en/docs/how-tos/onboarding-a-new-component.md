@@ -2,11 +2,34 @@
 title: Onboarding a New Component for Testing and Merge Automation
 description: How to onboard a new component repository to the CI system for testing and merge automation.
 ---
+aliases:
+  - /docs/onboarding/
+  - /docs/getting-started-ci/
+  - /docs/new-component/
 
 ## Overview
 
-This document overviews the workflow for onboarding new public component repositories to the Openshift CI. Private
+This guide walks you through adding your repository to OpenShift CI so it can run automated tests and participate in the merge automation workflow.
+
+### Before You Start
+
+**New to OpenShift CI?** Make sure you've read:
+- [Core Concepts]({{< ref "../getting-started/concepts" >}}) - Understanding Prow, ci-operator, and jobs
+- [Glossary]({{< ref "../getting-started/glossary" >}}) - Definitions of terms used in this guide
+
+### What You'll Set Up
+
+1. **GitHub permissions** - Allow CI robots to interact with your repository
+2. **Prow configuration** - Enable GitHub automation (like `/retest` commands)
+3. **CI Operator configuration** - Define how to build and test your code
+4. **Test jobs** - Specify what tests run and when
+
+### Repository Types
+
+This document covers onboarding new public component repositories to OpenShift CI. Private
 repositories are also supported with a few caveats. More information can be found [here](/docs/architecture/private-repositories).
+
+### Planning to Add Images to OpenShift?
 
 If you are thinking about adding new images to OpenShift release payloads, read [this section](#product-builds-and-becoming-part-of-an-openshift-release) first, to avoid doing work you might have to adjust later.
 
@@ -33,10 +56,16 @@ Both of them are required for automations to work properly, if one is missing yo
 
 ## Prow Configuration
 
-[Prow](https://docs.prow.k8s.io/docs/overview/) is the k8s-native upstream CI system, source
-code hosted in the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow) repository. Prow interacts with
-GitHub to provide the automation UX that developers use on their pull requests, as well as orchestrating test workloads
-for those pull requests.
+[Prow](https://docs.prow.k8s.io/docs/overview/) is the Kubernetes-native CI system that powers OpenShift CI. It's what enables commands like `/retest` and automatic merging of approved PRs.
+
+### What Prow Does
+
+- **Responds to GitHub events**: New PRs, commits, comments
+- **Schedules test jobs**: Decides when and where to run tests  
+- **Reports results**: Updates PR status checks and posts comments
+- **Handles merging**: Automatically merges PRs when all conditions are met
+
+Prow is developed by the Kubernetes community in the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow) repository.
 
 ### Bootstrapping Configuration for a new Repository
 
@@ -111,13 +140,21 @@ require under a new `plugins.yaml["plugins"]["$org/$repo"]` key.
 
 ### Describing Tests
 
-Prow provides the following test trigger types:
+Prow supports different types of tests that run at different times in your development workflow:
 
-|Type Name|Trigger|Target|Purpose|
+#### Test Types Explained
+
+|Type Name|When It Runs|What It Tests|Common Use Cases|
 |:---|:---|:---|:---|
-|`presubmit`|Push to a PR|A single PR merged into the branch it is targeting|Testing commits within a PR before they are merged|
-|`postsubmit`|Push/merge to a branch|User specified set of branches|Integration tests after a PR is merged|
-|`periodic`|`cron`-like schedule|User-specified set of branches|Scheduled test runs|
+|`presubmit`|On every PR update|Your PR changes merged with the target branch|Unit tests, linting, e2e tests - anything to validate the PR is good|
+|`postsubmit`|After PR merges|The actual state of the branch after merge|Building and publishing images, updating docs, integration tests|
+|`periodic`|On a schedule (like cron)|The current state of specified branches|Nightly builds, long-running tests, regular health checks|
+
+#### Example Scenarios
+
+- **Presubmit**: Run unit tests and linting on every PR to ensure code quality
+- **Postsubmit**: Build and push container images after changes are merged
+- **Periodic**: Run expensive integration tests nightly instead of on every PR
 
 Configuration for your repository’s tests live in YAML files in the
 [openshift/release](https://github.com/openshift/release) repository. Jobs are stored in
