@@ -64,13 +64,14 @@ In OpenShift CI, this timeout and grace period apply to the `ci-operator` orches
 
 ```yaml
 plank: # Prow's controller to launch Pods for jobs
-  default_decoration_configs:
-    '*':
-      grace_period: 30m0s
+  default_decoration_config_entries:
+  - config:
+      grace_period: 1h0m0s
       timeout: 4h0m0s
-    'org/repo': # overwrite the job timeout at repo level
+  - config:
       grace_period: 45m0s
       timeout: 6h0m0s
+    repo: org1/repo1 # overwrite the job timeout at repo level
 ```
 
 In special cases, long-running, generated jobs can raise the cap with job-specific configuration [like][generated-timeout-example]:
@@ -146,6 +147,33 @@ ref:
 
 {{< alert title="Note" color="info" >}}
 The `pod.spec.activeDeadlineSeconds` setting on a `Pod` only implicitly bounds the amount of time that a `Pod` executes for on a Kubernetes cluster. The active deadline begins at the first moment that a `kubelet` acknowledges the `Pod`, which is after it is scheduled to a specific node but before it pulls images, sets up a container sandbox, _etc_. It is therefore possible to exceed the active deadline without ever having a container in the `Pod` execute. Please see the [API documentation](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#podspec-v1-core) for more details. For these reasons, no timeout configured in the system makes use of this setting, instead relying on a thin wrapper around the executing code that's injected by Prow itself.
+{{< /alert >}}
+
+#### How to configure a customized timeout
+
+If you need a longer timeout than the default 24 hours, but no more than 72 hours,
+At [repository level](https://github.com/openshift/release/blob/6a5999d35c9bedca66a608cf5a9a2ad6bff49712/core-services/prow/02_config/_config.yaml#L442), add a `config` section for your repo as below,
+```yaml
+plank:
+  default_decoration_config_entries:
+  ...
+  - config:
+      grace_period: 1h30m0s
+      timeout: 36h0m0s
+    repo: org2/repo2 # overwrite the job timeout at repo level
+```
+At [job level](https://github.com/openshift/release/blob/5f3a72424aeee5027525e6dd471235139ef77108/ci-operator/config/openshift/release/openshift-release-master__ci-4.21.yaml#L88), add a `timeout` field for your job as below,
+```yaml
+- as: any-job-name-you-have
+  interval: 4h
+  steps:
+    cluster_profile: aws-2
+    workflow: openshift-upgrade-aws-ovn
+  timeout: 36h0m0s
+```
+
+{{< alert title="Note" color="info" >}}
+If you use a longer timeout, you might also need to reach to [DPP team](https://devservices.dpp.openshift.com/support/) to make sure your cloud account allows running OCP clusters longer than this timeout.
 {{< /alert >}}
 
 ## How Interruptions May Be Handled
