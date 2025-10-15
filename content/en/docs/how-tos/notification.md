@@ -60,4 +60,44 @@ It is possible to add slack reporting for the `images` postsubmit job by adding 
 {{< /alert >}}
 
 Once the configuration is added, simply use the `make jobs` target to generate the new job definitions containing the `reporter_config`.
+
+### Slack Reporter Configuration
+
+The `slack_reporter` configuration supports flexible job matching with multiple approaches:
+
+1. **Exact matching** with `job_names`: Matches job names exactly
+2. **Pattern matching** with `job_name_patterns`: Matches job names using regular expressions
+3. **Exclusion** with `excluded_job_patterns`: Excludes jobs matching regex patterns (similar to `excluded_variants`)
+
+**Matching Priority:**
+- Exclusions are checked first - if a job matches any `excluded_job_patterns`, it's excluded regardless of other rules
+- Exact matches in `job_names` take precedence over pattern matches in `job_name_patterns`
+- This allows for more flexible job matching while maintaining compatibility with existing configurations
+
+**Examples:**
+
+```yaml
+slack_reporter:
+# Example 1: Mixed exact and pattern matching
+- channel: "#my-team"
+  job_names: ["unit", "images"]        # Exact matches
+  job_name_patterns: ["^e2e-.*"]       # Regex patterns
+
+# Example 2: Broad matching with exclusions (similar to excluded_variants)
+- channel: "#ops-team"
+  job_name_patterns: [".*"]            # Match all jobs
+  excluded_job_patterns:               # But exclude these patterns
+  - ".*-skip$"                         # Jobs ending with "-skip"
+  - "^nightly-.*"                      # Jobs starting with "nightly-"
+  - ".*-flaky-.*"                      # Jobs containing "-flaky-"
+
+# Example 3: Combining all approaches
+- channel: "#dev-team"
+  job_names: ["critical-test"]         # Always include this specific job
+  job_name_patterns: ["^unit-.*"]      # Include all unit tests
+  excluded_job_patterns: [".*-slow$"]  # But exclude slow tests
+```
+
+The `excluded_job_patterns` approach is often simpler than complex inclusion patterns, especially when you want to match most jobs in a repository but exclude specific types.
+
 The `SlackReporterConfig` is provided for [reference](https://github.com/openshift/ci-tools/blob/6810ce942bbe25a06c092af8098fd2d071604a04/pkg/config/load.go#L49-L57).
