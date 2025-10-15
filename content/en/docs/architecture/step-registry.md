@@ -316,9 +316,13 @@ In this example, the `ci-operator` configuration simply specifies the desired cl
 example for the [`Workflow`](#workflow) section above.
 
 Since the `ci-operator` configuration and workflows share the same fields, it is possible to override fields specified in a workflow.
-In cases where both the workflow and a `ci-operator` configuration specify the same field, the `ci-operator` configuration’s field has
+In cases where both the workflow and a `ci-operator` configuration specify the same field, the `ci-operator` configuration's field has
 priority (i.e. the value from the `ci-operator` configuration is used).  List and mapping fields have a few special rules, described
 in the [hierarchical propagation](#hierarchical-propagation) section.
+
+{{< alert title="Important" color="info" >}}
+**Restriction on `pre` and `post` Step Overrides**: By default, tests cannot override `pre` and `post` steps defined in workflows to prevent accidental resource leaks. If you need to override these steps, you must explicitly set `allow_pre_post_step_overrides: true`. See [Overriding pre and post Step Definitions](#overriding-pre-and-post-step-definitions) for more details.
+{{< /alert >}}
 
 Example of a `ci-operator` configuration that overrides a workflow field:
 
@@ -351,6 +355,76 @@ tests:
 {{< / highlight >}}
 
 ## Options to Change Control Flow
+
+### Overriding `pre` and `post` Step Definitions
+
+By default, `ci-operator` prevents tests from overriding the `pre` and `post` step definitions that are specified in a workflow. This is a safety measure to prevent accidental resource leaks that could occur when setup steps (in `pre`) or cleanup steps (in `post`) are unintentionally modified or removed.
+
+To explicitly allow overriding of `pre` and `post` steps when using a workflow, the `allow_pre_post_step_overrides` field must be set to `true` in the test configuration. Without this flag, attempts to override `pre` or `post` steps will result in a validation error.
+
+{{< alert title="Warning" color="warning" >}}
+Overriding `pre` or `post` steps can lead to resource leaks if setup or cleanup operations are not performed correctly. Only override these steps if you fully understand the implications and have verified that all necessary setup and cleanup operations are still performed.
+{{< /alert >}}
+
+Example of allowing `pre` and `post` step overrides:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-custom-setup
+  steps:
+    allow_pre_post_step_overrides: true  # explicitly allow overriding pre/post steps
+    cluster_profile: aws
+    workflow: origin-e2e
+    pre:                                  # this overrides the pre steps from the workflow
+    - ref: custom-cluster-setup
+    post:                                 # this overrides the post steps from the workflow
+    - ref: custom-cluster-cleanup
+{{< / highlight >}}
+
+Without the `allow_pre_post_step_overrides: true` setting, the above configuration would fail validation. When this flag is set to `true`, the test takes full responsibility for ensuring proper resource management.
+
+#### Examples
+
+**Attempting to override without the flag (this will fail validation):**
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-bad-example
+  steps:
+    cluster_profile: aws
+    workflow: ipi-aws
+    post:                    # ERROR: This will fail validation
+    - ref: custom-cleanup    # because allow_pre_post_step_overrides is not set
+{{< / highlight >}}
+
+**Correctly overriding with explicit permission:**
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-good-example
+  steps:
+    allow_pre_post_step_overrides: true
+    cluster_profile: aws
+    workflow: ipi-aws
+    pre:                     # OK: Overrides pre steps from ipi-aws workflow
+    - ref: custom-pre-setup
+    - chain: modified-install
+    post:                    # OK: Overrides post steps from ipi-aws workflow  
+    - ref: gather-custom-artifacts
+    - chain: modified-deprovision
+{{< / highlight >}}
+
+**Overriding only test steps (no flag needed):**
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-test-only
+  steps:
+    cluster_profile: aws
+    workflow: ipi-aws
+    test:                    # OK: test step overrides don't require the flag
+    - ref: custom-e2e-test
+{{< / highlight >}}
 
 ### Skipping `post` Steps On Success
 
