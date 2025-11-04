@@ -389,7 +389,7 @@ tests:
 test to fail. Running a `post`-step in best-effort mode may be useful when the step is used to gather debugging information or otherwise
 is useful but should not cause the job to fail if it does not complete correctly. In order to run `post` steps in best-effort mode, the
 `best_effort` field must be set to `true` in the configuration for an individual step and the `allow_best_effort_post_steps` setting must
-be set at the workflow or job level. For example:
+be set at the workflow or job level. It is also necessary that the step has a timeout. For example:
 
 {{< highlight yaml >}}
 tests:
@@ -413,6 +413,7 @@ tests:
         requests:
           cpu: 300m
           memory: 300Mi
+      timeout: 5m
 {{< / highlight >}}
 
 ## Registry Layout and Naming Convention
