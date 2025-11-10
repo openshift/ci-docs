@@ -128,6 +128,8 @@
                         var description = item['product'] + ' ' + item['version'] + ' cluster on ' + item['cloud'];
                         if (item['cluster'] === 'app.ci') {
                             description = description + ' containing most Prow services.';
+                        } else if (item['cluster'] === 'core-ci') {
+                            description = description + ' to replace app.ci (WIP).';
                         } else if (item['cluster'] === 'hosted-mgmt') {
                             description = description + ' containing a Hive control plane.';
                         } else if (!item['cluster'].startsWith('build')) {
