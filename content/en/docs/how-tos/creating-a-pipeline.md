@@ -44,6 +44,11 @@ In **Automatic Mode**, the pipeline controller automatically triggers second-sta
 - When you want to ensure all relevant tests run automatically
 
 {{< alert title="Warning" color="warning" >}}
+Automatic Mode limitation: If a PR is abandoned with failing tests and the user returns to it later without pushing a new HEAD, the pipeline controller may not automatically start the second stage. This is because jobs are analyzed on the cluster rather than queried from GitHub, in order to conserve API tokens for more important operations. Jobs on cluster have limited lifespan. 
+If this happens, you can manually trigger the pipeline by issuing the `/pipeline required` command.
+{{< /alert >}}
+
+{{< alert title="Warning" color="warning" >}}
 If you manually trigger any second-stage test before the automatic trigger occurs, the controller will detect this and inform you that the pipeline is now under manual control. You will need to use `/pipeline required` to trigger the remaining tests manually until the PR HEAD changes.
 {{< /alert >}}
 
