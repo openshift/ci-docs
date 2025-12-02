@@ -46,5 +46,9 @@ This block tells the dispatcher that the job must be executed on a cluster that 
 1. `arm64` - To run job on a cluster which contains arm64 + amd64 nodes.
 2. `intranet` - Allows connectivity to the redhat intranet
 3. `sshd-bastion` - For multiarch libvirt jobs, this is a temporary capability until the Multiarch can use intranet and move away from legacy bastion connectivity.
-4. `rce` - release controller elligible, any job triggered from release controller will have this capability assigned.
-***Note*: Not to be added manually on any job config.**
+4. `rce` - release controller elligible, any job triggered from release controller will have this capability assigned. ***Note*: Not to be added manually on any job config.**
+5. `gpu` - To run job on a cluster with GPU resources available.
+6. `highperf` - To run job on nodes with better memory and CPU resources.
+7. `nested-podman` - For jobs requiring nested podman/container runtime capabilities.
+8. `kvm` - To run job on a cluster with KVM virtualization support.
+9. `gcp` - To run job on a Google Cloud Platform-based cluster.
