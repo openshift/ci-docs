@@ -187,9 +187,18 @@ The configuration format is:
 orgs:
   - org: your-org
     repos:
-      - repo: your-repo
-        trigger: manual  # or "auto"
+      - your-repo-1
+      - name: your-repo-2
+        mode:
+          trigger: manual  # or "auto"
+        branches:  # Optional: if specified, only these branches are enabled
+          - main
+          - release-4.x
 ```
+If the `branches` field is not specified or is empty, the pipeline controller will operate on all branches of the repository. If specified, the controller will only operate on pull requests targeting the listed branches.
+
+Note: The `mode` section with `trigger` is optional - if not specified, it defaults to `auto`.
+
 
 ### For LGTM Mode
 
@@ -200,8 +209,14 @@ The configuration format is:
 orgs:
   - org: your-org
     repos:
-      - repo: your-repo
+      - your-repo-1
+      - name: your-repo-2
+        branches:  # Optional: if specified, only these branches are enabled
+          - main
 ```
+
+If the `branches` field is not specified or is empty, the pipeline controller will operate on all branches of the repository.
+
 
 ## Best Practices
 
