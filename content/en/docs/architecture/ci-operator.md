@@ -251,7 +251,41 @@ images:
       as:
       - nginx:latest
 ```
-`nginx:latest` is going to be replaced with `pipeline:bin`  
+`nginx:latest` is going to be replaced with `pipeline:bin`
+
+### Automatic Detection from Dockerfiles
+
+`ci-operator` automatically detects base images referenced from `registry.ci.openshift.org` and `quay-proxy.ci.openshift.org` in Dockerfiles when `dockerfile_path` is specified, eliminating the need for manual `base_images` and `inputs` configuration.
+
+This replaces the deprecated `registry-replacer` tool which previously added these entries via periodic PRs.
+
+**Before (manual configuration required by registry-replacer):**
+```yaml
+base_images:
+  ocp_builder_rhel-9-golang-1.24-openshift-4.21:
+    name: builder
+    namespace: ocp
+    tag: rhel-9-golang-1.24-openshift-4.21
+
+images:
+- dockerfile_path: Dockerfile
+  inputs:
+    ocp_builder_rhel-9-golang-1.24-openshift-4.21:
+      as:
+      - registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-openshift-4.21
+  to: my-component
+```
+
+**After (auto-detected):**
+```yaml
+images:
+- dockerfile_path: Dockerfile
+  to: my-component
+```
+
+The Dockerfile's `FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-openshift-4.21` is automatically detected and configured at build time.
+
+Manual `base_images` and `inputs` entries take precedence over auto-detection. Test container base images (used in `tests[].container.from`) must still be configured manually as they are not in project Dockerfiles.
 
 ## Build Arguments
 The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.openshift.com/container-platform/4.7/cicd/builds/build-strategies.html#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument is taken from the field `value` in the configuration.
