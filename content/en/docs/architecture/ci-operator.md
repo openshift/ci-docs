@@ -698,7 +698,7 @@ To enable tests to access the Red Hat intranet, the `restrict_network_access` fl
 
 There are two levels of network access control for accessing the Red Hat intranet: the `restrict_network_access` flag, and network ACL maintained by IT.
 
-The network ACL can be tested with the [simulator](https://netsec.corp.redhat.com/). In case the resources your tests need are blacklisted by the ACL, please contact #forum-ocp-testplatform.
+The network ACL can be tested with the [simulator](https://netsec.corp.redhat.com/). The `Source` field shall have one of the build farm cluster's allocated IP (e.g., `10.29.0.1` for us-east-1 and `10.28.64.1` for us-east-2). In case the resources your tests need are blacklisted by the ACL, please contact #forum-ocp-testplatform.
 
 Only selected build farm clusters cannot access the Red Hat intranet at this moment. The following clusters do not support intranet access:
 * `build02` (GCP)
