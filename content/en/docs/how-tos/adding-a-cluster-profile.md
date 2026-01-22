@@ -2,7 +2,19 @@
 title: "Add a New Cluster Profile"
 description: How to add a cluster profile to the test platform.
 ---
-This document lays out the process of getting a new cluster profile added to the test platform so that jobs can begin using it.
+This guide walks you through creating a new cluster profile step-by-step, with real examples you can follow.
+
+## Quick Overview
+
+Creating a cluster profile involves three main steps:
+
+1. **Register the profile** - Add code to `openshift/ci-tools` to tell the system about your new profile
+2. **Set up leases** - Register cloud resources in `openshift/release` that tests can reserve
+3. **Add credentials** - Store secrets (cloud keys, SSH keys, etc.) that your tests will need
+
+**Time estimate:** Plan for 2-3 pull requests across different repositories, with review cycles for each.
+
+**Reference example:** Throughout this guide, we'll reference [PR 4685](https://github.com/openshift/ci-tools/pull/4685) which created the `gcp-oadp-qe` cluster profile. You can use this as a template for your own profile.
 
 {{< alert title="Info" color="info" >}}
 
@@ -13,165 +25,358 @@ about platform enablement process, please see the [OpenShift Infrastructure Prov
 
 ## What Is a Cluster Profile?
 
-The `cluster_profile` is a `ci-operator` concept that bundles together a couple of concepts to make it easier to configure jobs and steps that can operate on different cloud infrastructures.
+Think of a **cluster profile** as a "recipe" that tells the CI system:
 
-When a `cluster_profile` is added to a job or workflow, the following actions occur:
+- Which cloud platform to use (AWS, GCP, Azure, etc.)
+- What credentials are needed
+- How to reserve cloud resources for your tests
 
-- all steps in the workflow will have [`credentials`](/docs/architecture/step-registry/#injecting-custom-credentials) mounted at `$CLUSTER_PROFILE_DIR` for cloud accounts, image registries, etc.
-- the test will implicitly ask for a [`lease`](/docs/architecture/step-registry/#implicit-lease-configuration-with-cluster_profile) and expose it with `$LEASED_RESOURCE`
-- all steps in the test will implicitly declare [`dependencies`](/docs/architecture/ci-operator/#referring-to-images-in-tests) on imported OpenShift release images
-- all steps will have a number of environment variables set, such as `$CLUSTER_TYPE`, `$IMAGE_FORMAT`, and `$KUBECONFIG`
+Instead of configuring each of these things separately for every test, you create a cluster profile once, and then any test can use it by simply saying "use the `aws` profile" or "use the `gcp-oadp-qe` profile."
 
-Generally, the major difference between `cluster_profile`s is the content of the credentials.
+**What happens when you use a cluster profile in a test:**
+
+When you add a `cluster_profile` to a job or workflow, the CI system automatically:
+
+- **Mounts credentials:** All your cloud account keys, image registry passwords, and other secrets are automatically available to your test steps at `$CLUSTER_PROFILE_DIR`
+- **Reserves cloud resources:** The test automatically requests a "lease" (reserved cloud account/project) and makes it available via `$LEASED_RESOURCE`
+- **Sets up environment:** Important environment variables are automatically set, like:
+  - `$CLUSTER_TYPE` - tells your test what cloud platform it's running on
+  - `$IMAGE_FORMAT` - format for pulling OpenShift images
+  - `$KUBECONFIG` - path to the cluster's kubeconfig file
+- **Imports OpenShift images:** All test steps automatically have access to the OpenShift release images they need
+
+**The bottom line:** Different cluster profiles mainly differ in what credentials they provide. One profile might give you access to AWS account A, while another gives you access to AWS account B or a completely different cloud provider.
 
 ## Prepare the cloud account
+
 In order for most workflows to operate with the cluster profile, the cloud account must be prepared, including creating a new IAM user as described in the OCP document ([AWS](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-account.html), [GCP](https://docs.openshift.com/container-platform/4.14/installing/installing_gcp/installing-gcp-account.html)).
 
 In addition to the permissions specified by the OCP documentation, include the following which are required for running tests in the environment:
 
-AWS Policies:
+**AWS Policies:**
+
 - `CloudFormationFullAccess`
 - `AmazonEC2ContainerRegistryFullAccess`
 
-GCP Roles:
+**GCP Roles:**
+
 - `Deployment Manager Editor`
 - `Compute Image User`
 - `Role Administrator`
 
 The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.openshift.com/container-platform/4.17/installing/installing_aws/installing-aws-account.html#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations to be requested on us-east-1, us-east-2, us-west-1, us-west-2 regions separately:
 
-* Simple Storage Service (S3): Bucket Limit: 1000
-* Amazon Elastic Compute Cloud (Amazon EC2): EC2-VPC Elastic IPs: 500
-* Amazon Elastic Compute Cloud (Amazon EC2): Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances: 3700
-* Amazon Virtual Private Cloud (Amazon VPC): VPCs per Region: 250
-* Amazon Virtual Private Cloud (Amazon VPC): NAT gateways per Availability Zone: 200
-* Amazon Virtual Private Cloud (Amazon VPC): Internet gateways per Region: 200
-* Elastic Load Balancing (ELB): Classic Load Balancers per Region: 250
+- Simple Storage Service (S3): Bucket Limit: 1000
+- Amazon Elastic Compute Cloud (Amazon EC2): EC2-VPC Elastic IPs: 500
+- Amazon Elastic Compute Cloud (Amazon EC2): Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances: 3700
+- Amazon Virtual Private Cloud (Amazon VPC): VPCs per Region: 250
+- Amazon Virtual Private Cloud (Amazon VPC): NAT gateways per Availability Zone: 200
+- Amazon Virtual Private Cloud (Amazon VPC): Internet gateways per Region: 200
+- Elastic Load Balancing (ELB): Classic Load Balancers per Region: 250
 
 For GCP, we need to increase the following quotas:
-* Cloud Filestore API: Basic HDD (Standard) capacity (GB) per region: 20 TB
+
+- Cloud Filestore API: Basic HDD (Standard) capacity (GB) per region: 20 TB
 
 ## Adding a New Cluster Profile
 
-When adding a new `cluster_profile`, three major steps must be taken: registering the profile inside of `ci-operator`, adding the new leases to `Boskos`, and providing the credentials.
+When adding a new `cluster_profile`, you need to complete three main steps:
+
+1. **Register the profile** in the `ci-operator` code (in `openshift/ci-tools` repository)
+2. **Add the new leases** to `Boskos` (in `openshift/release` repository)  
+3. **Provide the credentials** for the profile
+
+The following sections walk you through each step with a real-world example.
+
+### Step-by-Step Example: Creating a New Cluster Profile
+
+Let's walk through creating a cluster profile using a real example. We'll use the `gcp-oadp-qe` profile from [PR 4685](https://github.com/openshift/ci-tools/pull/4685) as our reference.
+
+**Profile Name:** `gcp-oadp-qe`
+
+This example shows exactly what code changes you need to make. Follow this pattern for your own cluster profile.
 
 ### Registering a New Profile
 
-As `cluster-profile`s are handled as first-class items in the `ci-operator`
-configuration, a new pull request ([example](https://github.com/openshift/ci-tools/pull/2808))
-must be sent to the `openshift/ci-tools` repository in order to register a new
-profile.  The next sections detail the requirements for opening this pull
-request.  All changes required in `openshift/ci-tools` are isolated to a single
-file, [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
-The process of creating a new cluster profile involves adding:
+To register a new cluster profile, you need to create a pull request to the [`openshift/ci-tools`](https://github.com/openshift/ci-tools) repository. All the code changes go in a single file: [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
 
-- `ClusterProfile`: a new constant for the name of the profile.
-- `ClusterProfiles()`: a new item in the list of valid test profiles.
-- `ClusterProfile::ClusterType()`: a mapping from the profile to its
-  [cluster type]({{< relref "#cluster-type" >}}).
-- `ClusterProfile::LeaseType()`: a mapping from the profile to its
-  [lease type]({{< relref "#adding-new-leases" >}}).
-- `LeaseTypeFromClusterType()`: a mapping from cluster type to lease type, if
-  a new type is being added (this is only used for legacy template tests).
+Think of this as "telling the system about your new profile" - you're adding it to the list of profiles that the CI system recognizes.
 
+You need to make **5 specific changes** in the [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go) file:
+
+#### 1. Add a New Constant for the Profile Name
+
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+**Location:** Find the `const` block with other `ClusterProfile` constants (around [line 1517](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1517))
+
+Add your new constant following the existing naming pattern.
+
+**Example from PR 4685:**
+
+```go
+const (
+    // ... existing profiles ...
+    ClusterProfileGCPOADPQE ClusterProfile = "gcp-oadp-qe"
+)
+```
+
+**What this does:** This creates a constant that represents your profile name. The value in quotes (`"gcp-oadp-qe"`) is what you'll use when referencing this profile in CI jobs.
+
+#### 2. Add Your Profile to the Valid Profiles List
+
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+**Function:** [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713)  
+**Location:** Around [line 1713](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713)
+
+Find the `ClusterProfiles()` function and add your new constant to the list it returns.
+
+**Example from PR 4685:**
+
+```go
+func ClusterProfiles() []ClusterProfile {
+    return []ClusterProfile{
+        // ... existing profiles ...
+        ClusterProfileGCPOADPQE,
+    }
+}
+```
+
+**What this does:** This makes your profile "official" - it's now included in the list of profiles that the system recognizes as valid.
+
+#### 3. Map Your Profile to a Cluster Type
+
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+**Method:** [`ClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998)  
+**Location:** Around [line 1998](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998)
+
+Find the `ClusterType()` method and add a case for your profile. The cluster type is used by the OpenShift installer to know which cloud platform it's working with.
+
+**Note:** If you're creating a profile that reuses an existing cluster type (for example, a new GCP profile that uses the same `gcp` cluster type), you may not need to add a case here. The `gcp-oadp-qe` profile in PR 4685 reused the existing `gcp` cluster type, so no `ClusterType()` case was added.
+
+**Example for a new cluster type:**
+
+```go
+func (p ClusterProfile) ClusterType() string {
+    switch p {
+    // ... existing cases ...
+    case ClusterProfileYourNewProfile:
+        return "your-new-cluster-type"
+    default:
+        return ""
+    }
+}
+```
+
+**What this does:** When a test uses your cluster profile, this tells the system what type of cluster to create. The value you return here is passed to tests as the `$CLUSTER_TYPE` environment variable.
+
+#### 4. Map Your Profile to a Lease Type
+
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+**Method:** [`LeaseType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379)  
+**Location:** Around [line 2379](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379)
+
+Find the `LeaseType()` method and add a case for your profile. The lease type determines which cloud resources your tests can use.
+
+**Example from PR 4685:**
+
+```go
+func (p ClusterProfile) LeaseType() string {
+    switch p {
+    // ... existing cases ...
+    case ClusterProfileGCPOADPQE:
+        return "gcp-oadp-qe-quota-slice"
+    default:
+        return ""
+    }
+}
+```
+
+**What this does:** This tells the system which "lease" (reserved cloud resources) to use for your profile. The naming convention is `<profile-name>-quota-slice`. This lease must be registered separately in the `openshift/release` repository (see [Adding New Leases](#adding-new-leases) below).
+
+#### 5. Add to LeaseTypeFromClusterType (if needed)
+
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+**Function:** [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423)  
+**Location:** Around [line 2423](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423)
+
+If you're creating a completely new cluster type (not reusing an existing one), you also need to add it to the `LeaseTypeFromClusterType()` function. This is mainly used for older template-based tests.
+
+**Example from PR 4685:**
+
+```go
+func LeaseTypeFromClusterType(t string) (string, error) {
+    switch t {
+    // ... existing cases ...
+    case "gcp-oadp-qe":
+        return t + "-quota-slice", nil
+    default:
+        return "", fmt.Errorf("invalid cluster type %q", t)
+    }
+}
+```
+
+**What this does:** This provides a fallback way to convert cluster types to lease types for legacy test templates.
+
+#### Summary of Code Changes
+
+Here's a quick checklist of what you need to add to [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go):
+
+- [ ] Add constant: `ClusterProfileYourName ClusterProfile = "your-profile-name"` ([constants section](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1517))
+- [ ] Add to [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713) list
+- [ ] Add case in [`ClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998) method
+- [ ] Add case in [`LeaseType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379) method
+- [ ] Add case in [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423) (if new cluster type)
+
+Once you've made these changes, create a pull request to `openshift/ci-tools`. You can reference [PR 4685](https://github.com/openshift/ci-tools/pull/4685) as an example of the complete set of changes needed.
 
 {{< alert title="Note" color="info" >}}
 Default AWS accounts for the OpenShift organization have automated periodic deprovisioning jobs in place. These are designed to clean up residual resources left behind due to failed deprovisioning steps or network interruptions, helping to prevent quota limit issues.
 {{< /alert >}}
 
-### Cluster type
+### Understanding Cluster Type
 
-This value is passed to tests via the `CLUSTER_TYPE` environment variable, as
-mentioned in the introduction.  It is used for cloud-provider-specific behavior
-by step registry components such as the OpenShift installer steps
-([e.g.](https://steps.ci.openshift.org/reference/ipi-install-install)).
+The **cluster type** is a string that identifies what kind of cloud platform your tests will run on. This value gets passed to your test containers as the `$CLUSTER_TYPE` environment variable.
 
-For profiles created for completely new platforms, this should be a unique value
-and will probably require corresponding changes to the installation steps.
-Profiles which are derivatives of existing ones should likely retain the cluster
-type unless they require special treatment in the installation process.
+**How to choose a cluster type:**
+
+- **For a completely new platform:** Create a unique cluster type name (like `gcp-oadp-qe`). You'll likely need to work with the OpenShift installer team to add support for this new platform type.
+- **For a variant of an existing platform:** You can reuse the existing cluster type. For example, if you're creating a new AWS profile that works the same way as the standard AWS profile, you could use `aws` as the cluster type.
+
+The cluster type is used by the OpenShift installer and other step registry components to know how to set up your cluster. For example, the [`ipi-install-install`](https://steps.ci.openshift.org/reference/ipi-install-install) step uses this to determine which cloud provider APIs to call.
 
 ### Adding New Leases
 
-In the pull request to `openshift/ci-tools`, the mapping between a `cluster_profile` and the implicit `lease` that will be requested is determined. The standard is to use leases named `<name>-quota-slice`, so the `aws` profile uses `aws-quota-slice`. The resources for leasing must be [registered](/docs/architecture/quota-and-leases/#adding-a-new-type-of-resource) with our leasing server ([example](https://github.com/openshift/release/pull/32536)).
+A **lease** is a reservation of cloud resources (like AWS accounts or GCP projects) that your tests can use. When a test runs with your cluster profile, it automatically requests a lease so it has access to the cloud resources it needs.
+
+**The naming convention:** Leases are typically named `<profile-name>-quota-slice`. For example:
+
+- The `aws` profile uses `aws-quota-slice`
+- The `gcp-oadp-qe` profile uses `gcp-oadp-qe-quota-slice`
+
+**What you need to do:**
+
+1. **In your `ci-tools` PR:** You've already mapped your profile to a lease type in the `LeaseType()` method (step 4 above).
+
+2. **In a separate PR to `openshift/release`:** You need to register the actual lease resources with the leasing server (Boskos). This tells the system "here are the cloud accounts/projects that can be used for this lease type."
+
+   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)
+
+   See the [Adding a New Type of Resource](/docs/architecture/quota-and-leases/#adding-a-new-type-of-resource) documentation for details on how to register leases. You can also reference [this example PR](https://github.com/openshift/release/pull/32536) that shows how leases are registered.
+
+**Important:** The lease name you use in `openshift/release` must match exactly what you return from the `LeaseType()` method in `ci-tools`.
 
 ### Providing Credentials
 
-The credentials provided to tests that declare a `cluster_profile` are a mix
-of content owned by the test platform and content owned by the users adding 
-a new `cluster_profile`. The secret used to hold this content is 
-`cluster-secrets-<name>`, so the `aws` profile uses `cluster-secrets-aws`. 
-When adding a new profile, a pull request must change the `ci-secret-bootstrap` 
-configuration to seed this credential with content owned by the platform, 
-like central pull secrets for image registries ([example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd)). 
-In addition, any user-provided secrets must be added using 
-the [self-service portal](/docs/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) 
-to add it to the clusters, using the following keys in Vault (the destination 
-namespace/name needs to match the item added to the `ci-secret-bootstrap` config):
+Your tests need credentials (like cloud account keys, image registry passwords, etc.) to run. These credentials are stored in a Kubernetes Secret and automatically mounted into your test containers.
 
-{{< highlight yaml >}}
-secretsync/target-namespace: "ci"
-secretsync/target-name: "cluster-secrets-<name>"
-{{< / highlight >}}
+**How it works:**
 
-Credentials provided for the test containers are mounted using a simple `Secret` mount.
-  - The secret name must match the item in the `ci-secret-bootstrap` configuration.
-  - If the convention for the secret to be named `cluster-secrets-<name>` is 
-    followed, no other action is required.
-  - To use a custom secret name for the new cluster profile, 
-    e.g. when the new profile shares credentials with another profile,
-    a new field must be added to the [cluster profiles configuration](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml) to override the default naming:
-    ```
-    - profile: <name>
-      secret: custom-cluster-profile-secret
-    ```
-    In this case, **two pull requests are required**; the first pull request should modify 
-    the `ci-secret-bootstrap` configuration and must be merged before proceeding with the second
-    pull request, which modifies the [cluster profiles configuration](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
+1. **Secret naming:** The secret is always named `cluster-secrets-<profile-name>`. For example:
+   - `aws` profile → `cluster-secrets-aws`
+   - `gcp-oadp-qe` profile → `cluster-secrets-gcp-oadp-qe`
 
+2. **Two types of credentials:**
+   - **Platform-provided:** Things like central image registry pull secrets that the CI platform team manages
+   - **Your credentials:** Cloud account keys, SSH keys, and other secrets specific to your profile
 
-#### Storing AWS credentials as secrets
+3. **Setting it up:**
 
-Some workflows will provision resources before installing the cluster (e.g.,
-[`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws). These types of
-workflows requires AWS credentials exposed to the workflow as a Vault secret.
-It's important to note that the secret must contain a key-value pair where the
-key name is `.awscred` and the value is the contents of an [AWS credentials
-file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
-Replace the placeholder values as appropriate:
+   **Step 1:** Create a pull request to `openshift/release` that adds your secret to the `ci-secret-bootstrap` configuration. This "seeds" the secret with platform-provided content.
 
-```
+   **File:** [`core-services/ci-secret-bootstrap/_config.yaml`](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml)
+
+   See [this example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd) for reference.
+
+   **Step 2:** Add your custom credentials (cloud keys, SSH keys, etc.) using the [self-service portal](/docs/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret). When adding secrets in Vault, make sure to set these metadata keys:
+
+   ```yaml
+   secretsync/target-namespace: "ci"
+   secretsync/target-name: "cluster-secrets-<your-profile-name>"
+   ```
+
+   These metadata keys tell the system to automatically sync your Vault secrets into the Kubernetes Secret that your tests will use.
+
+**Special cases:**
+
+- **Using the default naming:** If you follow the `cluster-secrets-<name>` convention, no additional configuration is needed. The system will automatically find and mount your secret.
+
+- **Using a custom secret name:** If you want to share credentials with another profile or use a different name, you need to:
+  1. First, create the PR that adds your secret to `ci-secret-bootstrap` (and wait for it to merge)
+  2. Then, create a second PR that modifies the cluster profiles configuration to specify your custom secret name:
+
+     **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
+
+     ```yaml
+     - profile: <your-profile-name>
+       secret: custom-cluster-profile-secret
+     ```
+
+#### Storing AWS Credentials
+
+If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile secret.
+
+**Important:** The secret must contain a key named `.awscred` (note the leading dot). The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+
+**Format:**
+
+```ini
 [default]
-aws_access_key_id=<placeholder-id>
-aws_secret_access_key=<placeholder-secret>
+aws_access_key_id=YOUR_ACCESS_KEY_ID
+aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
 ```
 
-#### Storing SSH key pairs
+Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual AWS credentials.
 
-In addition to credentials, some workflows (e.g., `ipi-aws`) require ssh keys,
-which allow you to access CI clusters. This can be important for debugging
-issues. We recommend generating a new key pair specifically for CI usage.
+#### Storing SSH Key Pairs
 
-SSH key pairs are also stored in Vault, just like provider credentials. They
-should be stored within the same secret as the provider credentials, but as
-separate key-value pairs. You'll have two new key-value pairs, where the keys
-are `ssh-publickey` and `ssh-privatekey` and they store the file contents of
-the SSH public and private key, respectively.
+Some workflows (like `ipi-aws`) require SSH keys so you can access and debug CI clusters when needed.
 
-#### Supplying an AWS IP Pool
+**Best practice:** Generate a new SSH key pair specifically for CI usage. Don't reuse your personal SSH keys.
 
-It is possible to take advantage of AWS's [BYOIP feature](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-byoip.html)
-to allow your test's ephemeral clusters to utilize configured IP Pools for cost savings. To utilize this, a few steps must be taken:
-1. Set up IP Pool in utilized region(s). See AWS [docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-byoip.html). Note that this feature can only handle **one** IP Pool per region.
-2. Add `Boskos` configuration for _every_ region you intend to utilize. See the [example](https://github.com/openshift/release/blob/6a8f889b353fd3764b7c877bb0cd52cf7ea68aba/core-services/prow/02_config/_boskos.yaml#L435-L438), noting, the `name` should be `{cluster-profile-name}-ip-pools-{region}`.
-3. Add your lease name (without the region suffix) to the `ci-tools` [configuration](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/types.go#L1940-L1947) for your cluster-profile.
-4. (optional) If you **don't** want the [standard](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/leases.go#L50-L69) OpenShift branch validation to determine which tests can utilize the pools, modify [this function](https://github.com/openshift/ci-tools/blob/07c36f6c2e38780a54b071ea8c880e1f8dd9a7c9/pkg/api/types.go#L1952-L1957) to return `false` for your cluster-profile.
+**How to store them:**
+
+SSH keys are stored in the same Vault secret as your other credentials, but as separate key-value pairs:
+
+- **Key name:** `ssh-publickey`  
+  **Value:** The contents of your SSH public key file (usually `~/.ssh/id_rsa.pub`)
+
+- **Key name:** `ssh-privatekey`  
+  **Value:** The contents of your SSH private key file (usually `~/.ssh/id_rsa`)
+
+**Example:** If you generate a key pair with `ssh-keygen -t rsa -f ci-key`, you would:
+
+1. Store the contents of `ci-key.pub` as the `ssh-publickey` value
+2. Store the contents of `ci-key` as the `ssh-privatekey` value
+
+#### Using AWS IP Pools (Advanced)
+
+AWS supports a "Bring Your Own IP" (BYOIP) feature that lets you use your own IP addresses for cost savings. If you want to use this with your cluster profile, you need to:
+
+1. **Set up the IP Pool in AWS:** Follow AWS's [BYOIP documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-byoip.html) to configure IP pools in each region you'll use. **Note:** AWS only supports one IP pool per region.
+
+2. **Register IP Pool leases in Boskos:** Add configuration in `openshift/release` for each region. The lease name format should be `{cluster-profile-name}-ip-pools-{region}`.
+
+   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)  
+   **Example:** See [this example](https://github.com/openshift/release/blob/6a8f889b353fd3764b7c877bb0cd52cf7ea68aba/core-services/prow/02_config/_boskos.yaml#L435-L438)
+
+3. **Update ci-tools configuration:** Add your lease name (without the region suffix) to the IP pool configuration in `ci-tools`.
+
+   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+   **Location:** Around [line 1940](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1940)
+
+4. **Optional - Custom branch validation:** By default, only tests on certain OpenShift branches can use IP pools. If you want different behavior, modify the validation function to return `false` for your cluster profile.
+
+   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
+   **Function:** Around [line 1952](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1952)
 
 ## Private Cluster Profiles
 
-To restrict the usage of your cluster profile to specific organizations and repositories, 
+To restrict the usage of your cluster profile to specific organizations and repositories,
 you can create a pull request in the `openshift/release` repository.
-Within the pull request, add your repository or organization to the [cluster profiles configuration file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
+
+**File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
+
+Within the pull request, add your repository or organization to the cluster profiles configuration file.
 
 For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/README.md).
 
@@ -186,8 +391,7 @@ command: when a VPN connection is requested at the test level, it is set up
 automatically by the test platform with no changes required to individual tests.
 
 {{< alert title="Note" color="info" >}}
-Details of the implementation can be found in the
-<a href="https://docs.google.com/document/d/1mPjrHVS1EvmLdq4kGhRazTpGu6xVZDyGpVAphVZhX4w/edit?resourcekey=0-KA-qXXq1J2bTR7o6Kit9Vw">design document</a>.
+Details of the implementation can be found in the [design document](https://docs.google.com/document/d/1mPjrHVS1EvmLdq4kGhRazTpGu6xVZDyGpVAphVZhX4w/edit?resourcekey=0-KA-qXXq1J2bTR7o6Kit9Vw).
 {{< /alert >}}
 
 ### Cluster profile
