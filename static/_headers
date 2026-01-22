@@ -1,0 +1,13 @@
+# Security Headers
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# Content Security Policy
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.jquery.com https://unpkg.com https://cdn.jsdelivr.net https://cdn.datatables.net; style-src 'self' 'unsafe-inline' https://cdn.datatables.net; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cluster-display.ci.openshift.org https://helpdesk-faq-ci.apps.ci.l2s4.p1.openshiftapps.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+
+# Strict Transport Security (HTTPS only)
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+

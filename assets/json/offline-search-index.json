@@ -1,0 +1,146 @@
+{{- $.Scratch.Add "offline-search-index" slice -}}
+{{- range where .Site.AllPages ".Params.exclude_search" "!=" true -}}
+{{/* Enhanced search index with comprehensive content extraction for better searchability */}}
+{{- $title := .Title | default "" -}}
+{{- $description := .Description | default .Summary | default "" -}}
+{{- $content := .Plain | htmlUnescape | default "" -}}
+{{- $categories := .Params.categories | default (slice) -}}
+{{- $tags := .Params.tags | default (slice) -}}
+{{- $section := .Section | default "" -}}
+{{- $type := .Type | default "" -}}
+{{- $excerpt := ($description | default $content) | htmlUnescape | truncate (.Site.Params.offlineSearchSummaryLength | default 150) | htmlUnescape -}}
+{{- $keywords := .Params.keywords | default (slice) -}}
+
+{{- /* Extract headings from Table of Contents for better keyword matching */}}
+{{- $headingText := "" -}}
+{{- if .TableOfContents -}}
+{{- $headingMatches := findRE `>([^<]+)</a>` .TableOfContents -}}
+{{- range $headingMatches -}}
+{{- $headingText = printf "%s %s" $headingText (. | replaceRE `>` "" | replaceRE `</a` "") -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* Extract code blocks and technical terms - simplified approach */}}
+{{- $codeText := "" -}}
+{{- $codeMatches := findRE "```[^`]+```" $content -}}
+{{- range $codeMatches -}}
+{{- $cleanedCode := . | replaceRE "```[a-z]*" "" | replaceRE "`" "" -}}
+{{- $codeText = printf "%s %s" $codeText ($cleanedCode | trim) -}}
+{{- end -}}
+
+{{- /* Extract file paths and technical identifiers */}}
+{{- $pathText := "" -}}
+{{- $pathMatches := findRE "(?:/[\\w\\-./]+|\\w+\\.(?:yaml|yml|json|go|sh|py|js|ts|md))" $content -}}
+{{- range $pathMatches -}}
+{{- $pathText = printf "%s %s" $pathText . -}}
+{{- end -}}
+
+{{- /* Extract command names and flags (common in CI docs) */}}
+{{- $commandText := "" -}}
+{{- $commandMatches := findRE "(?:oc|kubectl|ci-operator|prow|test|make|git|docker|podman|hugo)\\s+[\\w\\-]+" $content -}}
+{{- range $commandMatches -}}
+{{- $commandText = printf "%s %s" $commandText . -}}
+{{- end -}}
+
+{{- /* Extract environment variables and config keys */}}
+{{- $envText := "" -}}
+{{- $envMatches := findRE "\\$?[A-Z_][A-Z0-9_]+" $content -}}
+{{- range $envMatches -}}
+{{- $envText = printf "%s %s" $envText . -}}
+{{- end -}}
+
+{{- /* Extract package names, imports, and references */}}
+{{- $packageText := "" -}}
+{{- $packageMatches := findRE "(?:github\\.com|golang\\.org|k8s\\.io|openshift)/[\\w\\-./]+" $content -}}
+{{- range $packageMatches -}}
+{{- $packageText = printf "%s %s" $packageText . -}}
+{{- end -}}
+
+{{- /* Extract markdown links and their text */}}
+{{- $linkText := "" -}}
+{{- $linkMatches := findRE "\\[([^\\]]+)\\]" $content -}}
+{{- range $linkMatches -}}
+{{- $linkText = printf "%s %s" $linkText (. | replaceRE "\\[|\\]" "") -}}
+{{- end -}}
+
+{{- /* Extract frontmatter fields that might contain useful keywords */}}
+{{- $frontmatterText := "" -}}
+{{- if .Params -}}
+{{- range $key, $value := .Params -}}
+{{- if and (ne $key "exclude_search") (ne $key "draft") -}}
+{{- if reflect.IsSlice $value -}}
+{{- $frontmatterText = printf "%s %s" $frontmatterText (delimit $value " ") -}}
+{{- else if reflect.IsMap $value -}}
+{{- /* Skip nested maps */}}
+{{- else -}}
+{{- $frontmatterText = printf "%s %s %s" $frontmatterText $key $value -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* Include page path segments as keywords */}}
+{{- $pathSegments := split .RelPermalink "/" -}}
+{{- $pathKeywords := delimit $pathSegments " " -}}
+
+{{- /* Create comprehensive searchable text with all extracted content */}}
+{{- $allText := printf "%s %s %s %s %s %s %s %s %s %s %s %s" 
+  ($title | default "") 
+  ($description | default "") 
+  ($content | default "") 
+  $headingText 
+  $codeText 
+  $pathText 
+  $commandText 
+  $envText 
+  $packageText 
+  $linkText 
+  $frontmatterText 
+  $pathKeywords -}}
+
+{{- if $categories -}}
+{{- $allText = printf "%s %s" $allText (delimit $categories " ") -}}
+{{- end -}}
+{{- if $tags -}}
+{{- $allText = printf "%s %s" $allText (delimit $tags " ") -}}
+{{- end -}}
+{{- if $keywords -}}
+{{- $allText = printf "%s %s" $allText (delimit $keywords " ") -}}
+{{- end -}}
+{{- if $section -}}
+{{- $allText = printf "%s %s" $allText $section -}}
+{{- end -}}
+{{- if $type -}}
+{{- $allText = printf "%s %s" $allText $type -}}
+{{- end -}}
+
+{{- /* Normalize and clean the text for better searching */}}
+{{- $allText = $allText | lower | replaceRE "[^\\w\\s\\-./]" " " | replaceRE "\\s+" " " | replaceRE "^\\s+|\\s+$" "" -}}
+
+{{- /* Create additional searchable fields */}}
+{{- $searchableCode := $codeText | lower | replaceRE "[^\\w\\s\\-./]" " " | replaceRE "\\s+" " " | replaceRE "^\\s+|\\s+$" "" -}}
+{{- $searchableCommands := $commandText | lower | replaceRE "\\s+" " " | replaceRE "^\\s+|\\s+$" "" -}}
+{{- $searchablePaths := $pathText | lower | replaceRE "^\\s+|\\s+$" "" -}}
+
+{{- $.Scratch.Add "offline-search-index" (dict 
+  "ref" .RelPermalink 
+  "title" $title
+  "categories" $categories
+  "tags" $tags
+  "keywords" $keywords
+  "section" $section
+  "type" $type
+  "description" $description
+  "body" $content
+  "excerpt" $excerpt
+  "allText" $allText
+  "headings" $headingText
+  "code" $searchableCode
+  "commands" $searchableCommands
+  "paths" $searchablePaths
+  "date" (.Date.Format "2006-01-02")
+  "lastmod" (.Lastmod.Format "2006-01-02")
+) -}}
+{{- end -}}
+{{- $.Scratch.Get "offline-search-index" | jsonify -}}
+

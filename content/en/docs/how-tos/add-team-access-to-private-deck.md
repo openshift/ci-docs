@@ -1,5 +1,5 @@
 How to Add Team Access to qe-private-deck
-=========================================
+======
 
 To grant a team access to the **qe-private-deck**, you need to:
 
