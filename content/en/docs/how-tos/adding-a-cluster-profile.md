@@ -307,7 +307,7 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
      **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
 
      ```yaml
-     - profile: <your-profile-name>
+     - profile: <your-profile-name>  # This needs to match the constant you added into [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)
        secret: custom-cluster-profile-secret
      ```
 
