@@ -275,7 +275,7 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
    - `aws` profile → `cluster-secrets-aws`
    - `gcp-oadp-qe` profile → `cluster-secrets-gcp-oadp-qe`
 
-2. **Two types of credentials:**
+2. **Two types of credentials are needed:**
    - **Platform-provided:** Things like central image registry pull secrets that the CI platform team manages
    - **Your credentials:** Cloud account keys, SSH keys, and other secrets specific to your profile
 
@@ -301,7 +301,7 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 - **Using the default naming:** If you follow the `cluster-secrets-<name>` convention, no additional configuration is needed. The system will automatically find and mount your secret.
 
 - **Using a custom secret name:** If you want to share credentials with another profile or use a different name, you need to:
-  1. First, create the PR that adds your secret to `ci-secret-bootstrap` (and wait for it to merge)
+  1. First, same as above, create the PR that adds your secret to `ci-secret-bootstrap` (and wait for it to merge)
   2. Then, create a second PR that modifies the cluster profiles configuration to specify your custom secret name:
 
      **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
