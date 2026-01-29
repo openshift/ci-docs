@@ -1,0 +1,26 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: ci-docs-test
+  namespace: dmistry
+  labels:
+    app: ci-docs-test
+spec:
+  source:
+    type: Binary
+    binary: {}
+    # Note: This BuildConfig expects binary source to be provided via:
+    # oc --context build01 --as system:admin start-build ci-docs-test --from-dir=. -n dmistry
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ci-docs-test:latest
+  triggers:
+    - type: ConfigChange
+  runPolicy: Serial
+

@@ -6,11 +6,29 @@ sectionPagesMenu: "main"
 contentDir: "content/en"
 params:
   offlineSearch: true
+  # Enhanced search configuration
+  search:
+    enabled: true
+    indexFullContent: true
+  # Enhanced search features
+  searchSuggestions: true
+  # Enhanced search configuration
+  enhancedSearch: true
   github_branch: main
   github_repo: "https://github.com/openshift/ci-docs"
   api_v1_url: "https://cluster-display.ci.openshift.org"
   helpdesk_faq_api_url: "https://helpdesk-faq-ci.apps.ci.l2s4.p1.openshiftapps.com/api/v1/faq-items"
-enableGitInfo: true
+  # SEO and AI indexing improvements
+  description: "Comprehensive documentation for OpenShift CI/CD platform, including CI Operator, Step Registry, and testing workflows"
+  keywords: ["OpenShift", "CI/CD", "Continuous Integration", "Kubernetes", "Prow", "CI Operator", "Step Registry"]
+  # Search configuration
+  offlineSearchMaxResults: 20
+  offlineSearchSummaryLength: 150
+  # Sitemap configuration
+  sitemap:
+    changefreq: "weekly"
+    priority: 0.7
+enableGitInfo: false
 menu:
   main:
   - name: CI Operator Reference

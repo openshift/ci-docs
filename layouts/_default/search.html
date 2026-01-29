@@ -1,0 +1,451 @@
+{{ define "main" }}
+<section class="row td-search-result">
+<div class="col-12 col-md-10 offset-md-1">
+<h1 class="mb-4">{{ .Title }}</h1>
+
+{{ if .Site.Params.gcs_engine_id }}
+<!-- Google Custom Search -->
+<script>
+(function() {
+var cx = '{{ .Site.Params.gcs_engine_id }}';
+var gcse = document.createElement('script');
+gcse.type = 'text/javascript';
+gcse.async = true;
+gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+var s = document.getElementsByTagName('script')[0];
+s.parentNode.insertBefore(gcse, s);
+})();
+</script>
+<gcse:searchresults-only></gcse:searchresults-only>
+{{ else if .Site.Params.offlineSearch }}
+    <!-- Enhanced Offline Search with Fuse.js -->
+<div class="search-container">
+  <div class="search-input-wrapper mb-4">
+    <input 
+      type="search" 
+      id="search-page-input" 
+      class="form-control form-control-lg td-search-input" 
+      placeholder="🔍 Search documentation..." 
+      aria-label="Search documentation"
+      autocomplete="off"
+      data-offline-search-index-json-src="{{ $offlineSearchIndex := resources.Get "json/offline-search-index.json" | resources.ExecuteAsTemplate "offline-search-index.json" . }}{{ $offlineSearchIndexFingerprint := $offlineSearchIndex | resources.Fingerprint "md5" }}{{ $offlineSearchIndexFingerprint.RelPermalink }}"
+      data-offline-search-base-href="/"
+      data-offline-search-max-results="{{ .Site.Params.offlineSearchMaxResults | default 20 }}"
+    />
+  </div>
+  <div id="search-results" class="search-results">
+    {{ if .Params.q }}
+    <p class="text-muted">Searching for: <strong>{{ .Params.q }}</strong></p>
+    {{ else }}
+    <p class="text-muted">Enter a search term above to find documentation.</p>
+    {{ end }}
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  // Get search query from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const queryParam = urlParams.get('q');
+  
+  if (queryParam) {
+    const searchInput = document.getElementById('search-page-input');
+    if (searchInput) {
+      searchInput.value = decodeURIComponent(queryParam);
+      // Trigger search after a short delay to ensure scripts are loaded
+      setTimeout(() => {
+        if (typeof Fuse !== 'undefined') {
+          performPageSearch(queryParam);
+        } else {
+          // Wait for scripts to load
+          window.addEventListener('load', () => {
+            setTimeout(() => performPageSearch(queryParam), 500);
+          });
+        }
+      }, 500);
+    }
+  }
+  
+  function performPageSearch(query) {
+    const searchInput = document.getElementById('search-page-input');
+    const resultsDiv = document.getElementById('search-results');
+    
+    if (!searchInput || !resultsDiv) return;
+    
+    const indexSrc = searchInput.getAttribute('data-offline-search-index-json-src');
+    const baseHref = searchInput.getAttribute('data-offline-search-base-href') || '/';
+    const maxResults = parseInt(searchInput.getAttribute('data-offline-search-max-results')) || 20;
+    
+    // Load search index
+    if (!indexSrc) {
+      resultsDiv.innerHTML = '<p class="text-danger">Search index not configured. Please check the search input configuration.</p>';
+      return;
+    }
+    
+    fetch(indexSrc)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load search index: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data || data.length === 0) {
+          resultsDiv.innerHTML = '<p class="text-warning">Search index is empty. No documents available for search.</p>';
+          return;
+        }
+        
+        // Use Fuse.js for fast, lightweight fuzzy search
+        if (typeof Fuse !== 'undefined') {
+          const fuseOptions = {
+            keys: [
+              { name: 'title', weight: 0.4 },
+              { name: 'description', weight: 0.3 },
+              { name: 'body', weight: 0.1 },
+              { name: 'headings', weight: 0.2 },
+              { name: 'code', weight: 0.15 },
+              { name: 'commands', weight: 0.15 },
+              { name: 'keywords', weight: 0.2 },
+              { name: 'categories', weight: 0.15 },
+              { name: 'tags', weight: 0.15 },
+              { name: 'section', weight: 0.1 },
+              { name: 'allText', weight: 0.05 }
+            ],
+            threshold: 0.3,
+            includeScore: true,
+            includeMatches: true,
+            minMatchCharLength: 2,
+            ignoreLocation: true,
+            findAllMatches: true,
+            useExtendedSearch: true,
+            shouldSort: true
+            // Removed getFn - let Fuse.js use default getter which handles arrays automatically
+          };
+          
+          const fuse = new Fuse(data, fuseOptions);
+          const fuseResults = fuse.search(query, { limit: maxResults });
+          
+          // Convert to display format
+          const results = fuseResults.map(result => ({
+            ref: result.item.ref,
+            score: result.score,
+            matches: result.matches || [],
+            item: result.item
+          }));
+          
+          const resultDetails = new Map();
+          data.forEach(doc => {
+            resultDetails.set(doc.ref, {
+              title: doc.title || '',
+              excerpt: doc.excerpt || doc.description || '',
+              description: doc.description || '',
+              categories: doc.categories || [],
+              tags: doc.tags || [],
+              keywords: doc.keywords || [],
+              section: doc.section || '',
+              type: doc.type || ''
+            });
+          });
+          
+          // Display results with Fuse.js highlighting
+          displayFuseSearchResults(results, resultDetails, baseHref, query, resultsDiv);
+        } else {
+          // Fuse.js not available - show error
+          console.error('Fuse.js not loaded. Please refresh the page.');
+          resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+              <h4>Search unavailable</h4>
+              <p>Search library not loaded. Please refresh the page.</p>
+            </div>
+          `;
+        }
+        });
+      })
+      .catch(error => {
+        console.error('Search error:', error);
+        resultsDiv.innerHTML = `
+          <div class="alert alert-danger">
+            <h4>Error loading search</h4>
+            <p>Failed to load search index: ${error.message}</p>
+            <p>Please try refreshing the page or contact support if the problem persists.</p>
+          </div>
+        `;
+      });
+  }
+  
+  function displaySearchResults(results, resultDetails, baseHref, query, container) {
+    if (results.length === 0) {
+      container.innerHTML = `
+        <div class="alert alert-info">
+          <h4>No results found</h4>
+          <p>I did not find information related to "<strong>${escapeHtml(query)}</strong>".</p>
+          <p>Try:</p>
+          <ul>
+            <li>Checking your spelling</li>
+            <li>Using different keywords</li>
+            <li>Using more general terms</li>
+          </ul>
+        </div>
+      `;
+      return;
+    }
+    
+    let html = `<div class="search-results-header mb-3">
+      <h3 class="mb-3">Found ${results.length} result${results.length !== 1 ? 's' : ''} for "<strong>${escapeHtml(query)}</strong>"</h3>
+    </div>`;
+    
+    html += '<div class="search-results-list">';
+    results.forEach((r, index) => {
+      const doc = resultDetails.get(r.ref);
+      const href = baseHref + r.ref.replace(/^\//, '');
+      const excerpt = highlightQuery(doc.excerpt || doc.description || '', query);
+      
+      html += `
+        <div class="search-result-item card mb-3 shadow-sm">
+          <div class="card-body">
+            <div class="search-result-path text-muted small mb-1">
+              <span class="badge badge-light">${escapeHtml(r.ref.split('/').filter(p => p).slice(0, 3).join(' / '))}</span>
+            </div>
+            <h4 class="search-result-title mb-2">
+              <a href="${escapeHtml(href)}" class="text-decoration-none text-primary">${highlightQuery(doc.title, query)}</a>
+            </h4>
+            ${excerpt ? `<p class="search-result-excerpt mb-2 text-muted">${excerpt}</p>` : ''}
+            ${doc.categories && doc.categories.length > 0 ? `
+              <div class="search-result-meta">
+                <span class="badge badge-secondary mr-1">${doc.categories.join('</span> <span class="badge badge-secondary mr-1">')}</span>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+  }
+  
+  function highlightQuery(text, query) {
+    if (!text || !query) return escapeHtml(text);
+    const escapedText = escapeHtml(text);
+    const tokens = query.toLowerCase().split(/\s+/);
+    let highlighted = escapedText;
+    tokens.forEach(token => {
+      if (token.length > 2) {
+        const regex = new RegExp(`(${escapeRegex(token)})`, 'gi');
+        highlighted = highlighted.replace(regex, '<mark>$1</mark>');
+      }
+    });
+    return highlighted;
+  }
+  
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  
+  // Handle search input on search page - prevent offline-search.js from interfering
+  const searchInput = document.getElementById('search-page-input');
+  if (searchInput) {
+    // Stop propagation to prevent offline-search.js from handling this
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const query = this.value.trim();
+        if (query) {
+          window.history.pushState({}, '', `?q=${encodeURIComponent(query)}`);
+          performPageSearch(query);
+        }
+        return false;
+      }
+    }, true); // Use capture phase to handle before offline-search.js
+    
+    // Also handle input changes for live search
+    let searchTimeout;
+    searchInput.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      const query = this.value.trim();
+      if (query.length > 2) {
+        searchTimeout = setTimeout(() => {
+          window.history.pushState({}, '', `?q=${encodeURIComponent(query)}`);
+          performPageSearch(query);
+        }, 500);
+      } else if (query.length === 0) {
+        const resultsDiv = document.getElementById('search-results');
+        if (resultsDiv) {
+          resultsDiv.innerHTML = '<p class="text-muted">Enter a search term above to find documentation.</p>';
+        }
+      }
+    });
+  }
+})();
+</script>
+
+<style>
+.search-container {
+  min-height: 400px;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input-wrapper::before {
+  content: "🔍";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#search-page-input {
+  padding-left: 3rem !important;
+  border: 2px solid rgba(48, 99, 142, 0.2) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+}
+
+#search-page-input:focus {
+  border-color: #30638E !important;
+  box-shadow: 0 0 0 3px rgba(48, 99, 142, 0.1) !important;
+  outline: none;
+}
+
+.search-results-header h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #30638E;
+  font-weight: 600;
+}
+
+.search-result-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(48, 99, 142, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.search-result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(48, 99, 142, 0.15), 0 2px 8px rgba(0,0,0,0.1) !important;
+  border-color: rgba(48, 99, 142, 0.3) !important;
+}
+
+.search-result-item .card-body {
+  padding: 1.5rem;
+}
+
+.search-result-title a {
+  color: #30638E;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.search-result-title a:hover {
+  color: #3772FF;
+  transform: translateX(4px);
+}
+
+.search-result-excerpt {
+  color: #495057;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+}
+
+.search-result-path {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+  color: #72A1E5;
+  background: rgba(48, 99, 142, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.search-result-meta .badge {
+  background: linear-gradient(135deg, rgba(48, 99, 142, 0.1) 0%, rgba(114, 161, 229, 0.1) 100%);
+  color: #30638E;
+  border: 1px solid rgba(48, 99, 142, 0.2);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+mark {
+  background: linear-gradient(135deg, rgba(255, 243, 205, 0.8) 0%, rgba(255, 235, 59, 0.3) 100%);
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 500;
+  color: #30638E;
+}
+
+.search-results-list {
+  margin-top: 2rem;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, rgba(192, 224, 222, 0.2) 0%, rgba(211, 243, 238, 0.3) 100%);
+  border: 1px solid rgba(48, 99, 142, 0.2);
+  border-radius: 12px;
+  color: #30638E;
+}
+
+.alert-info h4 {
+  color: #30638E;
+  font-weight: 600;
+}
+
+.alert-info ul {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+
+.alert-info li {
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+/* Chrome-specific CSS fixes */
+@supports (-webkit-appearance: none) {
+  .search-result-item {
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+  }
+  
+  #search-page-input:focus {
+    -webkit-appearance: none;
+  }
+  
+  .search-results-list {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Ensure smooth scrolling works in Chrome */
+.search-results-list {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+</style>
+{{ end }}
+</div>
+</section>
+{{ end }}
+

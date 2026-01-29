@@ -1,5 +1,5 @@
 Unofficial Red Hat template for Beamer
-======================================
+===
 
 *Warning: programmer art!*
 

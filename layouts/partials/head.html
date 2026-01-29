@@ -15,9 +15,105 @@
 
 {{ partialCached "favicons.html" . }}
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ with .Title }}{{ . }} | {{ end }}{{ .Site.Title }}{{ end }}</title>
-{{- template "_internal/opengraph.html" . -}}
-{{- template "_internal/schema.html" . -}}
-{{- template "_internal/twitter_cards.html" . -}}
+{{- $description := .Description | default .Summary | default .Site.Params.description | default "" -}}
+{{- if $description -}}
+<meta name="description" content="{{ $description | truncate 160 }}">
+{{- end -}}
+{{- $keywords := .Params.keywords | default .Site.Params.keywords | default (slice) -}}
+{{- if $keywords -}}
+<meta name="keywords" content="{{ if reflect.IsSlice $keywords }}{{ delimit $keywords ", " }}{{ else }}{{ $keywords }}{{ end }}">
+{{- end -}}
+{{- /* Canonical URL for SEO */ -}}
+<link rel="canonical" href="{{ .Permalink }}">
+{{- /* Open Graph and Twitter Card meta tags */ -}}
+<meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}">
+<meta property="og:description" content="{{ $description | truncate 200 }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:site_name" content="{{ .Site.Title }}">
+{{- if .Params.image -}}
+<meta property="og:image" content="{{ .Params.image | absURL }}">
+{{- end -}}
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}">
+<meta name="twitter:description" content="{{ $description | truncate 200 }}">
+{{- if .Params.image -}}
+<meta name="twitter:image" content="{{ .Params.image | absURL }}">
+{{- end -}}
+{{- /* Article meta tags */ -}}
+{{- if .IsPage -}}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- if .Params.author -}}
+<meta property="article:author" content="{{ .Params.author }}">
+{{- end -}}
+{{- if .Params.section -}}
+<meta property="article:section" content="{{ .Params.section }}">
+{{- end -}}
+{{- if .Params.tags -}}
+{{- range .Params.tags -}}
+<meta property="article:tag" content="{{ . }}">
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{/* Enhanced structured data for AI and SEO */}}
+{{ if .IsPage }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": {{ .Title | jsonify }},
+  "description": {{ $description | jsonify }},
+  "author": {
+    "@type": "Organization",
+    "name": "OpenShift CI",
+    "url": "https://github.com/openshift/ci-tools"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OpenShift",
+    "url": "https://www.openshift.com"
+  },
+  "datePublished": "{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}",
+  "dateModified": "{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ .Permalink }}"
+  },
+  "url": "{{ .Permalink }}",
+  {{- if .Params.keywords -}}
+  "keywords": {{ if reflect.IsSlice .Params.keywords }}{{ .Params.keywords | jsonify }}{{ else }}[{{ .Params.keywords | jsonify }}]{{ end }},
+  {{- end -}}
+  {{- if .Params.section -}}
+  "articleSection": {{ .Params.section | jsonify }},
+  {{- end -}}
+  "inLanguage": "{{ .Site.LanguageCode | default "en" }}"
+}
+</script>
+{{ else if .IsHome }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ .Site.Title | jsonify }},
+  "description": {{ $description | jsonify }},
+  "url": "{{ .Site.BaseURL }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "{{ .Site.BaseURL }}search/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OpenShift",
+    "url": "https://www.openshift.com"
+  }
+}
+</script>
+{{ end }}
 {{ if hugo.IsProduction }}
 {{ template "_internal/google_analytics_async.html" . }}
 {{ end }}
@@ -27,11 +123,13 @@
         integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
         crossorigin="anonymous"></script>
 {{ if .Site.Params.offlineSearch }}
+<!-- Fuse.js - Lightweight fuzzy search library for better performance -->
 <script
-        src="https://unpkg.com/lunr@2.3.8/lunr.min.js"
-        integrity="sha384-vRQ9bDyE0Wnu+lMfm57BlYLO0/XauFuKpVsZPs7KEDwYKktWi5+Kz3MP8++DFlRY"
+        src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"
         crossorigin="anonymous"></script>
+        <!-- Note: Using Fuse.js 7.0.0 - lightweight, fast fuzzy search with better highlighting support -->
 {{end}}
+{{/* Enhanced search configuration - removed unused AI libraries for better performance */}}
 {{ if .Site.Params.prism_syntax_highlighting }}
 <!-- stylesheet for Prism -->
 <link rel="stylesheet" href="{{ "/css/prism.css" | relURL }}"/>

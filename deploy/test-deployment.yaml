@@ -1,0 +1,94 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dmistry
+  labels:
+    name: dmistry
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-docs-test
+  namespace: dmistry
+  labels:
+    app: ci-docs-test
+    version: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ci-docs-test
+  template:
+    metadata:
+      labels:
+        app: ci-docs-test
+        version: test
+    spec:
+      containers:
+      - name: nginx
+        image: image-registry.openshift-image-registry.svc:5000/dmistry/ci-docs-test:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ci-docs-test
+  namespace: dmistry
+  labels:
+    app: ci-docs-test
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: ci-docs-test
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ci-docs-test
+  namespace: dmistry
+  labels:
+    app: ci-docs-test
+spec:
+  to:
+    kind: Service
+    name: ci-docs-test
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  # Use a different hostname to avoid conflicts
+  # This will create: ci-docs-test-dmistry.apps.build01.ci.devcluster.openshift.com
+  # Or you can specify a custom hostname if you have access
+  # host: ci-docs-test-dmistry.apps.build01.ci.devcluster.openshift.com
+
