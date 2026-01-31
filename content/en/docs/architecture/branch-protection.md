@@ -4,8 +4,14 @@ description: An overview of the integration between OpenShift CI and GitHub bran
 ---
 ## What Is Branch Protection?
 
-Branch protection is a repository setting that enforces certain rules when trying to merge to a protected branch. See
-the [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/about-protected-branches)
+Branch protection is a GitHub feature that helps maintain code quality by preventing direct pushes to important branches (like `main` or `master`). Instead, changes must go through pull requests and pass required checks.
+
+Think of it as a safety gate - you can't accidentally break the main branch because:
+- All changes must be reviewed
+- Required tests must pass
+- The code must be up-to-date with the target branch
+
+See the [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/about-protected-branches)
 for more details.
 
 {{< alert title="Note" color="info" >}}
@@ -34,15 +40,27 @@ blocking](https://docs.prow.k8s.io/docs/jobs#requiring-jobs-for-auto-merge-throu
 
 ## How Do We Set up Branch Protection?
 
+Good news: OpenShift CI handles branch protection automatically for you!
+
+### Automatic Setup
+
 Branch Protection requires no manual set-up for repositories with presubmit jobs. When a mandatory presubmit job is
 added or removed from a repository, automation will ensure that the GitHub Branch Protection settings are updated as
 well.
 
-Branch protection is configured by a job that runs periodically every six hours. You can see
-[here](https://prow.ci.openshift.org/?job=periodic-branch-protector) when it last ran. The implication of this is that
+### How It Works
+
+1. You add a required test to your CI configuration
+2. A periodic job (runs every 6 hours) detects the change
+3. Branch protection rules are automatically updated in GitHub
+4. Your required tests are now enforced before merging
+
+You can see [here](https://prow.ci.openshift.org/?job=periodic-branch-protector) when the updater last ran. The implication of this is that
 when you add/remove a mandatory job, it may take up to six hours for this change to show up in GitHub.
 
-The `openshift-merge-robot` that configures the branch protection needs admin permissions.
+### Prerequisites
+
+The `openshift-merge-robot` that configures the branch protection needs admin permissions on your repository. See the [onboarding guide]({{< ref "../how-tos/onboarding-a-new-component" >}}) for details.
 
 ## Is It Possible to Disable the Branch Protection for My Repository or Require Jobs That Are Not Managed by Prow?
 

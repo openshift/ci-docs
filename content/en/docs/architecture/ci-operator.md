@@ -10,6 +10,20 @@ installed. `ci-operator` hides the complexity of assembling an ephemeral OpenShi
 of end-to-end test suites to focus on the content of their tests and not the infrastructure required for cluster setup and
 installation.
 
+## Key Concepts for New Users
+
+Before diving into the details, let's clarify some important terms:
+
+- **Release Payload**: A bundle of container images that together form a complete OpenShift installation. Think of it as all the pieces needed to install and run OpenShift.
+- **ImageStream**: An OpenShift resource that tracks different versions of container images. It's like a catalog of available image versions.
+- **ImageStreamTag**: A specific version within an ImageStream, referenced as `stream:tag` (e.g., `pipeline:src`).
+- **Namespace**: An isolated workspace in OpenShift where your CI job runs. Each job gets its own namespace to prevent interference.
+- **Build**: An OpenShift process that creates container images from source code.
+
+For more definitions, see the [Glossary]({{< ref "../getting-started/glossary" >}}).
+
+## How CI Operator Works
+
 `ci-operator` allows for components that make up an OpenShift release to be tested together by allowing each component repository
 to test with the latest published versions of all other components. An integration stream of container `images` is maintained with
 the latest tested versions of every component. A test for any one component snapshots that stream, replaces any `images` that are
@@ -36,10 +50,16 @@ to fulfill their intent.
 
 When `ci-operator` runs tests to verify proposed changes in a pull request to a component repository, it must first build the
 output artifacts from the repository. In order to generate these builds, `ci-operator` needs to know the inputs from which they
-will be created. A number of inputs can be configured; the following example provides both:
+will be created. 
 
-* `base_images`: provides a mapping of named `ImageStreamTags` which will be available for use in container image builds
-* `build_root`: defines the `ImageStreamTag` in which dependencies exist for building executables and non-image artifacts
+Think of inputs as the "ingredients" your CI job needs:
+- What container images contain your build tools?
+- What base images should your application be built on top of?
+
+A number of inputs can be configured; the following example provides both:
+
+* `base_images`: provides a mapping of named images that will be available for use in container image builds (like base operating system images or images with specific tools)
+* `build_root`: defines the image that contains all the compilers, tools, and dependencies needed to build your project (like a Go compiler for Go projects)
 
 `ci-operator` configuration:
 
@@ -60,8 +80,19 @@ build_root: # declares that the release:golang-1.13 image has the build-time dep
     tag: "golang-1.13"
 {{< / highlight >}}
 
+### Understanding the Configuration
+
+In the example above:
+- The `base` image (`ocp/4.5:base`) is a minimal operating system image that other images can be built on top of
+- The `cli` image (`ocp/4.5:cli`) contains the OpenShift command-line tools
+- The `build_root` image (`openshift/release:golang-1.13`) contains the Go compiler and related tools
+
+These images are referenced using the format `namespace/name:tag`. The CI system will fetch these specific versions and make them available to your build process.
+
+### How Image References Work
+
 As `ci-operator` is an OpenShift-native tool, all image references take the form of an `ImageStreamTag` on the build farm cluster,
-not just a valid pull-spec for an image. `ci-operator` will import these `ImageStreamTags` into the `Namespace` created for the test
+not just a regular container image URL (pull-spec). `ci-operator` will import these `ImageStreamTags` into the `Namespace` created for the test
 workflow; snapshotting the current state of inputs to allow for reproducible builds.
 
 If an image that is required for building is not yet present on the cluster, either:
@@ -109,16 +140,22 @@ build_root_image:
 
 ## Building Artifacts
 
+Once `ci-operator` has the build environment ready, it needs to actually build your project. This happens in stages, with each stage creating a new container image that builds on the previous one.
+
+### The Build Pipeline
+
 Starting `FROM` the image described as the `build_root`, `ci-operator` will clone the repository under test and compile
 artifacts, committing them as image layers that may be referenced in derivative builds. The commands which are run to
 compile artifacts are configured with `binary_build_commands` and are run in the root of the cloned repository. A
 separate set of commands, `test_binary_build_commands`, can be configured for building artifacts to support test
-execution. The following `ImageStreamTags` are created in the test's `Namespace`
+execution. 
 
-* `pipeline:root`: imports or builds the `build_root` image
-* `pipeline:src`: clones the code under test `FROM pipeline:root`
-* `pipeline:bin`: runs commands in the cloned repository to build artifacts `FROM pipeline:src`
-* `pipeline:test-bin`: runs a separate set of commands in the cloned repository to build test artifacts `FROM pipeline:src`
+Here's the sequence of images that get created (called the "pipeline"):
+
+* `pipeline:root`: imports or builds the `build_root` image (your build environment)
+* `pipeline:src`: clones your repository's code into the `root` image  
+* `pipeline:bin`: runs your build commands (like `make build`) to create compiled artifacts
+* `pipeline:test-bin`: optionally runs different commands to build test-specific artifacts
 
 `ci-operator` configuration:
 
@@ -127,8 +164,17 @@ binary_build_commands: "go build ./cmd/..."         # these commands are run to 
 test_binary_build_commands: "go test -c -o mytests" # these commands are run to build "pipeline:test-bin"
 {{< / highlight >}}
 
+### Understanding the Build Flow
+
+Here's what happens when these commands run:
+
+1. **Setup**: The `pipeline:root` image (your Go development environment) is prepared
+2. **Clone**: Your repository is cloned into this environment, creating `pipeline:src`
+3. **Build**: The `binary_build_commands` run (e.g., `go build ./cmd/...`), creating `pipeline:bin` with your compiled binaries
+4. **Test Build** (optional): The `test_binary_build_commands` run, creating `pipeline:test-bin` with test executables
+
 The content created with these OpenShift `Builds` is addressable in the `ci-operator` configuration simply with the tag. For
-instance, the `pipeline:bin` image can be referenced as `bin` when the content in that image is needed in derivative `Builds`.
+instance, the `pipeline:bin` image can be referenced as just `bin` when the content in that image is needed in derivative `Builds`.
 
 ### Using the Build Cache
 
@@ -157,9 +203,17 @@ was built off of the same build root image as would otherwise be imported. That 
 
 Once container `images` exist with output artifacts for a repository, additional output container `images` may be built that
 make use of those artifacts. Commonly, the desired output container image will contain only the executables for a
-component and not any of the build-time dependencies. Furthermore, most teams will need to publish their output
-container `images` through the automated release pipeline, which requires that the `images` are built in Red Hat's
-production image build system, OSBS. In order to create an output container image without build-time dependencies in a
+component and not any of the build-time dependencies. 
+
+### Why Multi-Stage Dockerfiles?
+
+Your compiled application doesn't need all the build tools (compilers, build scripts, etc.) to run - it just needs the final binary. Multi-stage Dockerfiles let you:
+1. Build your application in an image with all the development tools
+2. Copy just the compiled binary to a minimal runtime image
+3. Ship a smaller, more secure image
+
+Furthermore, most teams will need to publish their output container `images` through the automated release pipeline, which requires that the `images` are built in Red Hat's
+production image build system, OSBS (OpenShift Build Service). In order to create an output container image without build-time dependencies in a
 manner which is compatible with OSBS, the simplest approach is a multi-stage `Dockerfile` build.
 
 The standard pattern for a multi-stage `Dockerfile` is to run a compilation in a builder image and copy the resulting

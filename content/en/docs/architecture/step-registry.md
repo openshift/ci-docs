@@ -8,19 +8,41 @@ These individual steps can be put into a shared registry that other tests can ac
 upgrade as multiple test workflows can share steps and don’t have to each be updated individually to fix bugs or add new features. It also reduces the
 chances of a mistake when copying a feature from one test workflow to another.
 
+## Why Multi-Stage Tests?
+
+Think of multi-stage tests like building with LEGO blocks:
+- **Traditional approach**: Write one big script that does everything (install cluster, run tests, collect logs, cleanup)
+- **Multi-stage approach**: Use pre-built, tested components that you can mix and match
+
+Benefits:
+- **Reusability**: Someone already wrote the "install AWS cluster" step - just use it!
+- **Maintainability**: When AWS installation needs an update, fix it once, and all tests benefit
+- **Flexibility**: Mix different cluster types, test suites, and configurations easily
+
 The current step registry is available for browsing [here](https://steps.ci.openshift.org/).
+
+## Building Blocks
 
 To understand how the multistage tests and registry work, we must first talk about the three components of the test registry and how to use those
 components to create a test:
 
-* [Step](#step): A step is the lowest level component in the test step registry. It describes an individual test step.
-* [Chain](#chain): A chain is a registry component that specifies multiple steps to be run. Any item of the chain can be either a step or another chain.
-* [Workflow](#workflow): A workflow is the highest level component of the step registry. It contains three chains: pre, test, post.
+* [Step](#step): A step is the lowest level component in the test step registry. It describes an individual test step (like "install cluster" or "run e2e tests").
+* [Chain](#chain): A chain is a registry component that specifies multiple steps to be run in sequence. Any item of the chain can be either a step or another chain.
+* [Workflow](#workflow): A workflow is the highest level component of the step registry. It defines a complete test scenario with three phases: pre (setup), test (main tests), and post (cleanup).
 
 ## Step
 
-A step is the lowest level component in the test registry. A step defines a base container image, the filename of the shell script to run inside the
-container, the resource requests and limits for the container, and documentation for the step. Example of a step:
+A step is the lowest level component in the test registry. Think of it as a single action in your test process - like "install a cluster" or "run conformance tests" or "collect logs".
+
+### What Makes Up a Step?
+
+A step defines:
+- **Container image**: Where the step runs (what tools are available)
+- **Script**: What commands to execute
+- **Resources**: How much CPU/memory the step needs
+- **Documentation**: What the step does and how to use it
+
+Here's an example of a step configuration:
 
 {{< highlight yaml >}}
 ref:

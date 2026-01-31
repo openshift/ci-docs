@@ -4,160 +4,474 @@ description: Examples of common tasks in CI configuration.
 weight: 2
 ---
 
-# How do I add a job that runs the OpenShift end-to-end conformance suite on AWS?
+# CI Configuration Examples
 
-Use the [`openshift-e2e-aws`](https://steps.ci.openshift.org/workflow/openshift-e2e-aws) workflow and set
-`cluster_profile` to `aws`.
+This page provides practical examples for common CI configuration scenarios. Each example includes the full configuration and explanation.
+
+## Table of Contents
+- [Basic Testing](#basic-testing)
+- [End-to-End Testing](#end-to-end-testing)
+- [Building and Testing Images](#building-and-testing-images)
+- [Cross-Repository Testing](#cross-repository-testing)
+- [Advanced Patterns](#advanced-patterns)
+
+## Basic Testing
+
+### Simple Unit Test
+Run unit tests without needing a cluster:
 
 {{< highlight yaml >}}
-- as: e2e-steps
-  steps:
-    cluster_profile: aws
-    workflow: openshift-e2e-aws
-{{< / highlight >}}
+tests:
+- as: unit
+  commands: |
+    echo "Running unit tests..."
+    go test -race -cover -v ./pkg/...
+  container:
+    from: src
+{{< /highlight >}}
 
-# How do I write a simple "Execute this command in a container" test?
-
-Use a container test. Container tests are set up to always contain the source code, either by
-explicitly cloning it if they use an image that is in `base_images` or implicitly if they reference
-a `pipeline` image like `src`.
+### Linting and Code Quality
+Use external tools for code quality checks:
 
 {{< highlight yaml >}}
 base_images:
   golangci-lint:
     namespace: ci
     name: golangci-lint
-    tag: v1.37.1
+    tag: v1.54.2
+
 tests:
 - as: lint
-  commands: golangci-lint run ./...
+  commands: |
+    echo "Running linters..."
+    golangci-lint run --timeout=10m
   container:
     from: golangci-lint
-    clone: true # Defaults to "true", set to "false" if you do not want your source code to be present.
+    clone: true  # Clone source code into the linter image
+
+- as: verify-deps
+  commands: |
+    echo "Verifying dependencies..."
+    go mod tidy
+    go mod vendor
+    git diff --exit-code
+  container:
+    from: src
 {{< /highlight >}}
 
-# How do I use an image from another repo in my repo’s tests?
-
-In order to use an image from one repository in the tests of another, it is necessary to first publish the image from
-the producer repository and import it in the consumer repository. Generally, a central `ImageStream` is used for
-continuous integration; a repository opts into using an integration stream with the `releases.integration` field in the
-`ci-operator` configuration and opts into publishing to the stream with the `promotion` field.
-
-## Publishing an Image For Reuse
-
-When configuring `ci-operator` for a repository, the `promotion` stanza declares which container `images` are published and
-defines the integration `ImageStream` where they will be available. By default, all container `images` declared in the
-`images` block of a `ci-operator` configuration are published when a `promotion` stanza is present to define the integration
-`ImageStream`. Promotion can be furthermore configured to include other `images`, as well, although promotion should be avoided unless there is an expectation of external consumption. For example, do not publish images with [the `io.openshift.release.operator` label](../../how-tos/onboarding-a-new-component/#product-builds-and-becoming-part-of-an-openshift-release) unless they should be included in OpenShift release images.
-
-In the following `ci-operator` configuration, the following `images` are promoted for reuse by other repositories to the `ocp/4.4` integration `ImageStream`:
-
-* the `pipeline:src` tag, published as `ocp/4.4:repo-scripts` containing the latest version of the repository to allow for executing helper scripts.
-* the `pipeline:test-bin` tag, published as `ocp/4.4:repo-tests` containing built test binaries to allow for running the repository's tests
-* the `stable:component` tag, published as `ocp/4.4:component` containing the component itself to allow for deployments and installations in end-to-end scenarios
-
-`ci-operator` configuration:
-{{< highlight yaml >}}
-test_binary_build_commands: go test -race -c -o e2e-tests # will create the test-bin tag
-promotion:
-  to:
-  - additional_images:
-      repo-scripts: src    # promotes "src" as "repo-scripts"
-      repo-tests: test-bin # promotes "test-bin" as "repo-tests"
-    namespace: ocp
-    name: 4.4
-images:
-- from: ubi8
-  to: component # promotes "component" by default
-  context_dir: images/component
-{{< / highlight >}}
-
-## Consuming an Image
-
-Once a repository is publishing an image for reuse by others, downstream users can configure `ci-operator` to use that
-image in tests by including it as a base_image or as part of the `releases`. In general, `images` will be available
-as part of the `releases` and explicitly including them as a base_image will only be necessary if the promoting
-repository is exposing them to a non-standard `ImageStream`. Regardless of which workflow is used to consume the image,
-the resulting tag will be available under the stable `ImageStream`. The following `ci-operator` configuration imports a
-number of `images`:
-
-* the `stable:custom-scripts` tag, published as `myregistry.com/project/custom-scripts:latest`
-* the `stable:component` and `:repo-{scripts|tests}` tags, by virtue of them being published under `ocp/4.4` and brought in with the `releases`
-
-`ci-operator` configuration:
-{{< highlight yaml >}}
-base_images:
-  custom-scripts:
-    namespace: project
-    name: custom-scripts
-    tag: latest
-releases:
-  latest:
-    integration:
-      namespace: ocp
-      name: 4.4
-{{< / highlight >}}
-
-Once the image has been configured to be an input for the repository's tests in the `ci-operator` configuration, either
-explicitly as a `base_image` or implicitly as part of the `releases`, it can be used in tests in one of two ways. A
-registry step can be written to execute the shared tests in any `ci-operator` configuration, or a literal test step can be
-added just to one repository's configuration to run the shared tests. Two examples follow which add an execution of
-shared end-to-end tests using these two approaches. Both examples assume that we have the ipi workflow available to use.
-
-### Adding a Reusable Test Step
-
-Full directions for adding a new reusable test step can be found in the overview for [new registry
-content](/docs/how-tos/adding-changing-step-registry-content/#adding-content). An example of the process is provided
-here. First, `make` directory for the test step in the registry: `ci-operator/step-registry/org/repo/e2e`.
-
-Then, declare a reusable step: `ci-operator/step-registry/org/repo/e2e/org-repo-e2e-ref.yaml`
-{{< highlight yaml >}}
-ref:
-  as: org-repo-e2e
-  from: repo-tests
-  commands: org-repo-e2e-commands.sh
-  resources:
-    requests:
-      cpu: 1000m
-      memory: 100Mi
-  documentation: |-
-    Runs the end-to-end suite published by org/repo.
-{{< / highlight >}}
-
-Finally, populate a command file for the step: `ci-operator/step-registry/org/repo/e2e/org-repo-e2e-commands.sh`
-{{< highlight bash >}}
-#!/bin/bash
-e2e-tests # as built by go test -c
-{{< / highlight >}}
-
-Now the test step is ready for use by any repository. To `make` use of it, update `ci-operator` configuration for a separate
-repository under `ci-operator/config/org/other/org-other-master.yaml`:
+### Running Tests in Parallel
+Speed up test execution with parallel test suites:
 
 {{< highlight yaml >}}
-- as: org-repo-e2e
+tests:
+- as: parallel-unit-tests
   steps:
-    cluster_profile: aws
-    workflow: ipi
     test:
-    - ref: org-repo-e2e
-{{< / highlight >}}
-
-### Adding a Literal Test Step
-
-`ci-operator` configuration:
-{{< highlight yaml >}}
-- as: repo-e2e
-  steps:
-    cluster_profile: aws
-    workflow: ipi
-    test:
-    - as: e2e
-      from: repo-tests
-      commands: |-
-        #!/bin/bash
-        e2e-tests # as built by go test -c
+    - as: test-pkg-api
+      commands: go test -v ./pkg/api/...
+      from: src
       resources:
         requests:
-          cpu: 1000m
+          cpu: 2
+          memory: 4Gi
+    - as: test-pkg-controller
+      commands: go test -v ./pkg/controller/...
+      from: src
+      resources:
+        requests:
+          cpu: 2
+          memory: 4Gi
+    - as: test-pkg-util
+      commands: go test -v ./pkg/util/...
+      from: src
+      resources:
+        requests:
+          cpu: 1
           memory: 2Gi
-{{< / highlight >}}
+{{< /highlight >}}
+
+## End-to-End Testing
+
+### Basic E2E on AWS
+{{< highlight yaml >}}
+tests:
+- as: e2e-aws
+  steps:
+    cluster_profile: aws
+    workflow: openshift-e2e-aws
+{{< /highlight >}}
+
+### E2E with Custom Test Suite
+Run your own e2e tests on a cluster:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-custom
+  steps:
+    cluster_profile: aws
+    test:
+    - as: run-my-tests
+      commands: |
+        echo "Running custom e2e tests..."
+        export KUBECONFIG=${KUBECONFIG}
+        
+        # Wait for cluster to be ready
+        oc wait --for=condition=Ready nodes --all --timeout=300s
+        
+        # Run your test suite
+        make test-e2e
+      from: src
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+    workflow: ipi-aws  # Handles cluster creation/destruction
+{{< /highlight >}}
+
+### E2E with Operator Deployment
+Deploy and test an operator:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-operator
+  steps:
+    cluster_profile: aws
+    test:
+    - as: install-operator
+      commands: |
+        # Create namespace
+        oc create namespace my-operator
+        
+        # Install CRDs
+        oc apply -f deploy/crds/
+        
+        # Deploy operator
+        oc apply -f deploy/ -n my-operator
+        
+        # Wait for deployment
+        oc wait --for=condition=Available \
+          deployment/my-operator \
+          -n my-operator \
+          --timeout=300s
+      from: src
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+    - as: test-operator
+      commands: |
+        # Create test resources
+        oc apply -f test/e2e/resources/
+        
+        # Run operator e2e tests
+        go test -v ./test/e2e/... \
+          -kubeconfig=${KUBECONFIG} \
+          -namespace=my-operator-test
+      from: src
+      resources:
+        requests:
+          cpu: 1
+          memory: 2Gi
+    workflow: ipi-aws
+{{< /highlight >}}
+
+### Upgrade Testing
+Test upgrades between OpenShift versions:
+
+{{< highlight yaml >}}
+releases:
+  initial:
+    release:
+      channel: stable
+      version: "4.13"
+  latest:
+    release:
+      channel: stable
+      version: "4.14"
+
+tests:
+- as: e2e-upgrade
+  steps:
+    cluster_profile: aws
+    workflow: openshift-upgrade-aws
+{{< /highlight >}}
+
+## Building and Testing Images
+
+### Build Multiple Images
+{{< highlight yaml >}}
+base_images:
+  base:
+    namespace: ocp
+    name: "4.14"
+    tag: base
+
+images:
+- from: base
+  to: controller
+  dockerfile_path: build/controller.Dockerfile
+- from: base
+  to: webhook
+  dockerfile_path: build/webhook.Dockerfile
+- from: base
+  to: cli
+  dockerfile_path: build/cli.Dockerfile
+
+tests:
+- as: verify-images
+  commands: |
+    # Test controller image
+    podman run --rm ${IMAGE_FORMAT}/controller:latest --version
+    
+    # Test webhook image
+    podman run --rm ${IMAGE_FORMAT}/webhook:latest --help
+    
+    # Test CLI image
+    podman run --rm ${IMAGE_FORMAT}/cli:latest version
+  container:
+    from: src
+{{< /highlight >}}
+
+### Multi-Stage Build Testing
+Test images built with multi-stage Dockerfiles:
+
+{{< highlight yaml >}}
+binary_build_commands: make build
+
+images:
+- dockerfile_literal: |
+    FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.14 AS builder
+    WORKDIR /go/src/github.com/org/repo
+    COPY . .
+    RUN make build
+
+    FROM registry.ci.openshift.org/ocp/4.14:base
+    COPY --from=builder /go/src/github.com/org/repo/bin/app /usr/bin/
+    ENTRYPOINT ["/usr/bin/app"]
+  from: base
+  inputs:
+    bin:
+      as:
+      - registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.14
+  to: my-app
+
+promotion:
+  to:
+  - namespace: my-namespace
+    name: my-app
+    tag: latest
+{{< /highlight >}}
+
+## Cross-Repository Testing
+
+### Using Images from Another Repository
+Test with images published by another repository:
+
+{{< highlight yaml >}}
+base_images:
+  another-component:
+    namespace: ocp
+    name: "4.14"
+    tag: another-component
+
+tests:
+- as: integration-test
+  commands: |
+    # Start the other component
+    podman run -d --name other ${ANOTHER_COMPONENT_IMAGE}
+    
+    # Run integration tests against it
+    export OTHER_COMPONENT_URL=http://localhost:8080
+    make test-integration
+    
+    # Cleanup
+    podman stop other
+  container:
+    from: src
+  dependencies:
+  - name: another-component
+    env: ANOTHER_COMPONENT_IMAGE
+{{< /highlight >}}
+
+### Testing Multiple Repositories Together
+Using a shared workflow to test multiple components:
+
+{{< highlight yaml >}}
+# In repo A
+tests:
+- as: cross-repo-test
+  steps:
+    cluster_profile: aws
+    test:
+    - ref: deploy-component-a
+    - ref: deploy-component-b  # From shared registry
+    - ref: run-integration-tests
+    workflow: openshift-e2e-aws
+
+# In the step registry
+ref:
+  as: deploy-component-b
+  from: component-b-image
+  commands: |
+    oc apply -f https://raw.githubusercontent.com/org/component-b/main/deploy/
+    oc wait --for=condition=Available deployment/component-b
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+{{< /highlight >}}
+
+## Advanced Patterns
+
+### Conditional Testing Based on Changes
+Only run expensive tests when relevant files change:
+
+{{< highlight yaml >}}
+tests:
+# Always run unit tests
+- as: unit
+  commands: make test-unit
+  container:
+    from: src
+
+# Only run integration tests if source code changes
+- as: integration
+  run_if_changed: "^(pkg|cmd)/"
+  commands: make test-integration
+  container:
+    from: src
+
+# Only run e2e if APIs or controllers change
+- as: e2e-aws
+  optional: true  # Don't block merge
+  run_if_changed: "^(api|controllers|deploy)/"
+  steps:
+    cluster_profile: aws
+    workflow: openshift-e2e-aws
+{{< /highlight >}}
+
+### Testing with External Services
+Using secrets to test with external services:
+
+{{< highlight yaml >}}
+tests:
+- as: external-integration
+  steps:
+    test:
+    - as: test-with-database
+      credentials:
+      - namespace: test-credentials
+        name: database-credentials
+        mount_path: /var/run/secrets/database
+      commands: |
+        # Read credentials
+        export DB_HOST=$(cat /var/run/secrets/database/host)
+        export DB_USER=$(cat /var/run/secrets/database/user)
+        export DB_PASS=$(cat /var/run/secrets/database/password)
+        
+        # Run tests against external database
+        make test-database-integration
+      from: src
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+{{< /highlight >}}
+
+### Platform-Specific Testing
+Run tests on multiple cloud providers:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-aws
+  steps:
+    cluster_profile: aws
+    env:
+      FEATURE_SET: TechPreviewNoUpgrade
+    workflow: openshift-e2e-aws
+
+- as: e2e-gcp
+  steps:
+    cluster_profile: gcp
+    env:
+      FEATURE_SET: TechPreviewNoUpgrade
+    workflow: openshift-e2e-gcp
+
+- as: e2e-azure
+  steps:
+    cluster_profile: azure4
+    env:
+      FEATURE_SET: TechPreviewNoUpgrade
+    workflow: openshift-e2e-azure
+{{< /highlight >}}
+
+### Periodic Regression Testing
+Set up nightly tests with notifications:
+
+{{< highlight yaml >}}
+tests:
+- as: nightly-regression
+  cron: "0 2 * * *"  # 2 AM UTC daily
+  steps:
+    cluster_profile: aws
+    test:
+    - as: deploy-latest
+      commands: |
+        # Deploy latest development version
+        oc apply -f https://raw.githubusercontent.com/org/repo/main/deploy/dev/
+      from: src
+    - as: run-full-suite
+      commands: |
+        # Run comprehensive test suite
+        make test-regression
+      from: src
+      timeout: 3h0m0s
+    post:
+    - as: send-results
+      commands: |
+        # Process and send results (if using a notification system)
+        if [ -f ${ARTIFACT_DIR}/junit.xml ]; then
+          python3 scripts/send-test-report.py \
+            --junit ${ARTIFACT_DIR}/junit.xml \
+            --webhook ${SLACK_WEBHOOK}
+        fi
+      from: src
+    workflow: ipi-aws
+{{< /highlight >}}
+
+### Using Cluster Pools for Faster Tests
+Instead of provisioning a new cluster:
+
+{{< highlight yaml >}}
+tests:
+- as: e2e-cluster-pool
+  cluster_claim:
+    architecture: amd64
+    cloud: aws
+    owner: openshift-ci
+    product: ocp
+    timeout: 1h0m0s
+    version: "4.14"
+  steps:
+    test:
+    - as: test
+      commands: |
+        # Cluster is already provisioned
+        oc get nodes
+        make test-e2e
+      from: src
+      resources:
+        requests:
+          cpu: 2
+          memory: 8Gi
+    workflow: generic-claim
+{{< /highlight >}}
+
+## Next Steps
+
+- Review the [Step Registry](https://steps.ci.openshift.org/) for reusable components
+- Check [Architecture documentation](/docs/architecture/) for deeper understanding
+- See [How-To guides](/docs/how-tos/) for specific tasks
+- Use the [Troubleshooting guide](/docs/troubleshooting/) when things go wrong
+
+Remember: Start simple, test locally when possible, and gradually add complexity as needed!
