@@ -1,2 +1,4 @@
 generate:
-	npm install -D --unsafe-perm=true --save postcss postcss-cli autoprefixer && cd themes/docsy && git submodule update -f --init && cd ../.. && hugo --gc --minify
+	npm install --save-dev postcss postcss-cli autoprefixer && git submodule update -f --init && hugo --gc --minify
+image:
+	podman build -t ci-docs -f Dockerfile .	
