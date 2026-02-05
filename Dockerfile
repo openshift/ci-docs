@@ -1,11 +1,12 @@
 FROM registry.access.redhat.com/ubi10/ubi as builder
 
 ARG HUGO_VERSION=0.155.2
+ARG ARCH=amd64
 
 WORKDIR /src
 
 RUN dnf install -y golang git nodejs
-RUN curl -sL https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz \
+RUN curl -sL https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-${ARCH}.tar.gz \
   | tar -C /usr/bin -xzf - hugo
 
 COPY . /src/
