@@ -2,6 +2,9 @@
 title: "Useful Links"
 description: Useful links to build farm clusters, hosted services, CI APIs and human contacts.
 weight: 1
+datatables: true
+custom_js:
+  - cluster-list
 ---
 
 # Clusters

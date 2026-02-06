@@ -2,6 +2,9 @@
 title: "Helpdesk FAQ"
 description: FAQ from forum-ocp-testplatform on slack
 weight: 1
+datatables: true
+custom_js:
+  - helpdesk-faq
 ---
 
 ## #forum-ocp-testplatform FAQ
