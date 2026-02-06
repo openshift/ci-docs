@@ -3,12 +3,7 @@ $(document).ready(function () {
     if ($('#table_helpdesk_faq').length === 0) return;
 
     function formatDate(timestamp) {
-        const d = new Date(timestamp * 1000);
-        let formattedDate = `${d.getMonth() + 1}-${d.getDate()}--${d.getFullYear()}`;
-        const hours = d.getHours().toString().padStart(2, 0);
-        const minutes = d.getMinutes().toString().padStart(2, 0);
-        const formattedTime = `${hours}:${minutes}`;
-        return `${formattedDate} ${formattedTime}`;
+        return new Date(timestamp * 1000).toLocaleString();
     }
 
     function formatLinks(reply) {
@@ -84,7 +79,6 @@ $(document).ready(function () {
         let formatted = '<table width="100%">';
 
         formatted += '<head><th>Type</th><th>Reply</th><th>User</th><th>Date</th></head>'
-        console.log(item)
         $.each(item.contributing_info, function (index, answer) {
             formatted += '<tr>' +
                 '<td>Additional Context</td><td>' +
