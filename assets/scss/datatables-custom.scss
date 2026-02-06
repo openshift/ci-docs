@@ -34,3 +34,16 @@ tr.shown td.details-control {
   max-width: 100%;
   margin: 0;
 }
+
+#table_helpdesk_faq_wrapper {
+  width: 100%;
+}
+
+#table_helpdesk_faq {
+  table-layout: fixed !important;
+
+  td:nth-child(4) {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+}

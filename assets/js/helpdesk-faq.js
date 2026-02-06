@@ -40,6 +40,7 @@ $(document).ready(function () {
             "url": window.HUGO_PARAMS.helpdesk_faq_api_url,
             "dataType": "jsonp",
         },
+        "scrollX": false,
         "columns": [
             {
                 "className": 'details-control',

@@ -11,7 +11,9 @@ $(document).ready(function () {
                         return;
                     }
                     if (item['cluster'] === 'hosted-mgmt') {
-                        $('#hypershift_supported_versions').text(item["hypershiftSupportedVersions"]);
+                        var versions = item["hypershiftSupportedVersions"];
+                        var formatted = Array.isArray(versions) ? versions.join(', ') : versions;
+                        $('#hypershift_supported_versions').text(formatted);
                     }
                 });
             },
