@@ -1,6 +1,9 @@
 ---
 title: "Interacting With CI Image Registries"
 description: How to interact with the CI image registries, set up service account access and interact with images for a specific job.
+datatables: true
+custom_js:
+  - registries
 ---
 
 # Summary of Available Registries

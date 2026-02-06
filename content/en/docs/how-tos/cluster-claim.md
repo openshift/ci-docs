@@ -1,6 +1,9 @@
 ---
 title: "Creating a Cluster Pool"
 description: How to create a cluster pool from which a job can claim a cluster.
+datatables: true
+custom_js:
+  - cluster-pools
 ---
 
 `ci-operator` [allows](https://docs.ci.openshift.org/docs/architecture/ci-operator/#testing-with-a-cluster-from-a-cluster-pool)

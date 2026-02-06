@@ -1,0 +1,49 @@
+// Custom styles for DataTables in CI docs
+
+@media(min-width:992px) {
+  .td-max-width-on-larger-screens,
+  .td-content>pre,
+  .td-content>.highlight,
+  .td-content>.lead,
+  .td-content>h1,
+  .td-content>h2,
+  .td-content>ul,
+  .td-content>ol,
+  .td-content>p,
+  .td-content>blockquote,
+  .td-content>dl dd,
+  .td-content .footnotes,
+  .td-content>.alert {
+    max-width:100%;
+  }
+}
+
+td.details-control {
+  background: center / 80% no-repeat url('/caret_right_icon.png');
+  cursor: pointer;
+}
+
+tr.shown td.details-control {
+  background: center / 80% no-repeat url('/caret_down_icon.png');
+  cursor: pointer;
+}
+
+.card-body > .highlight,
+.card-body > .highlight pre {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 0;
+}
+
+#table_helpdesk_faq_wrapper {
+  width: 100%;
+}
+
+#table_helpdesk_faq {
+  table-layout: fixed !important;
+
+  td:nth-child(4) {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+}

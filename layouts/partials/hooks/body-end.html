@@ -1,0 +1,48 @@
+{{/* CI Docs - Conditional loading of custom JavaScript based on page parameters */}}
+
+{{/* Expose Hugo params to JavaScript */}}
+<script>
+  window.HUGO_PARAMS = {
+    api_v1_url: "{{ .Site.Params.api_v1_url }}",
+    helpdesk_faq_api_url: "{{ .Site.Params.helpdesk_faq_api_url }}"
+  };
+</script>
+
+{{/* Check if this page needs DataTables */}}
+{{ $needsDataTables := false }}
+{{ if .Params.datatables }}
+  {{ $needsDataTables = true }}
+{{ end }}
+
+{{ if $needsDataTables }}
+  {{/* Load DataTables CSS and JS from CDN */}}
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css"
+        integrity="sha384-Vwj80kTHnbvFQKFx/DXnuzcgBarxFKFKVn0/CvmrVdyYhYHbg2e05M8TF4dskCwA"
+        crossorigin="anonymous">
+  <script type="text/javascript" charset="utf8"
+          src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"
+          integrity="sha384-9jwHdz3xcZ/aQmgwzEl+IfbIibihtBOx76/CoExUWGC11Nb4blmMdE8y2edqF9EF"
+          crossorigin="anonymous"></script>
+
+  {{/* Load custom DataTables styles */}}
+  {{ $customCSS := resources.Get "scss/datatables-custom.scss" | toCSS }}
+  {{ if hugo.IsProduction }}
+    {{ $customCSS = $customCSS | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ $customCSS.RelPermalink }}" integrity="{{ $customCSS.Data.Integrity }}" crossorigin="anonymous">
+  {{ else }}
+    <link rel="stylesheet" href="{{ $customCSS.RelPermalink }}">
+  {{ end }}
+{{ end }}
+
+{{/* Load page-specific JavaScript files */}}
+{{ if .Params.custom_js }}
+  {{ range .Params.custom_js }}
+    {{ $js := resources.Get (printf "js/%s.js" .) }}
+    {{ if hugo.IsProduction }}
+      {{ $js = $js | minify | fingerprint }}
+      <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" crossorigin="anonymous"></script>
+    {{ else }}
+      <script src="{{ $js.RelPermalink }}"></script>
+    {{ end }}
+  {{ end }}
+{{ end }}

@@ -1,6 +1,8 @@
 ---
 title: "CI Operator"
 description: An overview of the architecture of ci-operator, the OpenShift CI workflow engine.
+custom_js:
+  - hypershift-versions
 ---
 
 # What is `ci-operator` and how does it work?

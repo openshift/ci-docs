@@ -1,7 +1,8 @@
 FROM registry.access.redhat.com/ubi10/ubi as builder
 
 ARG HUGO_VERSION=0.155.2
-ARG ARCH=amd64
+ARG TARGETARCH
+ARG ARCH=${TARGETARCH:-amd64}
 
 WORKDIR /src
 
