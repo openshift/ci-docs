@@ -4,6 +4,7 @@ description: FAQ from forum-ocp-testplatform on slack
 weight: 1
 datatables: true
 custom_js:
+  - marked-16.3.0.umd.min
   - helpdesk-faq
 ---
 
