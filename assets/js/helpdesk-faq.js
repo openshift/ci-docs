@@ -1,33 +1,22 @@
 // Helpdesk FAQ DataTable
 $(document).ready(function () {
-    if ($('#table_helpdesk_faq').length === 0) return;
+    if ($('#table_helpdesk_faq').length === 0) {
+		return;
+	}
 
-    function formatDate(timestamp) {
+    var formatDate = function(timestamp) {
         return new Date(timestamp * 1000).toLocaleString();
-    }
+    };
 
-    function formatLinks(reply) {
-        return makeLinksClickable(formatSlackLinks(reply))
-    }
+    var formatLinks = function(reply) {
+        return marked.parse(formatSlackLinks(reply))
+    };
 
     // Replaces slack links (URL|text) with html links (<a href="URL">text</a>)
-    function formatSlackLinks(text) {
-        return text.replace(/`?([^`\s]+)\|([^`\s]+)`?/g, '<a href=' + '"$1"' + '>$2</a>');
-    }
-
-    // Replaces plain URLs with html links (<a href="URL">URL</a>)
-    function makeLinksClickable(text) {
-        const regex = /(<a href[^>]*>.*?<\/a>|(?:https?:\/\/|www\.)\S+)/g;
-
-        return text.replace(regex, function(match) {
-            if (match.startsWith('<a href')) {
-                return match;
-            }
-            // Ensure URL starts with http:// or https://
-            let fullUrl = match.startsWith('www.') ? 'https://' + match : match;
-            return '<a href="' + fullUrl + '">' + match + '</a>';
-        });
-    }
+	const regexLink = /`?([^`\s]+)\|([^`\s]+)`?/g
+    var formatSlackLinks = function(text) {
+        return text.replace(regexLink, '[$2]($1)');
+    };
 
     $.fn.dataTable.ext.errMode = 'throw';
     var table = $('#table_helpdesk_faq').DataTable({
@@ -47,13 +36,13 @@ $(document).ready(function () {
             {
                 "data": "question.subject",
                 "render": function (data, type, row, meta) {
-                    return formatLinks(data)
+                    return formatLinks(data);
                 }
             },
             {
                 "data": "question.body",
                 "render": function (data, type, row, meta) {
-                    return formatLinks(data)
+                    return formatLinks(data);
                 }
             },
             {
@@ -67,43 +56,41 @@ $(document).ready(function () {
                 "data": "thread_link",
                 "render": function (data, type, row, meta) {
                     if (data !== "") {
-                        return "<a href=\"" + data + "\">Thread</a>"
+                        return `<a href="${data}">Thread</a>`;
                     }
-                    return ""
+                    return "";
                 }
             }
         ]
     });
 
-    function replies(item) {
-        let formatted = '<table width="100%">';
+    var replies = function(item) {
+        let formatted = $('<table width="100%">')
+            .append($('<thead>')
+                .append($('<th>').append('Type'))
+                .append($('<th>').append('Reply'))
+                .append($('<th>').append('User'))
+                .append($('<th>').append('Date'))
+            );
 
-        formatted += '<head><th>Type</th><th>Reply</th><th>User</th><th>Date</th></head>'
         $.each(item.contributing_info, function (index, answer) {
-            formatted += '<tr>' +
-                '<td>Additional Context</td><td>' +
-                formatLinks(answer["body"]) +
-                '</td><td>' +
-                answer["author"] +
-                '</td><td>' +
-                formatDate(answer["timestamp"]) +
-                '</td></tr>';
+            formatted.append($('<tr>')
+                .append($('<td>').append('Additional Context'))
+                .append($('<td>').append(formatLinks(answer["body"])))
+                .append($('<td>').append(answer["author"]))
+                .append($('<td>').append(formatDate(answer["timestamp"])))
+            );
         });
         $.each(item.answers, function (index, answer) {
-            formatted += '<tr>' +
-                '<td>Answer</td><td>' +
-                formatLinks(answer["body"]) +
-                '</td><td>' +
-                answer["author"] +
-                '</td><td>' +
-                formatDate(answer["timestamp"]) +
-                '</td></tr>';
+            formatted.append($('<tr>')
+                .append($('<td>').append('Answer'))
+                .append($('<td>').append(formatLinks(answer["body"])))
+                .append($('<td>').append(answer["author"]))
+                .append($('<td>').append(formatDate(answer["timestamp"])))
+            );
         });
-
-        formatted += '</table>';
-
         return formatted;
-    }
+    };
 
     $('#table_helpdesk_faq tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');

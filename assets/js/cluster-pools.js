@@ -1,19 +1,22 @@
 // Cluster pools DataTable
-function format(d) {
-    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
-        '<tr>' +
-        '<td>RELEASE IMAGE:</td>' +
-        '<td>' + d.releaseImage + '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>LABELS:</td>' +
-        '<td>' + d.labels + '</td>' +
-        '</tr>' +
-        '</table>';
-}
 
 $(document).ready(function () {
-    if ($('#table_pools').length === 0) return;
+
+    if ($('#table_pools').length === 0) {
+        return;
+    }
+
+    var format = function(d) {
+        return $('<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px">')
+            .append($('<tr>')
+                .append($('<td>').append('RELEASE IMAGE'))
+                .append($('<td>').append(d.releaseImage))
+            )
+            .append($('<tr>')
+                .append($('<td>').append('LABELS'))
+                .append($('<td>').append(d.labels))
+            );
+    }
 
     $.fn.dataTable.ext.errMode = 'throw';
     var table = $('#table_pools').DataTable({
