@@ -169,7 +169,7 @@ the last step from the `test:` chain completes.
 When an observer fails, its failure will be reported inside logs and jUnit files, but the test
 will keep going without being affected at all.  
 
-When the last test from `test:` chain finishes, observers are going to be deleted by Kubernetes: see [here](https://kubernetes.io/concepts/workloads/pods/pod-lifecycle/#pod-termination) for more details on how pods termination works. After the test completes, no 'observer pods' pods will be found inside `ci-op-xxxx` namespace.
+When the last test from `test:` chain finishes, observers are going to be deleted by Kubernetes: see [here](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination) for more details on how pods termination works. After the test completes, no 'observer pods' pods will be found inside `ci-op-xxxx` namespace.
 
 Artifacts are collected as if they were regular tests.
 

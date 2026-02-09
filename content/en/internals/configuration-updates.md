@@ -13,8 +13,8 @@ strategies and the solutions adopted.
 ## `ConfigMap` mounts
 
 The primary mechanism used to give services access to the contents of the
-repository are Kubernetes [volumes](https://kubernetes.io/concepts/storage/volumes/),
-specifically [`ConfigMap` volume mounts](https://kubernetes.io/concepts/configuration/configmap/).
+repository are Kubernetes [volumes](https://kubernetes.io/docs/concepts/storage/volumes/),
+specifically [`ConfigMap` volume mounts](https://kubernetes.io/docs/concepts/configuration/configmap/).
 The update process for these mounts involves several Kubernetes and `test-infra`
 components and is divided in the following steps:
 
@@ -107,7 +107,7 @@ links.
 
 ### `kubelet`
 
-The [`kubelet`](https://kubernetes.io/concepts/overview/components/#kubelet)
+The [`kubelet`](https://kubernetes.io/docs/concepts/overview/components/#kubelet)
 is the Kubernetes process present in each physical node responsible for
 creating/monitoring/managing containers according to the `Pod` specifications in
 the cluster.  It is the intermediary between the Kubernetes core and the
@@ -127,10 +127,10 @@ types are implemented as _plugins_ in Kubernetes and the `kubelet`:
 - https://github.com/kubernetes/kubernetes/blob/v1.23.4/pkg/volume/configmap/configmap.go#L44
 
 Beyond the initial volume mount setup, the `kubelet` also keeps dynamic volume
-mounts [updated](https://kubernetes.io/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically).
+mounts [updated](https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically).
 These include `ConfigMap`, `Secret`, projected, and other types of mounts, which
 are all implemented similarly.  These updates happen at a predefined frequency
-specified in the [`kubelet` configuration](https://kubernetes.io/reference/config-api/kubelet-config.v1beta1/#kubelet-config-k8s-io-v1beta1-KubeletConfiguration).
+specified in the [`kubelet` configuration](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/#kubelet-config-k8s-io-v1beta1-KubeletConfiguration).
 The default, used in all of our clusters, is `1m`.
 
 {{< alert title="Note" color="info" >}}

@@ -8,7 +8,7 @@ ephemeral cluster and use it to run tests.
 
 ## Who is this documentation meant for?
 
-The user facing documentation is available at [konflux-ci.dev/testing/integration/third-parties/openshift-ci](https://konflux-ci.dev/testing/integration/third-parties/openshift-ci/).  
+The user facing documentation is available at [konflux-ci.dev/testing/integration/third-parties/openshift-ci](https://konflux-ci.dev/docs/testing/integration/third-parties/openshift-ci/).  
 This is intended as an high level overview for an OpenShift CI developer or for a user who is curious to understand how this feature works under the hood.
 
 ## Lifecycle of an Ephemeral Cluster
@@ -65,7 +65,7 @@ The provider creates an `EphemeralCluster` proxy object within the Konflux clust
 Crossplane uses a kubeconfig for the `app.ci` cluster defined at [https://github.com/redhat-appstudio/infra-deployments/components/crossplane-control-plane/staging/testplatform-provider-config.yaml#L16-L35](https://github.com/redhat-appstudio/infra-deployments/blob/4d63bbbe22977ad897d8074708d44f427d3b5092/components/crossplane-control-plane/staging/testplatform-provider-config.yaml#L16-L35).  
 
 The kubeconfig is synchronized from [Vault](https://vault.devshift.net/ui/vault/secrets/stonesoup/kv/production%2Fopenshift-ci%2Fephemeral-cluster/details).
-Follow [this](https://github.com/openshift/release/blob/ca2b56fe13700f7970240e1b72ae8b5860a1b668/dptp-triage-sop/token-rotation.md#konflux-ephemeral-cluster-service-account-token) guide to rotate the kubeconfig token.  
+Follow [this](https://github.com/openshift/release/blob/ca2b56fe13700f7970240e1b72ae8b5860a1b668/docs/dptp-triage-sop/token-rotation.md#konflux-ephemeral-cluster-service-account-token) guide to rotate the kubeconfig token.  
 
 #### XRD and CRD
 The `TestPlatformCluster` is an XRD (this is not entirely true, it's a `Claim` but the concept it's strictly tied to an XRD) resource (see [docs.crossplane.io/latest/composition/composite-resource-definitions](https://docs.crossplane.io/latest/composition/composite-resource-definitions/)) whereas the `EphemeralCluster` is a regular CRD.  
