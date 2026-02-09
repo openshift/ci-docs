@@ -93,7 +93,7 @@ Note: the shell script file must follow the [naming convention](#registry-layout
 ### Resources
 
 A step accepts resource `requests` and `limits` for its container's configuration.
-There is more information about resources [here](https://kubernetes.io/concepts/configuration/manage-resources-containers/).
+There is more information about resources [here](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 
 {{< alert title="Warning" color="warning" >}}
 The resources for the pod running a test step might be overwritten by
@@ -145,7 +145,7 @@ The following environment variables will be available to commands in a step:
 
 In addition to these variables, commands will also have a number of other environment variables available to them from
 `ci-operator` through [leases](#leases), [parameters](#parameters) and [dependencies](/architecture/ci-operator/#referencing-images).
-A further set of environment variables are made available by [Prow](https://docs.prow.k8s.io/jobs#job-environment-variables);
+A further set of environment variables are made available by [Prow](https://docs.prow.k8s.io/docs/jobs#job-environment-variables);
 if a job is using these variables, however, it may be an indication that some level of encapsulation has been broken and that a more
 straightforward approach exists to achieve the same outcome.
 

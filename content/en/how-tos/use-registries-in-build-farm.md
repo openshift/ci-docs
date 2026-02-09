@@ -156,7 +156,7 @@ After the pull request is merged, the manifests will be automatically applied to
 With the `admin_manifest.yaml` described above, the members of group `my-project-admins`
 can [create bound tokens for the service account](https://docs.openshift.com/container-platform/4.13/authentication/bound-service-account-tokens.html#bound-sa-tokens-configuring-externally_bound-service-account-tokens) `image-puller`.
 Once `oc` logs in to `app.ci` with the service account token, we may use the same commands above to pull the images.
-Note that we should avoid creating long-lived tokens for service accounts to lower security risk as described in [the Kubernetes document](https://kubernetes.io/reference/access-authn-authz/service-accounts-admin/#create-token). Regardless of the token types, the members of group `my-project-admins`
+Note that we should avoid creating long-lived tokens for service accounts to lower security risk as described in [the Kubernetes document](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#create-token). Regardless of the token types, the members of group `my-project-admins`
 are responsible for managing the tokens, e.g., rotate the token in case of leaking.
 
 

@@ -4,7 +4,7 @@ description: How to self-service manage secret data provided to jobs during exec
 ---
 
 Jobs execute as `Pod`s; those jobs that need access to sensitive information can have access through mounted Kubernetes
-[`Secrets`](https://kubernetes.io/concepts/configuration/secret/). Secret data is managed self-service by the owners
+[`Secrets`](https://kubernetes.io/docs/concepts/configuration/secret/). Secret data is managed self-service by the owners
 of the data.
 
 ## Add A New Secret

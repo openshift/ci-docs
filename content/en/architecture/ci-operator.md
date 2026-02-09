@@ -592,7 +592,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
 The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the `timeout`, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
 
 - almost no time to claim a running cluster in the pool;
-- 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after being provisioned;
+- 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after being provisioned;
 - 40 to 60 minutes to create a new cluster if all the pre-installed clusters in the pool are taken by other jobs.
 
 The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/how-tos/cluster-claim/) document for more details and check out [the existing cluster pools](/how-tos/cluster-claim/#existing-cluster-pools). By default, OpenShift CI provides the pools backed by DPP-owned accounts.
@@ -770,7 +770,7 @@ when a pull request is opened, when the contents of a pull request are changed, 
 
 There are few extra fields that can be configured to control if or when the test should be executed.
 
-* `run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://docs.prow.k8s.io/jobs#triggering-jobs-based-on-changes)).
+* `run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://docs.prow.k8s.io/docs/jobs#triggering-jobs-based-on-changes)).
 * `skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the documentation link above).
 * `always_run` Set to `false` to disable automatic triggering on every PR. This deaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
 * `optional` Set to `true` to make the job not block merges.

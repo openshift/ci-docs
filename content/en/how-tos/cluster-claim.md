@@ -37,7 +37,7 @@ available on the `hosted-mgmt` cluster. If you are not familiar with OpenShift C
    in [collection self-service](https://selfservice.vault.ci.openshift.org/).
 2. In the selected collection, create a secret with the necessary keys and values. The specific needed keys depend on
    the cloud platform; consult the
-   Hive [Cloud Credentials](https://github.com/openshift/hive/blob/master/using-hive.md#cloud-credentials)
+   Hive [Cloud Credentials](https://github.com/openshift/hive/blob/master/docs/using-hive.md#cloud-credentials)
    document.
 3. Set `secretsync/target-clusters` key to `hosted-mgmt` to make sure your credentials are synced to the necessary cluster.
 4. Set `secretsync/target-namespace` key to a name of the namespace that will hold your pools (`${team}-cluster-pool` is a
@@ -174,7 +174,7 @@ Pay attention to the following stanzas:
 #### Sizing Your Cluster Pool
 
 Hive maintains the number of clusters in the pool as specified by its `size`. A provisioned cluster will
-be [hibernating](https://github.com/openshift/hive/blob/master/hibernating-clusters.md) after staying idled for
+be [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) after staying idled for
 some time and can be woken up if a job claims it. Hive removes it from the pool once it is claimed and creates a new
 cluster to maintain the pool's `size`. The cluster will be destroyed 4 hours after it is claimed. If several jobs file
 claims from one `ClusterPool` simultaneously, Hive will fulfill all claims until the number of living clusters reaches
@@ -255,7 +255,7 @@ document.
 
 ## Troubleshooting Cluster Pools
 
-See the [upstream documentation](https://github.com/openshift/hive/blob/master/troubleshooting.md#clusterpools) for general troubleshooting information for ClusterPools.
+See the [upstream documentation](https://github.com/openshift/hive/blob/master/docs/troubleshooting.md#clusterpools) for general troubleshooting information for ClusterPools.
 
 For information specific to ClusterPools in OpenShift CI, read on.
 

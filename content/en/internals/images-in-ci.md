@@ -109,4 +109,4 @@ for the 2nd.
 Mostly, the not-found image is either not promoted yet or not mirrored yet.
 In the first case, we can trigger the job that promotes the missing image.
 In the 2nd one, we need to check if the error in pod log of ci-images-mirror which triggers an alert as well.
-See the [SOP](https://github.com/openshift/release/blob/master/dptp-triage-sop/misc.md#quay-io-image-mirroring-failures) of the corresponding alert.
+See the [SOP](https://github.com/openshift/release/blob/master/docs/dptp-triage-sop/misc.md#quay-io-image-mirroring-failures) of the corresponding alert.

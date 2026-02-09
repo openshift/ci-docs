@@ -413,20 +413,20 @@ following pages:
 [ci_tools]: https://github.com/openshift/ci-tools.git
 [configresolver]: {{< relref "configresolver" >}}
 [external_images]: {{< relref "/how-tos/external-images" >}}
-[git_ls_remote]: https://git-scm.com/git-ls-remote.html
+[git_ls_remote]: https://git-scm.com/docs/git-ls-remote.html
 [gitglossary]: https://www.man7.org/linux/man-pages/man7/gitglossary.7.html
 [gitrevisions]: https://www.man7.org/linux/man-pages/man7/gitrevisions.7.html
 [image_inputs]: {{< relref "/architecture/ci-operator#configuring-inputs" >}}
 [index]: {{< relref "_index.md" >}}
-[job_env_variables]: https://docs.prow.k8s.io/jobs#job-environment-variables
-[kubernetes_operators]: https://kubernetes.io/concepts/extend-kubernetes/operator#operators-in-kubernetes
-[kubernetes_resources]: https://kubernetes.io/concepts/configuration/manage-resources-containers/
-[life_of_a_prow_job]: https://docs.prow.k8s.io/life-of-a-prow-job/
-[namespaces]: https://kubernetes.io/concepts/overview/working-with-objects/namespaces/
+[job_env_variables]: https://docs.prow.k8s.io/docs/jobs#job-environment-variables
+[kubernetes_operators]: https://kubernetes.io/docs/concepts/extend-kubernetes/operator#operators-in-kubernetes
+[kubernetes_resources]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+[life_of_a_prow_job]: https://docs.prow.k8s.io/docs/life-of-a-prow-job/
+[namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [presentations]: {{< ref "/getting-started/useful-links#presentations" >}}
 [project]: https://docs.openshift.com/container-platform/4.9/rest_api/project_apis/projectrequest-project-openshift-io-v1.html
 [prow]: https://github.com/kubernetes/test-infra/tree/master/prow
-[prowjobs]: https://docs.prow.k8s.io/jobs/
+[prowjobs]: https://docs.prow.k8s.io/docs/jobs/
 [registry_authentication_errors]: {{< ref "/how-tos/use-registries-in-build-farm#why-i-am-getting-an-authentication-error" >}}
-[services_networking]: https://kubernetes.io/tasks/run-application/access-api-from-pod/#directly-accessing-the-rest-api
+[services_networking]: https://kubernetes.io/docs/tasks/run-application/access-api-from-pod/#directly-accessing-the-rest-api
 [steps]: {{< relref "steps.md" >}}

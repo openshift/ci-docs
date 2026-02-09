@@ -16,7 +16,7 @@ operator test is defined in.
 Multiple different `images` are involved in installing and testing candidate versions of OLM-delivered operators: operand,
 operator, bundle, and index `images`. Operand and operator `images` are built normally using the `images` stanza in
 [`ci-operator` configuration](/architecture/ci-operator/#building-container-images). The desired version of an operator
-is installed by [the operator-sdk cli](https://sdk.operatorframework.io/cli/) via the "bundle images".
+is installed by [the operator-sdk cli](https://sdk.operatorframework.io/docs/cli/) via the "bundle images".
 `ci-operator` can build ephemeral versions of these `images` suitable for installation and testing, but not for production.
 
 ## Building Operator Bundles
@@ -122,7 +122,7 @@ and index `images`. This job, named `pull-ci-$ORG-$REPO-$BRANCH-ci-index` for bu
 ## Simple Operator Installation
 
 Once `ci-operator` builds the operator bundle, they are available to be used
-by the [`operator-sdk run bundle`](https://sdk.operatorframework.io/cli/operator-sdk_run_bundle/) command for
+by the [`operator-sdk run bundle`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command for
 deploying and testing the operator. In the following example, the bundle image is named `my-bundle` after the `operator.bundles.as` field
 and can be exposed to multi-stage test workloads via the [dependencies feature](/architecture/ci-operator/#referring-to-images-in-tests):
 
@@ -167,7 +167,7 @@ tests:
 {{< / highlight >}}
 
 The `OO_BUNDLE` environmental variable set for the step will contain the pull specification of the bundle image.
-Note that the base index can be specified in the [`operator-sdk`](https://sdk.operatorframework.io/cli/operator-sdk_run_bundle/) command.
+Note that the base index can be specified in the [`operator-sdk`](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/) command.
 
 
 ## Operator Upgrade Testing
@@ -282,13 +282,13 @@ We encourage the test owners to migration from those workflows to the ones with 
 
 # Moving to File-Based Catalog
 
-Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/reference/file-based-catalogs/) which deprecates the db-based index image.
+Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) which deprecates the db-based index image.
 However, the method of building an index image used in `ci-opeartor` does not work with file-based index images.
 As a result, `ci-operator` has to skip the process of building the index image if
 it detects that the base index is file-based.
 This changes the expected way of consuming the bundles built in the workload from
 the index image which is used as a `CatalogSource` by OLM to the bundle image
-which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/cli/operator-sdk_run_bundle/). The command works with the index images of both formats.
+which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/). The command works with the index images of both formats.
 
 In order to run e2e tests with an index image with `4.11+`, the owners of the steps using `OO_INDEX` needs to switch to `OO_BUNDLE`.
 Once all steps are migrated to `OO_BUNDLE`, `ci-operator` will remove the process of building index images.
