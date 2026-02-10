@@ -47,7 +47,7 @@ The `openshift-merge-robot` that configures the branch protection needs admin pe
 ## Is It Possible to Disable the Branch Protection for My Repository or Require Jobs That Are Not Managed by Prow?
 
 Yes, these settings are configured [in the Prow
-config.](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
+config.](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_config.yaml)
 
 The basic structure looks like this:
 

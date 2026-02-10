@@ -84,7 +84,7 @@ In this configuration, all steps in the workflow will run with `amd64` unless a 
 
 ## Cluster selection
 
-There is currently no need to configure a specific cluster to your test. Cluster selection is achieved via the prowjob dispatcher component. Based on the [capabilities](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_clusters.yaml) of the cluster, the correct selection will be done based on the job's needs.
+There is currently no need to configure a specific cluster to your test. Cluster selection is achieved via the prowjob dispatcher component. Based on the [capabilities](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_clusters.yaml) of the cluster, the correct selection will be done based on the job's needs.
 
 ## Notes
 Available architectures: `amd64`, `arm64`. For availability of other architectures, please contact us.

@@ -263,7 +263,7 @@ the `optional-operators-ci-operator-sdk-$CLOUD` ([aws](https://steps.ci.openshif
 are alternatives to the workflow `generic-claim` in the above examples to install and test operational operators
 with `operator-sdk`. Note that the step [optional-operators-operator-sdk](https://steps.ci.openshift.org/reference/optional-operators-operator-sdk)
 in the `pre` chain of those workflows invokes `operator-sdk`, similarly to what the `install` step does in the `test` chain above.
-Examples of these workflows can be found in [the release repo](https://github.com/openshift/release/tree/master/ci-operator/config).
+Examples of these workflows can be found in [the release repo](https://github.com/openshift/release/tree/main/ci-operator/config).
 
 Currently, the workflows such as
 the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws),

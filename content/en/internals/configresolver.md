@@ -3,20 +3,20 @@ title: "Config Resolver"
 description: A description of the `ci-operator-configresolver` service.
 ---
 
-[`ci-operator-configresolver`](https://github.com/openshift/ci-tools/tree/master/cmd/ci-operator-configresolver)
+[`ci-operator-configresolver`](https://github.com/openshift/ci-tools/tree/main/cmd/ci-operator-configresolver)
 (abbreviated as `configresolver` in this document) is a web server which
 provides configuration files as input for `ci-operator` processes executed by CI
 jobs.
 
-It is [currently deployed](https://github.com/openshift/release/tree/master/clusters/app.ci/ci-operator-configresolver)
+It is [currently deployed](https://github.com/openshift/release/tree/main/clusters/app.ci/ci-operator-configresolver)
 in the `ci` namespace of the `app.ci` cluster and serves requests based on its
 own view of the latest version of files from the following directories in
 `openshift/release`:
 
-- [`ci-operator/config`](https://github.com/openshift/release/tree/master/ci-operator/config):
+- [`ci-operator/config`](https://github.com/openshift/release/tree/main/ci-operator/config):
   the configuration files for each repository, specifying image builds, tests,
   etc.
-- [`ci-operator/step-registry`](https://github.com/openshift/release/tree/master/ci-operator/step-registry):
+- [`ci-operator/step-registry`](https://github.com/openshift/release/tree/main/ci-operator/step-registry):
   shared test definitions used by the more complex ([multi-stage]({{< ref
   "/architecture/step-registry" >}})) tests.
 
@@ -94,7 +94,7 @@ interface at https://steps.ci.openshift.org, which contains:
 
 ## Volume
 
-[Currently](https://github.com/openshift/release/tree/master/clusters/app.ci/ci-operator-configresolver),
+[Currently](https://github.com/openshift/release/tree/main/clusters/app.ci/ci-operator-configresolver),
 the contents of the `openshift/release` repository are provided to the
 `configresolver` instances via a local `git-sync` container.  The process by
 which the content that is served is updated is:
@@ -103,7 +103,7 @@ which the content that is served is updated is:
 1. [`git-sync`]({{< ref "/internals/configuration-updates#git-sync" >}})
    performs its update cycle, notices the new revision, and updates the local
    clone and the symlink to it.
-1. The `configresolver` [monitors changes](https://github.com/openshift/ci-tools/blob/master/pkg/load/agents/)
+1. The `configresolver` [monitors changes](https://github.com/openshift/ci-tools/blob/main/pkg/load/agents/)
    to the volume mount directories using
    [`inotify(7)`](https://www.man7.org/linux/man-pages/man7/inotify.7.html).
 2. The change event from the agent triggers a configuration reload, which reads

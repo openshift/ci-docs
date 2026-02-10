@@ -12,13 +12,13 @@ Dynamic scheduling was introduced in response to frequent cluster failures obser
 
 The dispatcher uses two files:
 
-1. [**Dispatcher Configuration File**](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_config.yaml), the old dispatcher config file, is editable by the dispatcher during rescheduling events. This configuration file has been long used and contains job-to-cluster assignments and scheduling mechanisms (such as manual job assignments and colocation).
+1. [**Dispatcher Configuration File**](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_config.yaml), the old dispatcher config file, is editable by the dispatcher during rescheduling events. This configuration file has been long used and contains job-to-cluster assignments and scheduling mechanisms (such as manual job assignments and colocation).
 
-2. [**Cluster Configuration File**](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_clusters.yaml), the second config file, which is more critical for scheduling, contains information about the clusters enabled in the system.
+2. [**Cluster Configuration File**](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_clusters.yaml), the second config file, which is more critical for scheduling, contains information about the clusters enabled in the system.
 
 The dispatcher reacts to changes in the cluster configuration, loads the first configuration, and performs the scheduling work. It retains its old behavior of rescheduling jobs based on recent Prometheus input every Sunday.
 
-The dispatcher maintains its own copy of the job-to-cluster assignments. After successful scheduling, it opens a PR (pull request) against `openshift/release`, which should be merged by the **triage role** as soon as possible. The PR retains file-based scheduling as a backup for dynamic scheduling and also updates the necessary config changes [here](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_config.yaml).
+The dispatcher maintains its own copy of the job-to-cluster assignments. After successful scheduling, it opens a PR (pull request) against `openshift/release`, which should be merged by the **triage role** as soon as possible. The PR retains file-based scheduling as a backup for dynamic scheduling and also updates the necessary config changes [here](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_config.yaml).
 
 The dispatcher functions as a REST server that responds to requests containing job names. If a matching job is found in the database, the dispatcher returns the cluster assignment. The job-to-cluster assignment data is also stored in a Persistent Volume Claim (PVC) to prevent data loss in case of pod failures.
 

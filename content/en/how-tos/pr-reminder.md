@@ -13,7 +13,7 @@ The tool is currently run under a periodic job titled `periodic-pr-reminder`, an
 <img src="/pr-reminder.png" width="600" alt="example pr-reminder output">
 
 ## How to configure it for your team
-The configuration for `pr-reminder` is located in the `openshift/release` repo under [core-services/pr-reminder](https://github.com/openshift/release/blob/master/core-services/pr-reminder/_config.yaml).
+The configuration for `pr-reminder` is located in the `openshift/release` repo under [core-services/pr-reminder](https://github.com/openshift/release/blob/main/core-services/pr-reminder/_config.yaml).
 Adding the configuration for a specific team is as simple as adding an entry to the `teams` list for the team:
 ```yaml
 teams:

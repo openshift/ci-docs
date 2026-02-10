@@ -43,7 +43,7 @@ copies they hold are up-to-date and jobs that run there run with the correct con
 
 {{< alert title="Info" color="info" >}}
 In addition to QCI, `ci-operator` promotes images to `app.ci`'s registry `registry.ci.openshift.org` _only_ for the sake of internal automation such as Release Controllers, and [mirroring CI images to an external repository](/how-tos/mirroring-to-quay/#mirror-images-with-wildcard).
-ART still pushes the builder images for CI to `app.ci`'s registry and [then mirrored to QCI](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml) before a more sustainable way is available to ART.
+ART still pushes the builder images for CI to `app.ci`'s registry and [then mirrored to QCI](https://github.com/openshift/release/blob/main/core-services/image-mirroring/_config.yaml) before a more sustainable way is available to ART.
 Clients from CI users or their integration should _not_ reference the images there. Instead, please replace them with the corresponding image in QCI.
 {{< /alert >}}
 
@@ -55,14 +55,14 @@ This is done to reduce the effort of managing users in different places.
 The access to QCI has to be through a reverse proxy serving `quay-proxy.ci.openshift.org` and only pull permission is granted.
 
 ### Human Users
-Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). 
+Create a pull request to include a Rover group that the user belongs to as a subject in the rolebinding `qci-image-puller` in [the release repo](https://github.com/openshift/release/blob/main/clusters/app.ci/assets/admin_qci-image-puller_rbac.yaml). 
 ```console
 - kind: Group
   name: <rover-group>
   apiGroup: rbac.authorization.k8s.io
 ```
 The change will be applied automatically to the `app.ci` cluster after merging. Note that the group has to be on `app.ci` cluster, i.e., `app.ci` is included `clusters` if it
-is specified in [this config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml).
+is specified in [this config file](https://github.com/openshift/release/blob/main/core-services/sync-rover-groups/_config.yaml).
 ```console
   <rover-group>:
     clusters:

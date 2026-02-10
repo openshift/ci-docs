@@ -31,7 +31,7 @@ roleRef:
 Syncing Rover Group
 -------------------
 
-[`core-services/sync-rover-groups/_config.yaml`](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml)
+[`core-services/sync-rover-groups/_config.yaml`](https://github.com/openshift/release/blob/main/core-services/sync-rover-groups/_config.yaml)
 
 ```yaml
 groups:
@@ -43,7 +43,7 @@ groups:
 Configuring Deck and Plank
 --------------------------
 
-[`core-services/prow/02_config/_config.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
+[`core-services/prow/02_config/_config.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_config.yaml)
 
 ```yaml
 deck:

@@ -11,7 +11,7 @@ When a job includes a capabilities block, the dispatcher examines the required c
 
 # Configuration
 
-Capabilities are defined within the sanitizer configuration file. Names are designed to be self explanatory. You can view the [sanitizer config](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_clusters.yaml) to see configured capabilities.
+Capabilities are defined within the sanitizer configuration file. Names are designed to be self explanatory. You can view the [sanitizer config](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_clusters.yaml) to see configured capabilities.
 
 To use the Capabilities Feature, simply include the required capabilities in the ci-operator job configuration. For instance, if a job requires intranet support, the configuration should be written as follows:
 

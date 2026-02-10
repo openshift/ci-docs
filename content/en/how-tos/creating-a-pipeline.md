@@ -180,7 +180,7 @@ To enroll repository with the pipeline controller, you need to add it to the app
 
 ### For Manual or Automatic Mode
 
-Repository needs to be added to the main pipeline controller configuration file which can be fonud in [openshift/release config](https://github.com/openshift/release/blob/master/core-services/pipeline-controller/config.yaml).
+Repository needs to be added to the main pipeline controller configuration file which can be fonud in [openshift/release config](https://github.com/openshift/release/blob/main/core-services/pipeline-controller/config.yaml).
 
 The configuration format is:
 ```yaml
@@ -202,7 +202,7 @@ Note: The `mode` section with `trigger` is optional - if not specified, it defau
 
 ### For LGTM Mode
 
-Repository needs to be added to the LGTM-specific configuration file which can be found in [openshift/release lgtm config](https://github.com/openshift/release/blob/master/core-services/pipeline-controller/lgtm-config.yaml).
+Repository needs to be added to the LGTM-specific configuration file which can be found in [openshift/release lgtm config](https://github.com/openshift/release/blob/main/core-services/pipeline-controller/lgtm-config.yaml).
 
 The configuration format is:
 ```yaml

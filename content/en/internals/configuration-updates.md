@@ -37,8 +37,8 @@ components and is divided in the following steps:
 
 This [plugin](https://github.com/kubernetes-sigs/prow/tree/main/pkg/plugins/updateconfig)
 is configured by files under the Prow configuration directory,
-[`core-services/prow/02_config`](https://github.com/openshift/release/tree/master/core-services/prow/02_config).
-The [`openshift/release/_pluginconfig.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/openshift/release/_pluginconfig.yaml)
+[`core-services/prow/02_config`](https://github.com/openshift/release/tree/main/core-services/prow/02_config).
+The [`openshift/release/_pluginconfig.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/openshift/release/_pluginconfig.yaml)
 file enables it for the repository:
 
 {{< highlight yaml >}}
@@ -50,7 +50,7 @@ plugins:
     - approve
 {{< / highlight >}}
 
-while [`_plugins.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_plugins.yaml)
+while [`_plugins.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_plugins.yaml)
 configures it via the top-level `config_updater` key.  It is configured to
 populate several `ConfigMap`s in the clusters from the contents of the
 repository:

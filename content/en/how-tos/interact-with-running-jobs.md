@@ -212,7 +212,7 @@ It can be quite confusing to find the test command that is running in CI. Jobs a
 [the release repository](https://github.com/openshift/release).
 The YAML job definitions are generated from the step-registry workflow and/or the `ci-operator`/config files.
 For jobs that aren't configured with the `ci-operator`/step-registry, you can find test commands in
-[release/ci-operator/config/openshift](https://github.com/openshift/release/tree/master/ci-operator/config).
+[release/ci-operator/config/openshift](https://github.com/openshift/release/tree/main/ci-operator/config).
 For example, the `ci/prow/unit` test command for `openshift-apiserver` is
 [make test-unit](https://github.com/openshift/release/blob/8ccb2b1c17387920b3de0180c52052c535603855/ci-operator/config/openshift/openshift-apiserver/openshift-openshift-apiserver-master.yaml#L60-#L62).
 
@@ -265,7 +265,7 @@ $ openshift-tests run all --dry-run | grep -E "<REGEX>" | openshift-tests run -f
 ```
 If you _are_ adding a test or modifying a test suite, the test binary can be built from
 [openshift/origin repository](https://github.com/openshift/origin) and all of the `e2e` individual tests are found
-in [origin/test/extended](https://github.com/openshift/origin/tree/master/test/extended). First, clone the origin repository with:
+in [origin/test/extended](https://github.com/openshift/origin/tree/main/test/extended). First, clone the origin repository with:
 
 ```bash
 $ git clone git@github.com:openshift/origin

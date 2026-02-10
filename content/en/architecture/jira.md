@@ -170,7 +170,7 @@ Sample config overriding the `target_version` for the `release-4.6` branch of th
 
 The file defining all of the possible configuration options can be found [here][2].
 
-[0]: https://github.com/openshift/release/blob/master/core-services/jira-lifecycle-plugin/config.yaml
+[0]: https://github.com/openshift/release/blob/main/core-services/jira-lifecycle-plugin/config.yaml
 [1]: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_bugzilla_process
 [2]: https://github.com/openshift-eng/jira-lifecycle-plugin/blob/main/cmd/jira-lifecycle-plugin/config.go
 [3]: https://docs.google.com/document/d/1sxuq3f3dzhjt8mqYGL5_K4-2avhQwWC7gjEfZoABfEE/edit
