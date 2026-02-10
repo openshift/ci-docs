@@ -560,7 +560,7 @@ propagation](#hierarchical-propagation) section.
 Once a registry component exists that declares one or more parameters, it can be
 used by other components and tests. Components and their parameters can be found
 either directly in the step registry directory in
-[`openshift/release`](https://github.com/openshift/release/tree/master/ci-operator/step-registry)
+[`openshift/release`](https://github.com/openshift/release/tree/main/ci-operator/step-registry)
 or via the [step registry web page](https://steps.ci.openshift.org). The latter
 shows what parameters are available for each type (follow the links for
 examples):

@@ -49,8 +49,8 @@ in order to ensure that jobs are well-behaved against the cloud provider APIs.
 In order to add a new type of cloud quota to the system, changes to the `boskos` leasing server configuration are
 required. The configuration is checked into source control:
 
-* [generator](https://github.com/openshift/release/blob/master/core-services/prow/02_config/generate-boskos.py)
-* [generated configuration](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)
+* [generator](https://github.com/openshift/release/blob/main/core-services/prow/02_config/generate-boskos.py)
+* [generated configuration](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_boskos.yaml)
 
 After altering the generator, run `make boskos-config` to regenerate the configuration.
 

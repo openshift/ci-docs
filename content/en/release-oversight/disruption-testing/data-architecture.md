@@ -10,12 +10,12 @@ weight: 1
 You'll need access to the appropriate groups to work with disruption data, please reach out to the TRT team for access.
 {{% /alert %}}
 
-- [Periodic Jobs](https://github.com/openshift/release/tree/master/ci-operator/jobs/openshift/release)
+- [Periodic Jobs](https://github.com/openshift/release/tree/main/ci-operator/jobs/openshift/release)
 - [BigQuery](https://console.cloud.google.com/bigquery?project=openshift-ci-data-analysis)
 - `DPCR Job Aggregation Configs` (**private repo**)
 
   ```
-  https://github.com/openshift/continuous-release-jobs/tree/master/config/clusters/dpcr/services/dpcr-ci-job-aggregation
+  https://github.com/openshift/continuous-release-jobs/tree/main/config/clusters/dpcr/services/dpcr-ci-job-aggregation
   ```
 
 - [Origin Synthetic Backend Tests](https://github.com/openshift/origin/blob/a93ac08b2890dbe6dee760e623c5cafb1d8c9f97/pkg/synthetictests/allowedbackenddisruption)
@@ -71,7 +71,7 @@ It does not cover how the tests themselves are run against a cluster.
 
 ### How To Query The Data Manually
 
-The process for gathering and updating disruption data is fully automated, however, if you wish to explore the BigQuery data set, below are some of the queries you can run. If you also want to run the `job-run-aggregator` locally, the [README.md](https://github.com/openshift/ci-tools/tree/master/cmd/job-run-aggregator) for the project will provide guidance.
+The process for gathering and updating disruption data is fully automated, however, if you wish to explore the BigQuery data set, below are some of the queries you can run. If you also want to run the `job-run-aggregator` locally, the [README.md](https://github.com/openshift/ci-tools/tree/main/cmd/job-run-aggregator) for the project will provide guidance.
 
 Once you have access to BigQuery in the `openshift-ci-data-analysis` project, you can run the below query to fetch the latest results.
 

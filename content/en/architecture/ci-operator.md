@@ -592,7 +592,7 @@ The `cluster_claim` below claims an OCP 4.7 cluster in AWS from a pool owned by 
 The claim will be fulfilled immediately if a cluster is available in the cluster pool. If there is no cluster available at the moment, `ci-operator` will wait until new one is provisioned, up to the time limit specified in the `timeout` field. If no cluster is made available until the `timeout`, the `ci-operator` execution will fail. From our experience with clusters in AWS-backed cluster pools, the jobs can expect the following:
 
 - almost no time to claim a running cluster in the pool;
-- 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/master/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after being provisioned;
+- 3 - 6 minutes to wake up a [hibernating](https://github.com/openshift/hive/blob/main/docs/hibernating-clusters.md) cluster. A cluster is hibernating after it has not been claimed for sometime after being provisioned;
 - 40 to 60 minutes to create a new cluster if all the pre-installed clusters in the pool are taken by other jobs.
 
 The system is designed to allow teams to set up custom cluster pools backed by cloud platform accounts they own, and then use these pools to provide clusters to their jobs. See the [Creating a Cluster Pool](/how-tos/cluster-claim/) document for more details and check out [the existing cluster pools](/how-tos/cluster-claim/#existing-cluster-pools). By default, OpenShift CI provides the pools backed by DPP-owned accounts.
@@ -612,7 +612,7 @@ To avoid the release overriding, `cluster_claim.as` can be given as a value whic
 
 The version of the claimed cluster is determined by the reference to a `ClusterImageSet` of the cluster pool
 which defines the image that contains the payload to use when installing a cluster.
-The _released_ `4.Y` versions of `ClusterImageSet` [manifests](https://github.com/openshift/release/tree/master/clusters/hosted-mgmt/hive/pools) are maintained by
+The _released_ `4.Y` versions of `ClusterImageSet` [manifests](https://github.com/openshift/release/tree/main/clusters/hosted-mgmt/hive/pools) are maintained by
 a tool which ensures that they points to the latest version.
 It is currently not supported that a test claims by `cluster_claim` a cluster with the version which has not been released yet.
 
@@ -661,7 +661,7 @@ If another cluster profile is chosen, `BASE_DOMAIN` or `HYPERSHIFT_BASE_DOMAIN` 
 See [how to configuring Route 53](https://docs.openshift.com/container-platform/4.12/installing/installing_aws/installing-aws-account.html#installation-aws-route53_installing-aws-account) for details.
 A full list of environment variables consumed by this workflow can be found in the
 [step-registry](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow).
-An example of this workflow is the Prow job [release-openshift-origin-installer-launch-hypershift-hosted](https://github.com/openshift/release/blob/master/ci-operator/jobs/openshift/release/openshift-release-infra-periodics.yaml) which is used as the implementation of the Cluster Bot.
+An example of this workflow is the Prow job [release-openshift-origin-installer-launch-hypershift-hosted](https://github.com/openshift/release/blob/main/ci-operator/jobs/openshift/release/openshift-release-infra-periodics.yaml) which is used as the implementation of the Cluster Bot.
 {{% /alert %}}
 
 The hosted clusters provisioned by HyperShift have the following advantages over generic OpenShift clusters:
@@ -953,7 +953,7 @@ For example, if you need to authenticate to the `Red Hat` registry (`registry.re
 {{< / highlight >}}
 This mounts the `ci-pull-credentials` secret into the test container and sets the path to the Docker config file so that registry authentication works as expected.
 
-For further information, check configurations available in [core-services/ci-secret-bootstrap/_config.yaml](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml).
+For further information, check configurations available in [core-services/ci-secret-bootstrap/_config.yaml](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/_config.yaml).
 
 If you need to authenticate to a different service that's not already available in the build cluster,
 then you might want to look into [Adding a New Secret to CI](/how-tos/adding-a-new-secret-to-ci).

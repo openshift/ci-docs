@@ -5,7 +5,7 @@ description: How to set up RBACs on CI clusters.
 
 [All the clusters](/getting-started/useful-links/#clusters) for Openshift CI have enabled authentication via Red Hat SSO.
 The [RBAC](https://docs.openshift.com/container-platform/4.6/authentication/using-rbac.html) manifests defined in [the clusters folder of the release
-repo](https://github.com/openshift/release/tree/master/clusters) are applied automatically to the clusters. 
+repo](https://github.com/openshift/release/tree/main/clusters) are applied automatically to the clusters. 
 
 ## Rover Groups
 For privacy reasons, we avoid referring to specific usernames in all RBAC manifests stored in the repository.
@@ -14,7 +14,7 @@ As an enforced convention, users are not allowed to be subjects of the RoleBindi
 For the same privacy reasons, we disallow maintaining Group manifests directly in the repository. Instead, the users need to use the Red Hat's Rover Groups feature to maintain the list of RH users belonging to a group, and Test Platform tooling will maintain the Group resources on OpenShift CI cluster to contain users corresponding to the Rover group.
 
 ## Configuration
-By default, every group used in the manifests is created on all CI clusters. [A configuration file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml) is used to address special cases.
+By default, every group used in the manifests is created on all CI clusters. [A configuration file](https://github.com/openshift/release/blob/main/core-services/sync-rover-groups/_config.yaml) is used to address special cases.
 
 ```yaml
 cluster_groups:
@@ -60,7 +60,7 @@ users:
 
 When it is removed from the release repo and the cluster, the members of the group lose the corresponding permissions on the clusters.
 To retrieve the permissions, we have to modify RBACs in the release repo and/or
-update [the config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml).
+update [the config file](https://github.com/openshift/release/blob/main/core-services/sync-rover-groups/_config.yaml).
 
 The most common case is that we can use an existing [Rover](https://rover.redhat.com/groups/) group, e.g, `cvp-team` as subjects of RBACs.
 
@@ -80,7 +80,7 @@ subjects:
   name: cvp-team ### an existing Rover group
 ```
 
-Update [the config file](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml) with the following stanza because the group is needed only on the `hive` cluster.
+Update [the config file](https://github.com/openshift/release/blob/main/core-services/sync-rover-groups/_config.yaml) with the following stanza because the group is needed only on the `hive` cluster.
 
 ```yaml
 groups:

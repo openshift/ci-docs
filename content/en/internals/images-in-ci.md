@@ -30,7 +30,7 @@ Only Test-Platform members and their automation have access to `QCI` directly.
 
 ## QCI-APPCI
 
-The [reverse-proxy](https://github.com/openshift/release/blob/master/clusters/app.ci/assets/admin_qci-appci.yaml) (`quay-proxy.ci.openshift.org`) `QCI-APPCI` of `QCI` is the face of the images in QCI for human users and the 3rd party applications.
+The [reverse-proxy](https://github.com/openshift/release/blob/main/clusters/app.ci/assets/admin_qci-appci.yaml) (`quay-proxy.ci.openshift.org`) `QCI-APPCI` of `QCI` is the face of the images in QCI for human users and the 3rd party applications.
 Its existence is due to the fact that it delegates the access control of the images in `QCI` to the `RBAC`s on `app.ci`, i.e.,
 human users and the service accounts on `app.ci` can pull images in `QCI` via `QCI-APPCI`.
 
@@ -53,7 +53,7 @@ spec:
 
 ## The Cache Server for QCI
 
-For reducing the cost, [the pull-through cache server](https://github.com/openshift/release/blob/master/clusters/app.ci/quayio-pull-through-cache/qci-pull-through-cache-us-east-1.yaml) `qci-pull-through-cache-us-east-1-ci.apps.ci.l2s4.p1.openshiftapps.com` for QCI is deployed. Only Test-Platform members and their automation have access to it.
+For reducing the cost, [the pull-through cache server](https://github.com/openshift/release/blob/main/clusters/app.ci/quayio-pull-through-cache/qci-pull-through-cache-us-east-1.yaml) `qci-pull-through-cache-us-east-1-ci.apps.ci.l2s4.p1.openshiftapps.com` for QCI is deployed. Only Test-Platform members and their automation have access to it.
 It is used by [`ImageTagMirrorSet` and `ImageDigestMirrorSet`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/images/image-configuration#images-configuration-registry-mirror-configuring_image-configuration) defined on all CI clusters.
 
 ```yaml
@@ -103,10 +103,10 @@ If positive, we need to find out how the image is created.
 As mentioned in [the `QCI` section above](/internals/images-in-ci/#qci), the images in `QCI` are
 either promoted or mirrored.
 The utility `make explain` from [ci-tools](https://github.com/openshift/ci-tools/tree/master/cmd/promoted-image-governor#explain)
-is helpful for the first case and there should be some clue in [ci-images-mirror](https://github.com/openshift/ci-tools/tree/master/cmd/ci-images-mirror)'s [configuration](https://github.com/openshift/release/blob/master/core-services/image-mirroring/_config.yaml)
+is helpful for the first case and there should be some clue in [ci-images-mirror](https://github.com/openshift/ci-tools/tree/master/cmd/ci-images-mirror)'s [configuration](https://github.com/openshift/release/blob/main/core-services/image-mirroring/_config.yaml)
 for the 2nd.
 
 Mostly, the not-found image is either not promoted yet or not mirrored yet.
 In the first case, we can trigger the job that promotes the missing image.
 In the 2nd one, we need to check if the error in pod log of ci-images-mirror which triggers an alert as well.
-See the [SOP](https://github.com/openshift/release/blob/master/docs/dptp-triage-sop/misc.md#quay-io-image-mirroring-failures) of the corresponding alert.
+See the [SOP](https://github.com/openshift/release/blob/main/docs/dptp-triage-sop/misc.md#quay-io-image-mirroring-failures) of the corresponding alert.

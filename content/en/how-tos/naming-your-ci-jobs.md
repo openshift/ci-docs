@@ -79,7 +79,7 @@ When creating a job that utilizes the multiarch payload, there are many
 different architectures and configurations that can be used for deploying
 a cluster.  Creating the job name with a specific pattern will help others
 understand more about the deployment structure with just a glance. See this
-[README](https://github.com/openshift/release/blob/master/ci-operator/config/openshift/multiarch/README.md)
+[README](https://github.com/openshift/release/blob/main/ci-operator/config/openshift/multiarch/README.md)
 for more information on appropriate formatting.
 
 ### Example job names

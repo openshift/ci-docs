@@ -20,7 +20,7 @@ Nested containerization in Test Platform is not enabled on any build cluster by 
 ### Capability
 
 Only the clusters tagged with the `nested-podman` **capability** (see [capabilities](../capabilities/)) are able to run a container within a container.
-To check which capabilities are supported by a cluster, refer to [_clusters.yaml](https://github.com/openshift/release/blob/master/core-services/sanitize-prow-jobs/_clusters.yaml).  
+To check which capabilities are supported by a cluster, refer to [_clusters.yaml](https://github.com/openshift/release/blob/main/core-services/sanitize-prow-jobs/_clusters.yaml).  
 Below is an example of how to set this capability on a test:
 
 ```yaml

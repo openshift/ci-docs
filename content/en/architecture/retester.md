@@ -12,7 +12,7 @@ configuration, whatever onboards to Tide, gets onboarded to retester too.
 Retester is aware of Prow and the concept of optional and required jobs. It only triggers retests on PRs 
 where at least one required Prow job is failing.
 
-We can enable the retester on a repository or for the entire organization in [its configuration file](https://github.com/openshift/release/blob/master/core-services/retester/_config.yaml).
+We can enable the retester on a repository or for the entire organization in [its configuration file](https://github.com/openshift/release/blob/main/core-services/retester/_config.yaml).
 
 ### Config file
 There are 3 levels of policy in the configuration file: retester (global), org, repo. If a field of policy is defined at two levels, the value at the more specific level precedes. The values in the more generic level are inherited if they are not defined in the more specific level.

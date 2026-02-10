@@ -98,16 +98,16 @@ This example shows exactly what code changes you need to make. Follow this patte
 
 ### Registering a New Profile
 
-To register a new cluster profile, you need to create a pull request to the [`openshift/ci-tools`](https://github.com/openshift/ci-tools) repository. All the code changes go in a single file: [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go).
+To register a new cluster profile, you need to create a pull request to the [`openshift/ci-tools`](https://github.com/openshift/ci-tools) repository. All the code changes go in a single file: [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go).
 
 Think of this as "telling the system about your new profile" - you're adding it to the list of profiles that the CI system recognizes.
 
-You need to make **5 specific changes** in the [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go) file:
+You need to make **5 specific changes** in the [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go) file:
 
 #### 1. Add a New Constant for the Profile Name
 
-**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-**Location:** Find the `const` block with other `ClusterProfile` constants (around [line 1517](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1517))
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+**Location:** Find the `const` block with other `ClusterProfile` constants (around [line 1517](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1517))
 
 Add your new constant following the existing naming pattern.
 
@@ -124,9 +124,9 @@ const (
 
 #### 2. Add Your Profile to the Valid Profiles List
 
-**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-**Function:** [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713)  
-**Location:** Around [line 1713](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713)
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+**Function:** [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1713)  
+**Location:** Around [line 1713](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1713)
 
 Find the `ClusterProfiles()` function and add your new constant to the list it returns.
 
@@ -145,9 +145,9 @@ func ClusterProfiles() []ClusterProfile {
 
 #### 3. Map Your Profile to a Cluster Type
 
-**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-**Method:** [`ClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998)  
-**Location:** Around [line 1998](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998)
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+**Method:** [`ClusterType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1998)  
+**Location:** Around [line 1998](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1998)
 
 Find the `ClusterType()` method and add a case for your profile. The cluster type is used by the OpenShift installer to know which cloud platform it's working with.
 
@@ -171,9 +171,9 @@ func (p ClusterProfile) ClusterType() string {
 
 #### 4. Map Your Profile to a Lease Type
 
-**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-**Method:** [`LeaseType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379)  
-**Location:** Around [line 2379](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379)
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+**Method:** [`LeaseType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2379)  
+**Location:** Around [line 2379](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2379)
 
 Find the `LeaseType()` method and add a case for your profile. The lease type determines which cloud resources your tests can use.
 
@@ -195,9 +195,9 @@ func (p ClusterProfile) LeaseType() string {
 
 #### 5. Add to LeaseTypeFromClusterType (if needed)
 
-**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-**Function:** [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423)  
-**Location:** Around [line 2423](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423)
+**File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+**Function:** [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2423)  
+**Location:** Around [line 2423](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2423)
 
 If you're creating a completely new cluster type (not reusing an existing one), you also need to add it to the `LeaseTypeFromClusterType()` function. This is mainly used for older template-based tests.
 
@@ -219,13 +219,13 @@ func LeaseTypeFromClusterType(t string) (string, error) {
 
 #### Summary of Code Changes
 
-Here's a quick checklist of what you need to add to [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go):
+Here's a quick checklist of what you need to add to [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go):
 
-- [ ] Add constant: `ClusterProfileYourName ClusterProfile = "your-profile-name"` ([constants section](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1517))
-- [ ] Add to [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1713) list
-- [ ] Add case in [`ClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1998) method
-- [ ] Add case in [`LeaseType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2379) method
-- [ ] Add case in [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L2423) (if new cluster type)
+- [ ] Add constant: `ClusterProfileYourName ClusterProfile = "your-profile-name"` ([constants section](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1517))
+- [ ] Add to [`ClusterProfiles()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1713) list
+- [ ] Add case in [`ClusterType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1998) method
+- [ ] Add case in [`LeaseType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2379) method
+- [ ] Add case in [`LeaseTypeFromClusterType()`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L2423) (if new cluster type)
 
 Once you've made these changes, create a pull request to `openshift/ci-tools`. You can reference [PR 4685](https://github.com/openshift/ci-tools/pull/4685) as an example of the complete set of changes needed.
 
@@ -259,7 +259,7 @@ A **lease** is a reservation of cloud resources (like AWS accounts or GCP projec
 
 2. **In a separate PR to `openshift/release`:** You need to register the actual lease resources with the leasing server (Boskos). This tells the system "here are the cloud accounts/projects that can be used for this lease type."
 
-   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)
+   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_boskos.yaml)
 
    See the [Adding a New Type of Resource](/architecture/quota-and-leases/#adding-a-new-type-of-resource) documentation for details on how to register leases. You can also reference [this example PR](https://github.com/openshift/release/pull/32536) that shows how leases are registered.
 
@@ -283,7 +283,7 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 
    **Step 1:** Create a pull request to `openshift/release` that adds your secret to the `ci-secret-bootstrap` configuration. This "seeds" the secret with platform-provided content.
 
-   **File:** [`core-services/ci-secret-bootstrap/_config.yaml`](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/_config.yaml)
+   **File:** [`core-services/ci-secret-bootstrap/_config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/_config.yaml)
 
    See [this example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd) for reference.
 
@@ -304,10 +304,10 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
   1. First, same as above, create the PR that adds your secret to `ci-secret-bootstrap` (and wait for it to merge)
   2. Then, create a second PR that modifies the cluster profiles configuration to specify your custom secret name:
 
-     **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
+     **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/main/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
 
      ```yaml
-     - profile: <your-profile-name>  # This needs to match the constant you added into [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)
+     - profile: <your-profile-name>  # This needs to match the constant you added into [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)
        secret: custom-cluster-profile-secret
      ```
 
@@ -356,29 +356,29 @@ AWS supports a "Bring Your Own IP" (BYOIP) feature that lets you use your own IP
 
 2. **Register IP Pool leases in Boskos:** Add configuration in `openshift/release` for each region. The lease name format should be `{cluster-profile-name}-ip-pools-{region}`.
 
-   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_boskos.yaml)  
+   **File:** [`core-services/prow/02_config/_boskos.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_boskos.yaml)  
    **Example:** See [this example](https://github.com/openshift/release/blob/6a8f889b353fd3764b7c877bb0cd52cf7ea68aba/core-services/prow/02_config/_boskos.yaml#L435-L438)
 
 3. **Update ci-tools configuration:** Add your lease name (without the region suffix) to the IP pool configuration in `ci-tools`.
 
-   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-   **Location:** Around [line 1940](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1940)
+   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+   **Location:** Around [line 1940](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1940)
 
 4. **Optional - Custom branch validation:** By default, only tests on certain OpenShift branches can use IP pools. If you want different behavior, modify the validation function to return `false` for your cluster profile.
 
-   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go)  
-   **Function:** Around [line 1952](https://github.com/openshift/ci-tools/blob/master/pkg/api/types.go#L1952)
+   **File:** [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)  
+   **Function:** Around [line 1952](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go#L1952)
 
 ## Private Cluster Profiles
 
 To restrict the usage of your cluster profile to specific organizations and repositories,
 you can create a pull request in the `openshift/release` repository.
 
-**File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/master/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
+**File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/main/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
 
 Within the pull request, add your repository or organization to the cluster profiles configuration file.
 
-For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/README.md).
+For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/main/ci-operator/step-registry/cluster-profiles/README.md).
 
 ## VPN connection
 
@@ -473,5 +473,5 @@ client starts.
 {{< /alert >}}
 
 [openshift_release]: https://github.com/openshift/release.git
-[openvpn_build]: https://github.com/openshift/release/blob/master/clusters/app.ci/supplemental-ci-images/openvpn.yaml
-[supplemental_images]: https://github.com/openshift/release/blob/master/clusters/app.ci/supplemental-ci-images/
+[openvpn_build]: https://github.com/openshift/release/blob/main/clusters/app.ci/supplemental-ci-images/openvpn.yaml
+[supplemental_images]: https://github.com/openshift/release/blob/main/clusters/app.ci/supplemental-ci-images/

@@ -50,12 +50,12 @@ job, but for most of them it is:
   artifacts directory.
 
   This `ProwJob` is a runtime version of the content in
-  [`ci-operator/jobs`](https://github.com/openshift/release/tree/master/ci-operator/jobs)
+  [`ci-operator/jobs`](https://github.com/openshift/release/tree/main/ci-operator/jobs)
   in the [`openshift/release`](https://github.com/openshift/release.git)
   repository, which in turn is usually [automatically generated]({{< ref
   "/how-tos/contributing-openshift-release" >}}) by `ci-operator-prowgen`
   based on the `ci-operator` configuration in
-  [`ci-operator/config`](https://github.com/openshift/release/tree/master/ci-operator/config)
+  [`ci-operator/config`](https://github.com/openshift/release/tree/main/ci-operator/config)
   in the same repository.
 
   Note that for `ci-operator` jobs, this and all references to "pod" in this
@@ -254,7 +254,7 @@ authors, they are mostly meant for test platform engineers:
 - `junit_operator.xml`: the source of the JUnit section in the main page.
 
 - `metadata.json`: data file consumed by
-  [`testgrid`](https://github.com/kubernetes/test-infra/tree/master/testgrid).
+  [`testgrid`](https://github.com/kubernetes/test-infra/tree/main/testgrid).
 
 {{< alert title="Info" color="info" >}}
 "Step" in this context refers to [`ci-operator` steps]({{< ref

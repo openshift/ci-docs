@@ -25,7 +25,7 @@ If your component repository is **not** in the OpenShift github organization:
 1. The invitations will be accepted automatically via the `periodic-openshift-release-master-accept-invitations-ci-robot` and `periodic-openshift-release-master-accept-invitations-merge-robot` jobs in _no more_ than 4 hours.
 1. The `openshift-merge-robot` **must** be given `admin` permissions to support either of the following use cases:
    1. In order for `tide` to automatically merge PRs it must be allowed to verify the repo's allowed merge methods. 
-   1. By default, we enable [branch-protection](/architecture/branch-protection) for all prow-controlled repos. We can disable it in prow’s [config.yaml](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_config.yaml)
+   1. By default, we enable [branch-protection](/architecture/branch-protection) for all prow-controlled repos. We can disable it in prow’s [config.yaml](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_config.yaml)
 1. If a repository is [enrolled in centralized branch management](https://docs.ci.openshift.org/architecture/branching/) and no write permissions is granted to `openshift-merge-robot`, ensure that the `tide/merge-blocker` label exists on the repository. Otherwise, [the periodic-openshift-release-merge-blockers job](https://prow.ci.openshift.org/?job=periodic-openshift-release-merge-blockers) would fail. See how to create a label at [Github's documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-a-label).
 1. All repositories need the [Openshift CI](https://github.com/apps/openshift-ci) and the [Openshift Merge Bot](https://github.com/apps/openshift-merge-bot) GitHub Apps installed. Go to the [app](https://github.com/apps/openshift-ci) and click Configure. Repeat the process for the [second app](https://github.com/apps/openshift-merge-bot). We plan to eventually replace the bot accounts entirely with these apps, but that work is not yet done.
 Both of them are required for automations to work properly, if one is missing you might experience failures in tests like [pull-ci-openshift-release-check-gh-automation](https://github.com/openshift/release/blob/cd6d9f44031fad0fc9a50aab17cd79e4d8099654/ci-operator/jobs/openshift/release/openshift-release-master-presubmits.yaml#L1-L66)
@@ -71,7 +71,7 @@ This will place a new `_pluginconfig.yaml` file in the `/core-services/prow/02_c
 This file is used to configure the specific plugins for your repository.
 
 Default plugin configuration is stored in
-[`_plugins.yaml`](https://github.com/openshift/release/blob/master/core-services/prow/02_config/_plugins.yaml) in the
+[`_plugins.yaml`](https://github.com/openshift/release/blob/main/core-services/prow/02_config/_plugins.yaml) in the
 [openshift/release](https://github.com/openshift/release) repository. Plugins are enabled for a repository or
 organization under the `plugins` key. Plugin-specific configuration is under keys like `label` or `owners`. The set of a
 repository’s enabled plugins is the union of plugins configured for the repository’s organization (found at the
@@ -158,7 +158,7 @@ make jobs WHAT=openshift/release
 #### Setting up team ownership of ci-operator and Prow config files
 
 While the initial PR to [`openshift/release`](https://github.com/openshift/release) will need to be reviewed and
-approved by [root approvers](https://github.com/openshift/release/blob/master/OWNERS), once the component config is in
+approved by [root approvers](https://github.com/openshift/release/blob/main/OWNERS), once the component config is in
 place, it should be owned by the component team. To achieve this, an `OWNERS` file mirroring what exists upstream should
 be placed into both `ci-operator/config/$org/$repo` and `ci-operator/jobs/$org/$repo` directories.
 
@@ -370,6 +370,6 @@ operator's `image-references` file, or release payloads will fail to assemble af
 
 [doozer-environment-variables]: https://github.com/openshift/doozer/blob/57721c72b3ddd08e6493323fcce065f55327fd69/doozerlib/distgit.py#L1975-L1985
 [build-machinery-go-version-ldflags]: https://github.com/openshift/build-machinery-go/blob/e25cf57ea46d9ce17de894b1a00dcf43ba12ee1a/make/lib/golang.mk#L57-L69
-[cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/master/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
+[cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/main/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
 [enhancements]: https://github.com/openshift/enhancements
 [operator-lifecycle-manager]: https://olm.operatorframework.io/

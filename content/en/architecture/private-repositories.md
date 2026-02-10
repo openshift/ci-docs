@@ -38,7 +38,7 @@ The set of repositories that are managed automatically in `openshift-priv` is dy
 1. Repositories with existing CI configuration promoting `images` to the `ocp/4.X` namespace (same criteria like for
    enrollment into the centralized release branch management)
 1. Repositories explicitly listed in the
-   [allowlist](https://github.com/openshift/release/blob/master/core-services/openshift-priv/_whitelist.yaml)
+   [allowlist](https://github.com/openshift/release/blob/main/core-services/openshift-priv/_whitelist.yaml)
 
 ### Automation Architecture
 

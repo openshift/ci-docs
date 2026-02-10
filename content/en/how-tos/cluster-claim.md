@@ -62,9 +62,9 @@ At the end, you should have a secret similar to the following in Vault:
 ### Create a Directory for Your Manifests
 
 1. In the openshift/release repository, create a folder in
-   the [`clusters/hosted-mgmt/hive/pools`](https://github.com/openshift/release/tree/master/clusters/hosted-mgmt/hive/pools) directory that will
+   the [`clusters/hosted-mgmt/hive/pools`](https://github.com/openshift/release/tree/main/clusters/hosted-mgmt/hive/pools) directory that will
    contain manifests of all your resources (
-   see [`openshift-ci`](https://github.com/openshift/release/tree/master/clusters/hosted-mgmt/hive/pools/openshift-ci) as an
+   see [`openshift-ci`](https://github.com/openshift/release/tree/main/clusters/hosted-mgmt/hive/pools/openshift-ci) as an
    example).
 
 2. Create `OWNERS` file in the directory to allow your teammates make and approve changes.
@@ -161,7 +161,7 @@ Pay attention to the following stanzas:
    hosted zone when configuring the cloud platform account (see [prerequisites](#prerequisites)).
 3. `spec.imageSetRef`: A reference to a `ClusterImageSet` in the cluster that determines the exact version of clusters
    created in the pool. `ClusterImageSets` are cluster-scoped resources and their manifests are present
-   in [`clusters/hosted-mgmt/hive/pools`](https://github.com/openshift/release/tree/master/clusters/hosted-mgmt/hive/pools) directory. Either
+   in [`clusters/hosted-mgmt/hive/pools`](https://github.com/openshift/release/tree/main/clusters/hosted-mgmt/hive/pools) directory. Either
    select one of the already available, or create a new one. DPTP maintains a set of `ClusterImageSets` that are
    regularly bumped to most recent released OCP versions.
 4. `spec.installConfigSecretTemplateRef`: a reference to a `Secret` that serves as an installation config template. See
