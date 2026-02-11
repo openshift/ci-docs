@@ -1,6 +1,6 @@
 // Cluster list loader for useful-links page
 $(document).ready(function () {
-    if ($('#m-docsgetting-starteduseful-links').hasClass('active')) {
+    if ($('#m-getting-starteduseful-links').hasClass('active')) {
         $.ajax({
             url: window.HUGO_PARAMS.api_v1_url + '/api/v1/clusters',
             dataType: 'jsonp',
