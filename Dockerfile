@@ -17,5 +17,5 @@ RUN set -x && HUGO_ENV=production make generate
 FROM nginxinc/nginx-unprivileged:1.29-alpine
 
 COPY --from=builder /src/public/ /usr/share/nginx/html/
-COPY --from=builder /src/static/googlea8e04f239c597b8a.html /usr/share/nginx/html/
-COPY nginx/relative_redirect.sh /docker-entrypoint.d/
+COPY static/googlea8e04f239c597b8a.html /usr/share/nginx/html/
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
