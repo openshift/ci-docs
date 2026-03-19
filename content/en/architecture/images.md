@@ -21,13 +21,14 @@ base_images:
     namespace: ocp
     tag: rhel-8-golang-1.15-openshift-4.6
 images:
-- dockerfile_path: Dockerfile.rhel7
-  from: base
-  inputs:
-    ocp_builder_rhel-8-golang-1.15-openshift-4.6:
-      as:
-      - registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.6
-  to: cluster-etcd-operator
+  items:
+  - dockerfile_path: Dockerfile.rhel7
+    from: base
+    inputs:
+      ocp_builder_rhel-8-golang-1.15-openshift-4.6:
+        as:
+        - registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.15-openshift-4.6
+    to: cluster-etcd-operator
 ```
 
 This build uses a build manifest at `Dockerfile.rhel7` in the repository, which looks like:
