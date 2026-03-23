@@ -144,6 +144,40 @@ You can also invoke this command with multiple PRs:
 
 > `/payload-aggregate-with-prs <periodic_ci_openshift_release_some_job> <aggregated_count> <org/repo#number> [<org/repo#number ...]`
 
+#### Finding Individual Job Logs During Aggregation
+
+While an aggregate job is running, you can access the logs of individual job runs:
+
+**Step 1:** Once the aggregate job is kicked off, you will see a link in the GitHub PR similar to:
+```
+https://pr-payload-tests.ci.openshift.org/runs/ci/37c0e3a0-2660-11f1-966d-918086d37bcf-0
+```
+
+**Step 2:** The link will lead you to a webpage which will have links to individual jobs. For example:
+```
+periodic-ci-openshift-release-main-nightly-4.22-e2e-aws-ovn-runc-techpreview: 1e98cf9b-dede-48ae-bf7e-3ce225a235b3
+```
+The job link will look like:
+```
+https://prow.ci.openshift.org/view/gs/test-platform-results/logs/aggregator-periodic-ci-openshift-release-main-nightly-4.22-e2e-aws-ovn-runc-techpreview/2035906936582443008
+```
+
+**Step 3:** To get to the job history page, use the following template:
+```
+https://prow.ci.openshift.org/job-history/gs/test-platform-results/logs/openshift-<repo_name>-<pr_number>-nightly-<openshift_version>-<test_name>
+```
+
+Where:
+- `repo_name` is the name of the repo under openshift (example: `cri-o`)
+- `pr_number` is the pull request number (example: `6`)
+- `openshift_version` is the version of OpenShift (example: `4.22`)
+- `test_name` is the job name or test name being attempted (example: `e2e-aws-ovn-runc-techpreview`)
+
+For example, for PR `openshift/cri-o#6` running the `e2e-aws-ovn-runc-techpreview` test on OpenShift 4.22:
+```
+https://prow.ci.openshift.org/job-history/gs/test-platform-results/logs/openshift-cri-o-6-nightly-4.22-e2e-aws-ovn-runc-techpreview
+```
+
 {{% alert title="NOTE" color="warning" %}}
 * `/payload-with-prs`, `/payload-aggregate-with-prs`, and `/payload-job-with-prs` only accept a single command per comment; additional commands need to be triggered with separate comments (not just separate lines).
 * The jobs used in the payload commands above are periodics. Presubmits are not supported at the moment, which is different from the `/testwith` [command](/how-tos/multi-pr-presubmit-testing/#testwith-command).
