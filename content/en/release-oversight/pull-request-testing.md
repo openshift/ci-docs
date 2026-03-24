@@ -134,6 +134,18 @@ You can also invoke this command with multiple PRs:
 
 > `/payload-job-with-prs <periodic_ci_openshift_release_some_job> <org/repo#number> [<org/repo#number ...]`
 
+Some periodics are **sharded** in `ci-operator` configuration: the same logical test is split into multiple Prow jobs whose names end with `-<shard>of<total>` (for example `-1of3`, `-2of3`, `-3of3`).
+
+* Use the **usual periodic job name without** a shard suffix to run **all shards** in one payload run (same idea as before sharding existed):
+
+> `/payload-job <periodic_ci_openshift_release_some_job>`
+
+* Use the **full periodic name including** `-<shard>of<total>` to run **only that shard**:
+
+> `/payload-job <periodic_ci_openshift_release_some_job>-2of5`
+
+`/payload-aggregate` does **not** expand a base name into every shard; it still targets exactly the job name you pass (add `-XofY` if you need a specific shard).
+
 ### /payload-aggregate
 
 It is also possible to perform aggregation on any of these jobs with /payload-aggregate. This launches the specified number of job runs, and attempts aggregation with Fisher's Exact.
