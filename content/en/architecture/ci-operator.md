@@ -774,6 +774,9 @@ There are few extra fields that can be configured to control if or when the test
 * `skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the documentation link above).
 * `always_run` Set to `false` to disable automatic triggering on every PR. This deaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
 * `optional` Set to `true` to make the job not block merges.
+* `max_concurrency` Set the maximum number of concurrent runs of this job.
+* `disable_rehearsal` Set to `true` to prevent this test from being picked up for rehearsals.
+* `slack_reporter` Configure [Slack reporting](/how-tos/notification/) for this test with `channel`, `job_states_to_report`, and `report_template`.
 
 **Note:** `run_if_changed`, `skip_if_only_changed`, and `always_run: true` are mutually exclusive.
 
@@ -828,6 +831,28 @@ tests:
 
 Note that the build farms used to execute jobs run on UTC time, so time-of-day based `cron` schedules must be set with
 that in mind.
+
+## Prowgen Configuration
+
+The `prowgen` stanza in `ci-operator` configuration controls Prow job generation behavior. These fields replace the
+deprecated `.config.prowgen` file.
+
+{{< highlight yaml >}}
+prowgen:
+  private: true                        # mark jobs as hidden and mount git credentials for private repos
+  expose: true                         # make private jobs visible in Deck
+  disable_rehearsals: true             # prevent all tests in this config from being rehearsed
+  enable_secrets_store_csi_driver: true # use CSI Secrets Store for multi-stage credentials
+{{< / highlight >}}
+
+The `ci-operator` config fields take precedence over `.config.prowgen` when both are set. If a field is omitted in the
+`ci-operator` config, the `.config.prowgen` value is used as a fallback.
+
+**Note:** Repositories in the `openshift-priv` organization are automatically treated as `private: true`.
+
+{{< alert title="Note" color="info" >}}
+The `.config.prowgen` file is deprecated. All configuration should be migrated to the `prowgen` stanza in the `ci-operator` configuration file. The `.config.prowgen` fallback is still supported but will be removed in the future.
+{{< /alert >}}
 
 ## Referencing Images
 
