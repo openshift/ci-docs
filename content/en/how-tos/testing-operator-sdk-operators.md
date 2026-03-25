@@ -45,8 +45,9 @@ base_images:
     name: "redhat-operator-index"
     tag: "v4.7"
 images:
-- from: "ubi"
-  to: "tested-operator"
+  items:
+  - from: "ubi"
+    to: "tested-operator"
 operator:
   bundles: # entries create bundle images from Dockerfiles and an index containing all bundles
   - as: my-bundle

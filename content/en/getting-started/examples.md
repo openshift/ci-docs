@@ -67,9 +67,10 @@ promotion:
     namespace: ocp
     name: 4.4
 images:
-- from: ubi8
-  to: component # promotes "component" by default
-  context_dir: images/component
+  items:
+  - from: ubi8
+    to: component # promotes "component" by default
+    context_dir: images/component
 {{< / highlight >}}
 
 ## Consuming an Image

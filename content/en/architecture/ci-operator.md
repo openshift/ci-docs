@@ -195,26 +195,49 @@ artifacts in `pipeline:bin` and the output image base is replaced with the appro
 
 {{< highlight yaml >}}
 images:
-- dockerfile_path: "Dockerfile" # this is a relative path from the root of the repository to the multi-stage Dockerfile
-  from: "base" # a reference to the named base_image, used to replace the last FROM image in the Dockerfile
-  inputs:
-    bin: # declares that the "bin" tag is used as the builder image when overwriting that FROM instruction
-      as:
-      - "registry.ci.openshift.org/ocp/builder:golang-1.13"
-  to: "mycomponent" # names the output container image "mycomponent"
-- dockerfile_path: "tests/Dockerfile"
-  from: "test-bin" # base the build off of the built test binaries
-  inputs:
-    cli:
-      paths:
-      - destination_dir: "."
-        source_path: "/go/bin/oc" # inject the OpenShift clients into the build context directory
-  to: "mytests" # names the output container image "mytests"
-- dockerfile_literal: |- # Trivial dockerfiles can just be inlined
-    FROM base
-    RUN yum install -y python2
-  from: "test-bin"
-  to: test-bin-with-python2
+  items:
+  - dockerfile_path: "Dockerfile" # this is a relative path from the root of the repository to the multi-stage Dockerfile
+    from: "base" # a reference to the named base_image, used to replace the last FROM image in the Dockerfile
+    inputs:
+      bin: # declares that the "bin" tag is used as the builder image when overwriting that FROM instruction
+        as:
+        - "registry.ci.openshift.org/ocp/builder:golang-1.13"
+    to: "mycomponent" # names the output container image "mycomponent"
+  - dockerfile_path: "tests/Dockerfile"
+    from: "test-bin" # base the build off of the built test binaries
+    inputs:
+      cli:
+        paths:
+        - destination_dir: "."
+          source_path: "/go/bin/oc" # inject the OpenShift clients into the build context directory
+    to: "mytests" # names the output container image "mytests"
+  - dockerfile_literal: |- # Trivial dockerfiles can just be inlined
+      FROM base
+      RUN yum install -y python2
+    from: "test-bin"
+    to: test-bin-with-python2
+{{< / highlight >}}
+
+The `images` stanza supports optional fields to control when the auto-generated `-images` presubmit and postsubmit jobs
+should run. These fields work the same way as the equivalent fields in the `tests` stanza:
+
+* `run_if_changed` Set a regex to trigger the images job only when a pull request changes a matching path.
+* `skip_if_only_changed` Set a regex to skip the images job when all changes in the pull request match.
+* `pipeline_run_if_changed` Like `run_if_changed`, but operates on the pipeline graph instead of Prow.
+* `pipeline_skip_if_only_changed` Like `skip_if_only_changed`, but operates on the pipeline graph instead of Prow.
+* `build_if_affected` Set to `true` to only build images when the build graph is affected by the changes.
+
+**Note:** `run_if_changed`, `skip_if_only_changed`, `pipeline_run_if_changed`, and `pipeline_skip_if_only_changed` are mutually exclusive.
+
+For example, to skip building images when only documentation files change:
+
+{{< highlight yaml >}}
+images:
+  skip_if_only_changed: ^docs/|\.md$|^OWNERS$
+  items:
+  - dockerfile_path: "Dockerfile"
+    from: "base"
+    to: "mycomponent"
 {{< / highlight >}}
 
 By making use of the previously compiled artifacts in the intermediate `pipeline:bin` image, this repository is able to
@@ -231,27 +254,29 @@ Images substitution can happen in one of the following ways:
 - in a `--from=` argument:
 ```yaml
 images:
-- dockerfile_literal: |
-    # ...
-    COPY --from=nginx:latest /tmp/dummy /tmp/dummy
-  inputs:
-    bin:
-      as:
-      - nginx:latest
+  items:
+  - dockerfile_literal: |
+      # ...
+      COPY --from=nginx:latest /tmp/dummy /tmp/dummy
+    inputs:
+      bin:
+        as:
+        - nginx:latest
 ```
-`nginx:latest` is going to be replaced with `pipeline:bin`  
+`nginx:latest` is going to be replaced with `pipeline:bin`
 
 - in a `FROM` directive:
 ```yaml
 images:
-- dockerfile_literal: |
-    FROM nginx:latest AS builder 
-    # ...
-    COPY --from=builder /tmp/dummy /tmp/dummy
-  inputs:
-    bin:
-      as:
-      - nginx:latest
+  items:
+  - dockerfile_literal: |
+      FROM nginx:latest AS builder
+      # ...
+      COPY --from=builder /tmp/dummy /tmp/dummy
+    inputs:
+      bin:
+        as:
+        - nginx:latest
 ```
 `nginx:latest` is going to be replaced with `pipeline:bin`
 
@@ -270,19 +295,21 @@ base_images:
     tag: rhel-9-golang-1.24-openshift-4.21
 
 images:
-- dockerfile_path: Dockerfile
-  inputs:
-    ocp_builder_rhel-9-golang-1.24-openshift-4.21:
-      as:
-      - registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-openshift-4.21
-  to: my-component
+  items:
+  - dockerfile_path: Dockerfile
+    inputs:
+      ocp_builder_rhel-9-golang-1.24-openshift-4.21:
+        as:
+        - registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-openshift-4.21
+    to: my-component
 ```
 
 **After (auto-detected):**
 ```yaml
 images:
-- dockerfile_path: Dockerfile
-  to: my-component
+  items:
+  - dockerfile_path: Dockerfile
+    to: my-component
 ```
 
 The Dockerfile's `FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-openshift-4.21` is automatically detected and configured at build time.
@@ -294,14 +321,15 @@ The `build_args` option in `ci-operator` configuration specifies a list of [buil
 
 ```yaml
 images:
-- build_args:
-    - name: product
-      value: okd
-  dockerfile_literal: |-
-    FROM centos:8
-    ARG product=ocp
-  from: os
-  to: test-image
+  items:
+  - build_args:
+      - name: product
+        value: okd
+    dockerfile_literal: |-
+      FROM centos:8
+      ARG product=ocp
+    from: os
+    to: test-image
 ```
 
 ## How Builds Work In CI
@@ -310,7 +338,7 @@ Every container image built in CI is implemented by
 `ci-operator` uses the parameters in the `images` stanza from the configuration file to define `builds` options on CI clusters.
 
 
-| `images`              | `build`                                        |
+| `images.items[]`      | `build`                                        |
 |-----------------------|------------------------------------------------|
 | `.build_args`         | `.spec.strategy.dockerStrategy.buildArgs`      |
 | `.dockerfile_literal` | `.spec.source.dockerfile`                      |

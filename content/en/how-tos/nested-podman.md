@@ -85,24 +85,25 @@ build_root:
     name: ci-tools-build-root
     tag: "1.23"
 images:
-# Use the `nested-podman` as a base image for the e2e test.
-# Copy the source code and the oc binary into it.
-- from: nested-podman
-  dockerfile_literal: |
-      FROM nested-podman
-      COPY oc /usr/bin/oc
-      COPY src/ /opt/app-root/src/
-      WORKDIR /opt/app-root/src
-  inputs:
-    cli:
-      paths:
-      - destination_dir: .
-        source_path: /usr/bin/oc
-    src:
-      paths:
-      - destination_dir: src/
-        source_path: /go/src/github.com/openshift/ci-tools
-  to: e2e-image
+  items:
+  # Use the `nested-podman` as a base image for the e2e test.
+  # Copy the source code and the oc binary into it.
+  - from: nested-podman
+    dockerfile_literal: |
+        FROM nested-podman
+        COPY oc /usr/bin/oc
+        COPY src/ /opt/app-root/src/
+        WORKDIR /opt/app-root/src
+    inputs:
+      cli:
+        paths:
+        - destination_dir: .
+          source_path: /usr/bin/oc
+      src:
+        paths:
+        - destination_dir: src/
+          source_path: /go/src/github.com/openshift/ci-tools
+    to: e2e-image
 resources:
   '*':
     requests:
