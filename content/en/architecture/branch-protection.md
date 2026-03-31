@@ -38,8 +38,9 @@ Branch Protection requires no manual set-up for repositories with presubmit jobs
 added or removed from a repository, automation will ensure that the GitHub Branch Protection settings are updated as
 well.
 
-Branch protection is configured by a job that runs periodically every six hours. You can see
-[here](https://prow.ci.openshift.org/?job=periodic-branch-protector) when it last ran. The implication of this is that
+Branch protection is configured by a job that runs periodically every six hours. You can see when it last ran
+for the [`openshift` org](https://prow.ci.openshift.org/?job=periodic-branch-protector-openshift-org) and
+[other orgs](https://prow.ci.openshift.org/?job=periodic-branch-protector). The implication of this is that
 when you add/remove a mandatory job, it may take up to six hours for this change to show up in GitHub.
 
 The `openshift-merge-robot` that configures the branch protection needs admin permissions.
