@@ -17,11 +17,12 @@ base_images:
     namespace: ocp
     tag: "9"
 images:
-- context_dir: .
-  from: os
-  to: my-image
-  additional_architectures:
-  - arm64
+  items:
+  - context_dir: .
+    from: os
+    to: my-image
+    additional_architectures:
+    - arm64
 ```
 
 In the above example, the `os` image defined in the `base_images` is used as a base to build the `my-image` image.

@@ -198,9 +198,10 @@ for each image that is promoted:
 
 ```yaml
 images:
-- dockerfile_path: images/my-component
-  from: base
-  to: my-component
+  items:
+  - dockerfile_path: images/my-component
+    from: base
+    to: my-component
 promotion:
   to:
   - name: "4.7"
@@ -220,9 +221,10 @@ for each image that is promoted, with the named tag in each stream:
 
 ```yaml
 images:
-- dockerfile_path: images/my-component
-  from: base
-  to: my-component
+  items:
+  - dockerfile_path: images/my-component
+    from: base
+    to: my-component
 promotion:
   to:
   - namespace: my-organization
