@@ -800,8 +800,11 @@ There are few extra fields that can be configured to control if or when the test
 
 * `run_if_changed` Set a regex to make the job trigger only when a pull request changes a certain path in the repository (see the [upstream doc](https://docs.prow.k8s.io/docs/jobs#triggering-jobs-based-on-changes)).
 * `skip_if_only_changed` Set a regex to skip triggering the job when all the changes in the pull request match (see the documentation link above).
-* `always_run` Set to `false` to disable automatic triggering on every PR. This deaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
+* `always_run` Set to `false` to disable automatic triggering on every PR. This defaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
 * `optional` Set to `true` to make the job not block merges.
+* `max_concurrency` Set the maximum number of concurrent runs of this job.
+* `disable_rehearsal` Set to `true` to prevent this test from being picked up for rehearsals.
+* `slack_reporter` Configure [Slack reporting](/how-tos/notification/) for this test with `channel`, `job_states_to_report`, and `report_template`.
 
 **Note:** `run_if_changed`, `skip_if_only_changed`, and `always_run: true` are mutually exclusive.
 
@@ -856,6 +859,44 @@ tests:
 
 Note that the build farms used to execute jobs run on UTC time, so time-of-day based `cron` schedules must be set with
 that in mind.
+
+## Prowgen Configuration
+
+The `prowgen` stanza in `ci-operator` configuration controls Prow job generation behavior. These fields replace the
+deprecated `.config.prowgen` file.
+
+{{< highlight yaml >}}
+prowgen:
+  private: true                        # mark jobs as hidden and mount git credentials for private repos
+  expose: true                         # make private jobs visible in Deck
+  disable_rehearsals: true             # prevent all tests in this config from being rehearsed
+  enable_secrets_store_csi_driver: true # use CSI Secrets Store for multi-stage credentials
+{{< / highlight >}}
+
+The `ci-operator` config fields take precedence over `.config.prowgen` when both are set. If a field is omitted in the
+`ci-operator` config, the `.config.prowgen` value is used as a fallback.
+
+**Note:** Repositories in the `openshift-priv` organization are automatically treated as `private: true`.
+
+{{< alert title="Warning" color="warning" >}}
+The `.config.prowgen` file is deprecated. All configuration should be migrated to the `ci-operator` configuration file. The `.config.prowgen` fallback is still supported but will be removed in the future.
+{{< /alert >}}
+
+### Migrating from `.config.prowgen`
+
+The following table maps `.config.prowgen` fields to their replacements in the `ci-operator` configuration:
+
+| `.config.prowgen` field | `ci-operator` replacement |
+|:---|:---|
+| `private: true` | `prowgen.private: true` |
+| `expose: true` | `prowgen.expose: true` |
+| `enable_secrets_store_csi_driver: true` | `prowgen.enable_secrets_store_csi_driver: true` |
+| `rehearsals.disable_all: true` | `prowgen.disable_rehearsals: true` |
+| `rehearsals.disabled_rehearsals: [test]` | `tests[].disable_rehearsal: true` (per test) |
+| `slack_reporter` (pattern-based) | `tests[].slack_reporter` (per test, see [Slack notifications](/how-tos/notification/)) |
+| `skip_presubmits` (operator bundles) | `operator.skip_presubmits: true` |
+
+When both `.config.prowgen` and `ci-operator` config specify the same setting, the `ci-operator` config takes precedence.
 
 ## Referencing Images
 
