@@ -14,12 +14,6 @@ namespace inside an OpenShift CI (Prow) job: it reserves a namespace before your
 tests run and releases it afterward, regardless of whether the tests pass or
 fail.
 
-{{< alert title="Note" color="info" >}}
-This page documents ephemeral **namespaces** on the ephemeral cluster,
-not ephemeral **clusters** (full OpenShift installations). For
-ephemeral clusters, see [Ephemeral Clusters in Konflux CI](/architecture/ephemeral-cluster-konflux/).
-{{< /alert >}}
-
 ## Background and Key Concepts
 
 Before using the workflow, it helps to understand the tools and services
