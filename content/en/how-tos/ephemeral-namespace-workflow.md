@@ -173,12 +173,17 @@ NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
 echo "Running tests in namespace: ${NAMESPACE}"
 oc project "${NAMESPACE}"
 
-# Deploy your application into the namespace
-# (use your project's deployment tooling here)
-
-# Run your tests
-make test-integration
+# Once connected, use oc commands as you would against any OpenShift cluster:
+oc apply -f deploy/my-app.yaml
+oc wait --for=condition=Available deployment/my-app --timeout=120s
+oc run my-tests --image=my-test-image --restart=Never -- ./run-tests.sh
 {{< / highlight >}}
+
+Once `KUBECONFIG` is set and `oc project` has switched to the reserved
+namespace, you can run `oc` commands exactly as you would against any OpenShift
+cluster — deploying resources with `oc apply`, building images with `oc
+start-build`, running test scripts, or invoking your project's existing
+deployment and test tooling.
 
 ## SHARED_DIR Outputs
 
@@ -253,8 +258,9 @@ tests:
         NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
         oc project "${NAMESPACE}"
 
-        # Deploy your application into the namespace
-        # (use your project's deployment tooling here)
+        # Use oc commands as you would against any OpenShift cluster
+        oc apply -f deploy/my-app.yaml
+        oc wait --for=condition=Available deployment/my-app --timeout=120s
 
         pytest tests/integration/ -v
       resources:
