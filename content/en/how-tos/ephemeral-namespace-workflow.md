@@ -40,9 +40,9 @@ configurations.
 
 You can also manage ephemeral namespaces through web interfaces:
 
-- **[Firelink](https://firelink.devshift.net/namespace/reserve)** — a web UI for
+- **Firelink** (`https://firelink.devshift.net/namespace/reserve`) — a web UI for
   reserving, listing, extending, and releasing ephemeral namespaces.
-- **[InScope / Firelink](https://inscope.corp.redhat.com/firelink)** — the
+- **InScope / Firelink** (`https://inscope.corp.redhat.com/firelink`) — the
   Red Hat internal portal for ephemeral namespace management (requires VPN).
 
 These UIs are useful for manual testing and debugging, but the
@@ -279,7 +279,7 @@ tests:
 The ephemeral pool may be full. You can:
 - Increase `BONFIRE_NAMESPACE_TIMEOUT` to wait longer.
 - Check pool utilization using the
-  [Firelink UI](https://firelink.devshift.net/namespace/reserve) or by running
+  Firelink UI (`https://firelink.devshift.net/namespace/reserve`) or by running
   `bonfire namespace list --available`.
 - Try a different pool by setting `BONFIRE_NAMESPACE_POOL`.
 
@@ -315,9 +315,9 @@ to the CI cluster, not the ephemeral cluster.
 
 - [Bonfire documentation](https://github.com/RedHatInsights/bonfire#readme) —
   CLI reference for deploying applications and managing namespaces.
-- [Firelink](https://firelink.devshift.net/namespace/reserve) — web UI for
+- Firelink (`https://firelink.devshift.net/namespace/reserve`) — web UI for
   managing ephemeral namespaces.
-- [InScope / Firelink](https://inscope.corp.redhat.com/firelink) — Red Hat
+- InScope / Firelink (`https://inscope.corp.redhat.com/firelink`) — Red Hat
   internal ephemeral namespace portal.
 - [Multi-Stage Tests and the Step Registry](/architecture/step-registry/) —
   how workflows, chains, and steps work in OpenShift CI.
