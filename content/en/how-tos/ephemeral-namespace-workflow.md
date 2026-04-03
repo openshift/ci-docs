@@ -72,7 +72,10 @@ All pools share the same per-container LimitRange defaults:
 {{< alert title="Note" color="info" >}}
 The `default` and `default-pvc` pools do not enforce CPU or memory quotas — only
 a pod count limit of 200. The `minimal` and `ai-development` pools enforce
-explicit CPU and memory quotas to manage cluster capacity.
+explicit CPU and memory quotas to manage cluster capacity. If none of the
+existing pools meet your requirements, contact the workflow owners listed in the
+[OWNERS file](https://github.com/openshift/release/blob/master/ci-operator/step-registry/ephemeral/OWNERS)
+to discuss creating a new pool or adjusting limits.
 {{< /alert >}}
 
 ## How the Workflow Works
