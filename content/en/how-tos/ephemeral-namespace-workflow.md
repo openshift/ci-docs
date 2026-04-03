@@ -1,14 +1,13 @@
 ---
 title: "Using the Ephemeral Namespace Workflow"
-description: How to reserve an ephemeral namespace on the consoledot ephemeral cluster in an OpenShift CI job using the ephemeral-namespace workflow.
+description: How to reserve an ephemeral namespace in an OpenShift CI job using the ephemeral-namespace workflow.
 ---
 
 Ephemeral namespaces are short-lived, isolated OpenShift namespaces managed by
 the [Ephemeral Namespace Operator](https://github.com/RedHatInsights/ephemeral-namespace-operator)
-on the consoledot ephemeral cluster. Teams building services for
-[console.redhat.com](https://console.redhat.com) use them to deploy and test
-full application stacks — including all [ClowdApp](https://github.com/RedHatInsights/clowder)
-dependencies — without interfering with shared environments.
+on the ephemeral cluster. Engineering teams use them to deploy and test
+applications in a clean, disposable environment without interfering with shared
+staging or production namespaces.
 
 The `ephemeral-namespace` workflow automates the full lifecycle of an ephemeral
 namespace inside an OpenShift CI (Prow) job: it reserves a namespace before your
@@ -16,8 +15,8 @@ tests run and releases it afterward, regardless of whether the tests pass or
 fail.
 
 {{< alert title="Note" color="info" >}}
-This page documents ephemeral **namespaces** on the consoledot ephemeral
-cluster, not ephemeral **clusters** (full OpenShift installations). For
+This page documents ephemeral **namespaces** on the ephemeral cluster,
+not ephemeral **clusters** (full OpenShift installations). For
 ephemeral clusters, see [Ephemeral Clusters in Konflux CI](/architecture/ephemeral-cluster-konflux/).
 {{< /alert >}}
 
@@ -30,17 +29,15 @@ involved.
 
 [Bonfire](https://github.com/RedHatInsights/bonfire) (`crc-bonfire`) is the CLI
 tool that powers ephemeral namespace operations. It manages
-`NamespaceReservation` custom resources on the ephemeral cluster and can deploy
-full application stacks by resolving ClowdApp dependency trees from
-[app-interface](https://gitlab.cee.redhat.com/service/app-interface). The
-workflow uses bonfire's `namespace reserve` and `namespace release` commands
-under the hood.
+`NamespaceReservation` custom resources on the ephemeral cluster. The workflow
+uses bonfire's `namespace reserve` and `namespace release` commands under the
+hood.
 
 ### Ephemeral Namespace Operator
 
 The [Ephemeral Namespace Operator](https://github.com/RedHatInsights/ephemeral-namespace-operator)
-runs on the consoledot ephemeral cluster. It watches `NamespaceReservation` CRs,
-provisions namespaces with pre-configured `ClowdEnvironment` resources, and
+runs on the ephemeral cluster. It watches `NamespaceReservation` CRs, provisions
+namespaces with pre-configured resources, and
 automatically cleans up expired reservations. Namespaces are organized into
 **pools** (e.g. `default`, `minimal`) that provide different environment
 configurations.
@@ -152,8 +149,8 @@ NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
 echo "Running tests in namespace: ${NAMESPACE}"
 oc project "${NAMESPACE}"
 
-# Deploy your application with bonfire (optional — install bonfire first)
-# bonfire deploy my-app --namespace "${NAMESPACE}"
+# Deploy your application into the namespace
+# (use your project's deployment tooling here)
 
 # Run your tests
 make test-integration
@@ -214,75 +211,26 @@ authentication errors, the token may have expired and needs rotation. Contact
 the workflow owners for assistance.
 {{< /alert >}}
 
-## Deploying Applications with Bonfire
-
-A common pattern is to use bonfire inside your test step to deploy your
-application and its dependencies into the reserved namespace. To do this, install
-bonfire in your test step and call `bonfire deploy`:
-
-{{< highlight bash >}}
-#!/bin/bash
-set -euo pipefail
-
-export KUBECONFIG="${SHARED_DIR}/ephemeral-kubeconfig"
-NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
-oc project "${NAMESPACE}"
-
-# Install bonfire
-python3 -m venv /tmp/bonfire-venv
-source /tmp/bonfire-venv/bin/activate
-pip install --quiet crc-bonfire
-
-# Deploy your application and all its ClowdApp dependencies
-export BONFIRE_BOT=true
-bonfire deploy my-app \
-    --namespace "${NAMESPACE}" \
-    --ref-env insights-stage
-
-# Run tests against the deployed stack
-run-my-tests --namespace "${NAMESPACE}"
-{{< / highlight >}}
-
-For full details on bonfire's deploy options — including setting custom image
-tags, git refs, and optional dependency modes — see the
-[bonfire documentation](https://github.com/RedHatInsights/bonfire#readme).
-
 ## Full Example: ci-operator Configuration
 
-The following is a complete `ci-operator` configuration that builds a component
-image, reserves an ephemeral namespace, deploys the application with bonfire,
-runs integration tests, and releases the namespace:
+The following is a complete `ci-operator` configuration that reserves an
+ephemeral namespace, runs integration tests, and releases the namespace:
 
 {{< highlight yaml >}}
-base_images:
-  ubi-minimal:
-    name: ubi-minimal
-    namespace: ocp
-    tag: "9"
-images:
-- from: ubi-minimal
-  to: my-component
-  context_dir: .
 tests:
 - as: integration
   steps:
     workflow: ephemeral-namespace
     test:
-    - as: deploy-and-test
+    - as: run-tests
       from: src
       commands: |
         export KUBECONFIG="${SHARED_DIR}/ephemeral-kubeconfig"
         NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
         oc project "${NAMESPACE}"
 
-        python3 -m venv /tmp/bonfire-venv
-        source /tmp/bonfire-venv/bin/activate
-        pip install --quiet crc-bonfire
-
-        export BONFIRE_BOT=true
-        bonfire deploy my-app \
-            --namespace "${NAMESPACE}" \
-            --set-image-tag quay.io/myorg/my-component="${IMAGE_TAG}"
+        # Deploy your application into the namespace
+        # (use your project's deployment tooling here)
 
         pytest tests/integration/ -v
       resources:
