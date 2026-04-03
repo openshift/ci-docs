@@ -48,6 +48,33 @@ You can also manage ephemeral namespaces through web interfaces:
 These UIs are useful for manual testing and debugging, but the
 `ephemeral-namespace` workflow handles everything automatically in CI.
 
+### Namespace Pools
+
+Ephemeral namespaces are organized into pools, each with different pre-installed
+services and resource quotas. Choose a pool based on the services your tests
+need and the resources they consume. Set the pool with the
+`BONFIRE_NAMESPACE_POOL` environment variable.
+
+|Pool|Pool Size|Services Included|ResourceQuota|
+|:---|:---|:---|:---|
+|`default`|7 namespaces|Database (local), Redis, Kafka (operator), Minio (object store), feature flags (Unleash), metrics (operator)|200 pods (no CPU/memory quota)|
+|`default-pvc`|1 namespace|Same as `default`, but all services use persistent volume claims (PVCs) for data durability|200 pods (no CPU/memory quota)|
+|`minimal`|1 namespace|Database (local), Redis only — no Kafka, no object store, no feature flags, no metrics|**CPU**: 8 req / 32 limit, **Memory**: 32Gi req / 64Gi limit (non-terminating); **CPU**: 3 req / 6 limit, **Memory**: 12Gi req / 24Gi limit (terminating); 200 pods|
+|`ai-development`|2 namespaces|Database (local) only — no Redis, no Kafka, no object store, no feature flags, no metrics. Includes team-specific secrets for `engineering-productivity`.|Same as `minimal`|
+
+All pools share the same per-container LimitRange defaults:
+
+|Resource|Default Request|Default Limit|
+|:---|:---|:---|
+|CPU|100m|200m|
+|Memory|384Mi|512Mi|
+
+{{< alert title="Note" color="info" >}}
+The `default` and `default-pvc` pools do not enforce CPU or memory quotas — only
+a pod count limit of 200. The `minimal` and `ai-development` pools enforce
+explicit CPU and memory quotas to manage cluster capacity.
+{{< /alert >}}
+
 ## How the Workflow Works
 
 The `ephemeral-namespace` workflow is a
