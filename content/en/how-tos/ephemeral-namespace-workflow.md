@@ -5,7 +5,7 @@ description: How to reserve an ephemeral namespace in an OpenShift CI job using 
 
 Ephemeral namespaces are short-lived, isolated OpenShift namespaces managed by
 the [Ephemeral Namespace Operator](https://github.com/RedHatInsights/ephemeral-namespace-operator)
-on the ephemeral cluster. Engineering teams use them to deploy and test
+on the Bonfire host cluster. Engineering teams use them to deploy and test
 applications in a clean, disposable environment without interfering with shared
 staging or production namespaces.
 
@@ -13,6 +13,13 @@ The `ephemeral-namespace` workflow automates the full lifecycle of an ephemeral
 namespace inside an OpenShift CI (Prow) job: it reserves a namespace before your
 tests run and releases it afterward, regardless of whether the tests pass or
 fail.
+
+{{< alert title="Terminology" color="info" >}}
+The persistent cluster that hosts ephemeral namespaces is called the **Bonfire
+host cluster**. It is a long-lived, shared cluster — not an ephemeral cluster.
+In OpenShift CI the term *ephemeral cluster* refers to a temporary cluster that
+is created on-demand for a CI job and destroyed after the job finishes.
+{{< /alert >}}
 
 ## Background and Key Concepts
 
@@ -23,14 +30,14 @@ involved.
 
 [Bonfire](https://github.com/RedHatInsights/bonfire) (`crc-bonfire`) is the CLI
 tool that powers ephemeral namespace operations. It manages
-`NamespaceReservation` custom resources on the ephemeral cluster. The workflow
+`NamespaceReservation` custom resources on the Bonfire host cluster. The workflow
 uses bonfire's `namespace reserve` and `namespace release` commands under the
 hood.
 
 ### Ephemeral Namespace Operator
 
 The [Ephemeral Namespace Operator](https://github.com/RedHatInsights/ephemeral-namespace-operator)
-runs on the ephemeral cluster. It watches `NamespaceReservation` CRs, provisions
+runs on the Bonfire host cluster. It watches `NamespaceReservation` CRs, provisions
 namespaces with pre-configured resources, and
 automatically cleans up expired reservations. Namespaces are organized into
 **pools** (e.g. `default`, `minimal`) that provide different environment
@@ -93,7 +100,7 @@ phase that you fill with your own test logic:
 │  ┌─── pre ────────────────────────────────────────┐  │
 │  │  ephemeral-namespace-reserve                   │  │
 │  │  • Installs bonfire                            │  │
-│  │  • Logs in to the ephemeral cluster            │  │
+│  │  • Logs in to the Bonfire host cluster           │  │
 │  │  • Reserves a namespace from the pool          │  │
 │  │  • Writes kubeconfig + namespace to SHARED_DIR │  │
 │  └────────────────────────────────────────────────┘  │
@@ -121,7 +128,7 @@ The `ephemeral-namespace-reserve` step:
 1. Reads cluster credentials from a Vault-managed secret
 2. Installs `crc-bonfire` into an isolated Python virtualenv
 3. Creates a dedicated kubeconfig (so it does not overwrite the CI-provided one)
-4. Logs in to the ephemeral cluster with `oc login`
+4. Logs in to the Bonfire host cluster with `oc login`
 5. Calls `bonfire namespace reserve` with your configured pool, duration, and
    timeout
 6. Writes three files to `SHARED_DIR` for your test steps to consume (see
@@ -139,7 +146,7 @@ The `ephemeral-namespace-release` step runs as `best_effort`, meaning it
 **always executes** — even when the test phase fails. It:
 
 1. Reads the namespace name from `SHARED_DIR/ephemeral-namespace`
-2. Logs in to the ephemeral cluster independently (it does not rely on state
+2. Logs in to the Bonfire host cluster independently (it does not rely on state
    from the pre step)
 3. Calls `bonfire namespace release` to return the namespace to the pool
 4. If bonfire fails, falls back to patching the `NamespaceReservation` CR
@@ -166,7 +173,7 @@ In your test step's commands script, read the connection details from
 #!/bin/bash
 set -euo pipefail
 
-# Point kubectl/oc at the ephemeral cluster
+# Point kubectl/oc at the Bonfire host cluster
 export KUBECONFIG="${SHARED_DIR}/ephemeral-kubeconfig"
 NAMESPACE=$(cat "${SHARED_DIR}/ephemeral-namespace")
 
@@ -192,8 +199,8 @@ The reserve step writes these files for your test steps to consume:
 |File|Content|
 |:---|:---|
 |`ephemeral-namespace`|The reserved namespace name (e.g. `ephemeral-abc123`).|
-|`ephemeral-kubeconfig`|A kubeconfig authenticated to the ephemeral cluster, with the context set to the reserved namespace.|
-|`ephemeral-cluster-server`|The API server URL of the ephemeral cluster.|
+|`ephemeral-kubeconfig`|A kubeconfig authenticated to the Bonfire host cluster, with the context set to the reserved namespace.|
+|`ephemeral-cluster-server`|The API server URL of the Bonfire host cluster.|
 
 ## Environment Variables
 
@@ -231,7 +238,7 @@ The workflow requires the `ephemeral-bot-svc-account` secret in the
 
 |Key|Description|
 |:---|:---|
-|`oc-login-token`|An OAuth or service-account token for the ephemeral cluster.|
+|`oc-login-token`|An OAuth or service-account token for the Bonfire host cluster.|
 |`oc-login-server`|The API server URL (e.g. `https://api.crc-eph.r9lp.p1.openshiftapps.com:6443`).|
 
 {{< alert title="Warning" color="warning" >}}
@@ -300,7 +307,7 @@ The service-account token may have expired and need rotation. Contact the
 workflow owners listed in the
 [OWNERS file](https://github.com/openshift/release/blob/master/ci-operator/step-registry/ephemeral/OWNERS).
 
-### Tests cannot reach the ephemeral cluster
+### Tests cannot reach the Bonfire host cluster
 
 Make sure your test step sets `KUBECONFIG` to the file provided in `SHARED_DIR`:
 
@@ -309,7 +316,7 @@ export KUBECONFIG="${SHARED_DIR}/ephemeral-kubeconfig"
 {{< / highlight >}}
 
 Do **not** rely on the default `$KUBECONFIG` environment variable — that points
-to the CI cluster, not the ephemeral cluster.
+to the CI cluster, not the Bonfire host cluster.
 
 ## Further Reading
 
@@ -324,4 +331,4 @@ to the CI cluster, not the ephemeral cluster.
 - [Adding and Changing Step Registry Content](/how-tos/adding-changing-step-registry-content/) —
   how to contribute new steps and workflows.
 - [Ephemeral Namespace Operator](https://github.com/RedHatInsights/ephemeral-namespace-operator) —
-  the operator that manages namespace pools on the ephemeral cluster.
+  the operator that manages namespace pools on the Bonfire host cluster.
