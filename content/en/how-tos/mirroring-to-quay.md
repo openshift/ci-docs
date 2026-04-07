@@ -72,7 +72,7 @@ using the following keys in Vault:
 {{< highlight yaml >}}
 secretsync/target-namespace: "ci"
 secretsync/target-name: "registry-push-credentials-quay-io-NEW_ORGANIZATION"
-secretsync/target-clusters: "app.ci"
+secretsync/target-clusters: "app.ci,core-ci"
 {{< / highlight >}}
 
 Then, the mirroring jobs can mount the secret as a volume:
@@ -90,23 +90,27 @@ periodics:
   spec:
     automountServiceAccountToken: true
     containers:
-    - command:
-      - /tp-entrypoint.sh
+    - args:
+      - -c
+      - curl -sL https://raw.githubusercontent.com/openshift/release/refs/heads/main/hack/periodic-mirroring.sh
+        | bash
+      command:
+      - bash
       env:
       - name: HOME
-        value: /home/mirror
+        value: /tmp/user
       - name: MAPPING_FILE_PREFIX
         value: mapping_NEW_ORGANIZATION
       - name: dry_run
         value: "false"
-      image: registry.ci.openshift.org/ci/image-mirror:oc-415
-      imagePullPolicy: Always
+      image: registry.redhat.io/openshift4/ose-cli-rhel9
+      imagePullPolicy: IfNotPresent
       name: ""
       resources:
         requests:
           cpu: 500m
       volumeMounts:
-      - mountPath: /home/mirror/.docker/config.json
+      - mountPath: /tmp/user/.docker/config.json
         name: push
         readOnly: true
         subPath: config.json # this matches the key in the secret
