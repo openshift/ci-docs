@@ -254,7 +254,7 @@ authors, they are mostly meant for test platform engineers:
 - `junit_operator.xml`: the source of the JUnit section in the main page.
 
 - `metadata.json`: data file consumed by
-  [`testgrid`](https://github.com/kubernetes/test-infra/tree/main/testgrid).
+  [`testgrid`](https://github.com/kubernetes/test-infra/tree/master/testgrid).
 
 {{< alert title="Info" color="info" >}}
 "Step" in this context refers to [`ci-operator` steps]({{< ref

@@ -370,6 +370,6 @@ operator's `image-references` file, or release payloads will fail to assemble af
 
 [doozer-environment-variables]: https://github.com/openshift/doozer/blob/57721c72b3ddd08e6493323fcce065f55327fd69/doozerlib/distgit.py#L1975-L1985
 [build-machinery-go-version-ldflags]: https://github.com/openshift/build-machinery-go/blob/e25cf57ea46d9ce17de894b1a00dcf43ba12ee1a/make/lib/golang.mk#L57-L69
-[cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/main/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
+[cluster-version-manifest-version-placeholder]: https://github.com/openshift/enhancements/blob/master/dev-guide/cluster-version-operator/dev/clusteroperator.md#what-should-be-the-contents-of-clusteroperator-custom-resource-in-manifests
 [enhancements]: https://github.com/openshift/enhancements
 [operator-lifecycle-manager]: https://olm.operatorframework.io/

@@ -39,7 +39,7 @@ If a non-release gating job is added to the [`_allow-list.yaml`](https://github.
 
 Refer to the README for the [TestGrid config generator tool](https://github.com/openshift/ci-tools/tree/main/cmd/testgrid-config-generator) for more details regarding how the testgrid-config-generator works.
 
-Once the changes for either the release gating or non release gating jobs have been checked into [`openshift/release`](https://github.com/openshift/release) they should automatically be picked up by the [`periodic-prow-auto-testgrid-generator`](https://prow.ci.openshift.org/?job=periodic-prow-auto-testgrid-generator) job which runs daily. This job creates a PR to merge these changes into the [TestGrid config](https://github.com/kubernetes/test-infra/tree/main/config/testgrids/openshift). 
+Once the changes for either the release gating or non release gating jobs have been checked into [`openshift/release`](https://github.com/openshift/release) they should automatically be picked up by the [`periodic-prow-auto-testgrid-generator`](https://prow.ci.openshift.org/?job=periodic-prow-auto-testgrid-generator) job which runs daily. This job creates a PR to merge these changes into the [TestGrid config](https://github.com/kubernetes/test-infra/tree/master/config/testgrids/openshift).
 
 If the PR is not merged in a timely manner 
 1. Search for the PR titled [Update OpenShift testgrid definitions by auto-testgrid-generator job](https://github.com/kubernetes/test-infra/pulls?q=is%3Apr+is%3Aopen+Update+OpenShift+testgrid+definitions+by+auto-testgrid-generator+job) in [`kubernetes/test-infra`](https://github.com/kubernetes/test-infra)
