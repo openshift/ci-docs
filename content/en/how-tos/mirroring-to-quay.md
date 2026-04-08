@@ -72,7 +72,7 @@ using the following keys in Vault:
 {{< highlight yaml >}}
 secretsync/target-namespace: "ci"
 secretsync/target-name: "registry-push-credentials-quay-io-NEW_ORGANIZATION"
-secretsync/target-clusters: "app.ci,core-ci"
+secretsync/target-clusters: "core-ci,app.ci"
 {{< / highlight >}}
 
 Then, the mirroring jobs can mount the secret as a volume:
@@ -80,7 +80,7 @@ Then, the mirroring jobs can mount the secret as a volume:
 {{< highlight yaml >}}
 periodics:
 - agent: kubernetes
-  cluster: app.ci
+  cluster: core-ci
   cron: '@hourly'
   decorate: true
   labels:
