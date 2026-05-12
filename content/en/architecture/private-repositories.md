@@ -14,14 +14,17 @@ At that time, a Test Platform member will assist with creating the proper config
 2. When not configured to use a private `deck` instance, the logs and artifacts executed for the private repository
 will be publicly available on the `deck`. **Only set up such jobs when you are absolutely sure your jobs would not leak any sensitive information.**
 
-To allow the CI jobs to access a private repo, drop the following file to the directory in `openshift/release` holding the
-`ci-operator` configuration for your repository (usually `ci-operator/config/$org/$repo`):
+To allow the CI jobs to access a private repo, add the `prowgen` stanza to your `ci-operator` configuration file:
 
-`.config.prowgen`
 {{< highlight yaml >}}
-private: true # allows the source to be cloned from the private repo, without setting this: jobs will not succeed
-expose: true # allows the jobs to be displayed on the `deck` instance in which they are configured
+prowgen:
+  private: true # allows the source to be cloned from the private repo, without setting this: jobs will not succeed
+  expose: true # allows the jobs to be displayed on the `deck` instance in which they are configured
 {{< / highlight >}}
+
+{{< alert title="Note" color="info" >}}
+The `.config.prowgen` file is deprecated. All prowgen configuration should be moved into the `ci-operator` configuration file under the `prowgen` stanza.
+{{< /alert >}}
 
 ## `openshift-priv` organization
 
