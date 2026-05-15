@@ -428,7 +428,7 @@ spec:
       pollIntervalMinutes: 1
 {{< / highlight >}}
 
-**2. Installer ServiceAccount and ClusterRoleBinding** — OLM v1 currently requires an explicit service account:
+**2. Installer ServiceAccount and ClusterRoleBinding** — OLM v1 currently requires an explicit service account (this requirement is expected to be relaxed in a future OLM v1 update):
 
 {{< highlight yaml >}}
 apiVersion: v1
