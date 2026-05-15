@@ -324,20 +324,29 @@ bundle image using `opm render`, then use that catalog image directly as `OO_IND
 ## Creating the Catalog Dockerfile
 
 Add a catalog `Dockerfile` to your operator repository (for example, `build/Dockerfile.catalog`).
-The `opm` base image provides the `opm` tool needed to render and serve the catalog:
+Make sure the catalog content is a valid FBC with at least `olm.package`, `olm.channel`, and `olm.bundle` entries.
+`opm render <bundleImage>` produces bundle entries, so package/channel entries must also be included:
 
 ```dockerfile
 FROM quay.io/operator-framework/opm:latest AS builder
 ARG BUNDLE_IMG
 RUN mkdir /catalog && \
-    opm render ${BUNDLE_IMG} --output=yaml > /catalog/catalog.yaml && \
+    opm render ${BUNDLE_IMG} --output=yaml > /catalog/bundles.yaml
+
+# Add package/channel entries (for example from files committed in your repo) and
+# combine them with rendered bundle content into /catalog/catalog.yaml.
+# The final catalog.yaml must include olm.package + olm.channel + olm.bundle.
+COPY catalog/package-and-channel.yaml /catalog/package-and-channel.yaml
+RUN cat /catalog/package-and-channel.yaml /catalog/bundles.yaml > /catalog/catalog.yaml && \
     opm validate /catalog
 
 FROM scratch
 COPY --from=builder /catalog /catalog
-ENTRYPOINT ["/bin/opm"]
-CMD ["serve", "/catalog"]
+LABEL operators.operatorframework.io.index.configs.v1=/catalog
 ```
+
+For OLM v0 with a `CatalogSource` that does **not** use `spec.grpcPodConfig.extractContent`,
+you also need to run `opm serve` in the final image (for example, by using an `opm` base image that contains the binary).
 
 ## Configuring ci-operator
 
@@ -419,7 +428,7 @@ spec:
       pollIntervalMinutes: 1
 {{< / highlight >}}
 
-**2. Installer ServiceAccount and ClusterRoleBinding** — OLM v1 requires an explicit service account:
+**2. Installer ServiceAccount and ClusterRoleBinding** — OLM v1 currently requires an explicit service account:
 
 {{< highlight yaml >}}
 apiVersion: v1
