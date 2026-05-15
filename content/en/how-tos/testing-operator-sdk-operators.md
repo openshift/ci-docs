@@ -293,7 +293,7 @@ the `optional-operators-ci-operator-sdk-$CLOUD` workflows with `OO_BUNDLE` as a 
 # Moving to File-Based Catalog
 
 Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) which deprecates the db-based index image.
-However, the method of building an index image used in `ci-opeartor` does not work with file-based index images.
+However, the method of building an index image used in `ci-operator` does not work with file-based index images.
 As a result, `ci-operator` has to skip the process of building the index image if
 it detects that the base index is file-based.
 
@@ -435,7 +435,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: cluster-admin   # scope this down to only the permissions your operator actually needs
 subjects:
 - kind: ServiceAccount
   name: my-operator-installer
