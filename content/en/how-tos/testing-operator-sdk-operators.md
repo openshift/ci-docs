@@ -1,11 +1,19 @@
 ---
-title: "Testing Operators Built With The Operator SDK and Deployed Through OLM"
-description: How to configure tests for a component that is deployed as an operator through OLM.
+title: "Testing OLM-Deployed Operators in CI"
+description: How to configure tests for a component that is deployed as an operator through OLM, covering FBC catalog image builds, the OLM v0 subscription path, and the OLM v1 ClusterExtension path.
 ---
 
 `ci-operator` supports building, deploying, and testing operator bundles, whether the operator repository uses the
 Operator SDK or not. This document outlines how to configure `ci-operator` to build bundle `images` and use those
 in end-to-end tests.
+
+Three install paths are available:
+1. **FBC catalog image** (recommended) — build a File-Based Catalog image from the bundle using `opm render`,
+   then use it as `OO_INDEX` with the `optional-operators-ci-$CLOUD` workflows
+2. **`operator-sdk run bundle`** (alternative, the SDK is no longer actively developed) — use `OO_BUNDLE` with
+   the `optional-operators-ci-operator-sdk-$CLOUD` workflows
+3. **OLM v1 / ClusterExtension** (for OCP 4.18+) — point a `ClusterCatalog` at an FBC image and install via
+   `ClusterExtension`
 
 Consult the `ci-operator` [overview](/architecture/ci-operator/) and the step environment
 [reference](/architecture/step-registry/) for detailed descriptions of the broader test infrastructure that an
@@ -14,9 +22,8 @@ operator test is defined in.
 # Building Artifacts for OLM Operators
 
 Multiple different `images` are involved in installing and testing candidate versions of OLM-delivered operators: operand,
-operator, bundle, and index `images`. Operand and operator `images` are built normally using the `images` stanza in
-[`ci-operator` configuration](/architecture/ci-operator/#building-container-images). The desired version of an operator
-is installed by [the operator-sdk cli](https://sdk.operatorframework.io/docs/cli/) via the "bundle images".
+operator, bundle, and catalog `images`. Operand and operator `images` are built normally using the `images` stanza in
+[`ci-operator` configuration](/architecture/ci-operator/#building-container-images).
 `ci-operator` can build ephemeral versions of these `images` suitable for installation and testing, but not for production.
 
 ## Building Operator Bundles
@@ -273,23 +280,214 @@ the `optional-operators-ci-$CLOUD` ([aws](https://steps.ci.openshift.org/workflo
 the `optional-operators-ci-$CLOUD-upgrade` ([aws](https://steps.ci.openshift.org/workflow/optional-operators-ci-aws-upgrade),
 [gcp](https://steps.ci.openshift.org/workflow/optional-operators-ci-gcp-upgrade),
 [azure](https://steps.ci.openshift.org/workflow/optional-operators-ci-azure-upgrade)) family
-still use the index image to install the operator.
-The index image built by `ci-operator` is deprecated.
+still use the index image (`OO_INDEX`) to install the operator.
+The `ci-operator`-built index image is deprecated.
 See the [moving-to-file-based-catalog](/how-tos/testing-operator-sdk-operators/#moving-to-file-based-catalog) section below.
-Those workflows are still useful when the index image is **not** built by the process described in
-the [Building an Index: Deprecated](/how-tos/testing-operator-sdk-operators/#building-an-index-deprecated) section above.
-We encourage the test owners to migration from those workflows to the ones with "operator-sdk" for all other use cases.
+Those workflows are the **recommended** choice when using an FBC catalog image as `OO_INDEX`
+(see [Building an FBC Catalog Image](#building-an-fbc-catalog-image)).
+We encourage test owners to migrate from providing a `ci-operator`-built `ci-index` as `OO_INDEX`
+to either providing their own FBC catalog image as `OO_INDEX`, or switching to
+the `optional-operators-ci-operator-sdk-$CLOUD` workflows with `OO_BUNDLE` as a transitional measure.
 
 
 # Moving to File-Based Catalog
 
 Starting with `4.11`, the index image such as `registry.redhat.io/redhat/redhat-operator-index:v4.11` is [file-based](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) which deprecates the db-based index image.
-However, the method of building an index image used in `ci-opeartor` does not work with file-based index images.
+However, the method of building an index image used in `ci-operator` does not work with file-based index images.
 As a result, `ci-operator` has to skip the process of building the index image if
 it detects that the base index is file-based.
-This changes the expected way of consuming the bundles built in the workload from
-the index image which is used as a `CatalogSource` by OLM to the bundle image
-which is used in [the `operator-sdk run bundle` command](https://sdk.operatorframework.io/docs/cli/operator-sdk_run_bundle/). The command works with the index images of both formats.
 
-In order to run e2e tests with an index image with `4.11+`, the owners of the steps using `OO_INDEX` needs to switch to `OO_BUNDLE`.
-Once all steps are migrated to `OO_BUNDLE`, `ci-operator` will remove the process of building index images.
+When migrating from the deprecated `OO_INDEX` (built by `ci-operator`) path, two options are available:
+
+**Option 1 (recommended): Build an FBC catalog image** — build a catalog image from the bundle using `opm render`
+and use it as `OO_INDEX` with the `optional-operators-ci-$CLOUD` workflows. No `operator-sdk` dependency is required.
+See the [Building an FBC Catalog Image](#building-an-fbc-catalog-image) section below.
+
+**Option 2 (alternative): Use `operator-sdk run bundle`** — switch from `OO_INDEX` to `OO_BUNDLE` and use the
+`optional-operators-ci-operator-sdk-$CLOUD` workflows. Note that the Operator SDK CLI is no longer actively developed
+and this path should be considered a transitional option.
+
+Once all steps are migrated away from the `ci-operator`-built index image, `ci-operator` will remove the process of building index images.
+
+# Building an FBC Catalog Image
+
+{{< alert title="Recommended" color="success" >}}
+This is the recommended migration path from the deprecated `ci-operator`-built index image.
+It avoids the `operator-sdk` dependency and works with OLM v0 (`optional-operators-ci-$CLOUD` workflows)
+as well as OLM v1 (`ClusterCatalog` + `ClusterExtension`).
+{{< /alert >}}
+
+Instead of relying on `ci-operator` to build an ephemeral index image, you can build a proper
+[File-Based Catalog (FBC)](https://olm.operatorframework.io/docs/reference/file-based-catalogs/) image from the
+bundle image using `opm render`, then use that catalog image directly as `OO_INDEX`.
+
+## Creating the Catalog Dockerfile
+
+Add a catalog `Dockerfile` to your operator repository (for example, `build/Dockerfile.catalog`).
+Make sure the catalog content is a valid FBC with at least `olm.package`, `olm.channel`, and `olm.bundle` entries.
+`opm render <bundleImage>` produces bundle entries, so package/channel entries must also be included:
+
+```dockerfile
+FROM quay.io/operator-framework/opm:latest AS builder
+ARG BUNDLE_IMG
+RUN mkdir /catalog && \
+    opm render ${BUNDLE_IMG} --output=yaml > /catalog/bundles.yaml
+
+# Add package/channel entries (for example from files committed in your repo) and
+# combine them with rendered bundle content into /catalog/catalog.yaml.
+# The final catalog.yaml must include olm.package + olm.channel + olm.bundle.
+COPY catalog/package-and-channel.yaml /catalog/package-and-channel.yaml
+RUN cat /catalog/package-and-channel.yaml /catalog/bundles.yaml > /catalog/catalog.yaml && \
+    opm validate /catalog
+
+FROM scratch
+COPY --from=builder /catalog /catalog
+LABEL operators.operatorframework.io.index.configs.v1=/catalog
+```
+
+For OLM v0 with a `CatalogSource` that does **not** use `spec.grpcPodConfig.extractContent`,
+you also need to run `opm serve` in the final image (for example, by using an `opm` base image that contains the binary).
+
+## Configuring ci-operator
+
+Set `skip_building_index: true` for the bundle and add a new image entry that builds the catalog from the bundle.
+The `build_args` mechanism passes the bundle image pull specification into the catalog `Dockerfile` at build time:
+
+{{< highlight yaml >}}
+operator:
+  bundles:
+  - as: my-operator-bundle
+    dockerfile_path: build/Dockerfile.bundle
+    skip_building_index: true   # do not build the deprecated ci-operator index
+  substitutions:
+  - pullspec: "quay.io/example/my-operator:latest"
+    with: "pipeline:my-operator"
+images:
+  items:
+  - build_args:
+    - name: BUNDLE_IMG
+      value: my-operator-bundle   # resolved to the pipeline image pull spec at build time
+    dockerfile_path: build/Dockerfile.catalog
+    to: my-operator-catalog
+{{< / highlight >}}
+
+## Using the Catalog Image in Tests
+
+Reference `my-operator-catalog` as `OO_INDEX` with the standard `optional-operators-ci-$CLOUD` workflow
+(no `operator-sdk` required):
+
+{{< highlight yaml >}}
+tests:
+- as: e2e
+  cluster_claim:
+    architecture: amd64
+    cloud: aws
+    owner: openshift-ci
+    product: ocp
+    timeout: 1h0m0s
+    version: "4.18"
+  steps:
+    test:
+    - ref: my-operator-e2e
+    workflow: optional-operators-ci-aws
+  env:
+    OO_CHANNEL: stable
+    OO_PACKAGE: my-operator
+    OO_TARGET_NAMESPACES: '!install'
+  dependencies:
+    OO_INDEX: my-operator-catalog   # the FBC catalog image, not ci-index
+{{< / highlight >}}
+
+# OLM v1 / ClusterExtension (OCP 4.18+)
+
+{{< alert title="Note" color="info" >}}
+OLM v1 is available as TechPreview in OCP 4.18+ (requires `TechPreviewNoUpgrade` feature set) and is heading
+toward GA. The APIs used here (`ClusterCatalog`, `ClusterExtension`) are in the `olm.operatorframework.io/v1`
+API group.
+{{< /alert >}}
+
+OLM v1 replaces the `CatalogSource` + `Subscription` model with `ClusterCatalog` + `ClusterExtension`.
+An FBC catalog image (built as described above) is used for both paths.
+
+## OLM v1 Installation Pattern
+
+The following resources are needed to install an operator via OLM v1 in a CI test step:
+
+**1. ClusterCatalog** — points OLM v1 at your FBC image:
+
+{{< highlight yaml >}}
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterCatalog
+metadata:
+  name: my-operator-catalog
+spec:
+  source:
+    type: Image
+    image:
+      ref: <FBC_IMAGE>          # pull spec of the catalog image
+      pollIntervalMinutes: 1
+{{< / highlight >}}
+
+**2. Installer ServiceAccount and ClusterRoleBinding** — OLM v1 currently requires an explicit service account (this requirement is expected to be relaxed in a future OLM v1 update):
+
+{{< highlight yaml >}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-operator-installer
+  namespace: my-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: my-operator-installer-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin   # scope this down to only the permissions your operator actually needs
+subjects:
+- kind: ServiceAccount
+  name: my-operator-installer
+  namespace: my-operator-system
+{{< / highlight >}}
+
+**3. ClusterExtension** — installs the operator from the catalog:
+
+{{< highlight yaml >}}
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
+metadata:
+  name: my-operator
+spec:
+  namespace: my-operator-system
+  serviceAccount:
+    name: my-operator-installer
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: my-operator
+      name: my-operator-catalog
+{{< / highlight >}}
+
+## Waiting for Installation
+
+After applying the `ClusterExtension`, poll its `Installed` condition:
+
+```bash
+for i in {1..30}; do
+  STATUS=$(oc get clusterextension my-operator \
+    -o jsonpath='{.status.conditions[?(@.type=="Installed")].status}' 2>/dev/null || echo "Unknown")
+  if [[ "${STATUS}" == "True" ]]; then
+    echo "ClusterExtension successfully installed!"
+    break
+  fi
+  echo "Attempt $i: status=${STATUS}. Retrying in 10s..."
+  sleep 10
+done
+```
+
+## Step Registry Reference
+
+The [`windows-conf-operator-olmv1`](https://steps.ci.openshift.org/reference/windows-conf-operator-olmv1) step
+in the step registry is a working example of the full OLM v1 install flow
+(`ClusterCatalog` → ServiceAccount → RBAC → `ClusterExtension`). Use it as a reference when authoring your own step.
