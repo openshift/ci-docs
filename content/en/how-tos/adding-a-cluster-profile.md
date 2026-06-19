@@ -267,11 +267,11 @@ A **lease** is a reservation of cloud resources (like AWS accounts or GCP projec
 
 ### Providing Credentials
 
-Your tests need credentials (like cloud account keys, image registry passwords, etc.) to run. These credentials are stored in a Kubernetes Secret and automatically mounted into your test containers.
+Your tests need credentials (like cloud account keys, image registry passwords, etc.) to run. These credentials are stored in Google Secret Manager (GSM) and automatically mounted into your test containers via a **bundle**.
 
 **How it works:**
 
-1. **Secret naming:** The secret is always named `cluster-secrets-<profile-name>`. For example:
+1. **Bundle naming:** Each cluster profile has a corresponding bundle named `cluster-secrets-<profile-name>`. For example:
    - `aws` profile → `cluster-secrets-aws`
    - `gcp-oadp-qe` profile → `cluster-secrets-gcp-oadp-qe`
 
@@ -281,43 +281,68 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 
 3. **Setting it up:**
 
-   **Step 1:** Create a pull request to `openshift/release` that adds your secret to the `ci-secret-bootstrap` configuration. This "seeds" the secret with platform-provided content.
+   **Step 1:** Create your secrets using the [Secret Manager CLI](/architecture/cli-secret-manager/).
+   Make sure you have a [secret collection](/how-tos/adding-a-new-secret-to-ci-gsm/#step-1-create-a-secret-collection)
+   set up.
 
-   **File:** [`core-services/ci-secret-bootstrap/_config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/_config.yaml)
-
-   See [this example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd) for reference.
-
-   **Step 2:** Add your custom credentials (cloud keys, SSH keys, etc.) using the [self-service portal](/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret). When adding secrets in Vault, make sure to set these metadata keys:
+   **Step 2:** Define a bundle in [`core-services/ci-secret-bootstrap/gsm-config.yaml`](https://github.com/openshift/release/blob/master/core-services/ci-secret-bootstrap/gsm-config.yaml)
+   that groups your secrets under `cluster-secrets-<your-profile-name>`. Example bundle:
 
    ```yaml
-   secretsync/target-namespace: "ci"
-   secretsync/target-name: "cluster-secrets-<your-profile-name>"
+   bundles:
+   - name: cluster-secrets-my-profile
+     gsm_secrets:
+     - collection: my-collection
+       group: aws
+     - collection: my-collection
+       group: ssh
+     sync_to_cluster: true
+     targets:
+     - cluster_groups: [build_farm]
+       namespace: ci
    ```
 
-   These metadata keys tell the system to automatically sync your Vault secrets into the Kubernetes Secret that your tests will use.
+   **Important**:`sync_to_cluster: true` is required. The `targets` section specifies which clusters and namespaces receive the secret,
+   usually `build_farm` cluster_group and the `ci` namespace are the preferred options.
+
+   Submit this as a PR to [`openshift/release`](https://github.com/openshift/release). After it merges, it may take
+   1-2 hours for the secrets to be propagated.
+
+   See [Composed Secrets (Bundles)](/how-tos/adding-a-new-secret-to-ci-gsm/#composed-secrets-bundles) for more details on the bundle format.
 
 **Special cases:**
 
-- **Using the default naming:** If you follow the `cluster-secrets-<name>` convention, no additional configuration is needed. The system will automatically find and mount your secret.
+- **Using the default naming:** If you follow the `cluster-secrets-<name>` convention, no additional configuration is needed. The system will automatically find and mount your bundle.
 
-- **Using a custom secret name:** If you want to share credentials with another profile or use a different name, you need to:
-  1. First, same as above, create the PR that adds your secret to `ci-secret-bootstrap` (and wait for it to merge)
-  2. Then, create a second PR that modifies the cluster profiles configuration to specify your custom secret name:
+- **Using a custom bundle name:** If you want to share credentials with another profile or use a different name, add a `secret` override in the cluster profiles configuration:
 
      **File:** [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/main/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml)
 
      ```yaml
-     - profile: <your-profile-name>  # This needs to match the constant you added into [`pkg/api/types.go`](https://github.com/openshift/ci-tools/blob/main/pkg/api/types.go)
+     - profile: <your-profile-name>
        secret: custom-cluster-profile-secret
      ```
 
+     The `secret` value must match the `name` of a bundle defined in `gsm-config.yaml`.
+
 #### Storing AWS Credentials
 
-If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile secret.
+If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile.
 
-**Important:** The secret must contain a key named `.awscred` (note the leading dot). The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+**Important:** The field must be named `.awscred` (note the leading dot). Due to GSM naming restrictions, dots are stored as `--dot--`, so the field name in GSM will be `--dot--awscred`. Use `as` in your bundle definition to restore the original name:
 
-**Format:**
+```yaml
+bundles:
+- name: cluster-secrets-my-profile
+  gsm_secrets:
+  - collection: my-collection
+    group: aws
+    fields:
+    - name: --dot--awscred
+      as: .awscred
+```
+
+The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html):
 
 ```ini
 [default]
@@ -325,7 +350,11 @@ aws_access_key_id=YOUR_ACCESS_KEY_ID
 aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
 ```
 
-Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual AWS credentials.
+To store it:
+
+```sh
+sm create -c my-collection aws/--dot--awscred --from-file=./aws-credentials
+```
 
 #### Storing SSH Key Pairs
 
@@ -333,20 +362,14 @@ Some workflows (like `ipi-aws`) require SSH keys so you can access and debug CI 
 
 **Best practice:** Generate a new SSH key pair specifically for CI usage. Don't reuse your personal SSH keys.
 
-**How to store them:**
+Store SSH keys as separate fields in your collection:
 
-SSH keys are stored in the same Vault secret as your other credentials, but as separate key-value pairs:
+```sh
+sm create -c my-collection ssh/ssh-publickey --from-file=./ci-key.pub
+sm create -c my-collection ssh/ssh-privatekey --from-file=./ci-key
+```
 
-- **Key name:** `ssh-publickey`  
-  **Value:** The contents of your SSH public key file (usually `~/.ssh/id_rsa.pub`)
-
-- **Key name:** `ssh-privatekey`  
-  **Value:** The contents of your SSH private key file (usually `~/.ssh/id_rsa`)
-
-**Example:** If you generate a key pair with `ssh-keygen -t rsa -f ci-key`, you would:
-
-1. Store the contents of `ci-key.pub` as the `ssh-publickey` value
-2. Store the contents of `ci-key` as the `ssh-privatekey` value
+Then include the `ssh` group in your cluster profile bundle (see [Step 2](#step-2-define-the-bundle) above).
 
 #### Using AWS IP Pools (Advanced)
 
