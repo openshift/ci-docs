@@ -1,21 +1,21 @@
 ---
-title: "Adding a New Secret to CI"
+title: "Adding a New Secret to CI (Coming Soon)"
 description: How to add and manage secrets used by CI jobs.
 ---
 
-{{< alert title="Coming soon" color="info" >}}
-This page describes the new GSM-based secrets workflow, which is not yet in production.
+{{%  alert title="Coming soon" color="info" %}}
+This page describes the new Google Secret Manager-based secrets workflow, which is not yet in production.
 Until the migration is complete, please continue using the [current Vault-based workflow](/how-tos/adding-a-new-secret-to-ci/).
-{{< /alert >}}
+{{% /alert %}}
 
 Jobs execute as `Pod`s; those jobs that need access to sensitive information can have it mounted from
 [Google Secret Manager](https://cloud.google.com/security/products/secret-manager) (GSM). Secret data is managed
 self-service by the owners of the data using the [Secret Manager CLI](/architecture/cli-secret-manager/).
 
-{{< alert title="Security model" color="warning" >}}
+{{% alert title="Security model" color="warning" %}}
 Secret values **cannot be read back** by users. Only the CI infrastructure reads secrets during job execution.
 This is by design to protect sensitive data.
-{{< /alert >}}
+{{% /alert %}}
 
 ## Add a New Secret
 
@@ -27,11 +27,11 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
 
 1. Go to [Rover groups](https://rover.redhat.com/groups/) and find an existing group for your team, or create a new one.
 
-   {{< alert title="Important" color="warning" >}}
+   {{% alert title="Important" color="warning" %}}
    The Rover group must have **email/calendar capabilities enabled**. This is required for the access control integration
    to work. When creating a new group, check "Enable mail/calendar capabilities." For existing groups, this setting can be
    enabled in the group settings.
-   {{< /alert >}}
+   {{% /alert %}}
 
 2. Submit a PR to [`openshift/release`](https://github.com/openshift/release) adding your Rover group and collection
    to [`core-services/sync-rover-groups/_config.yaml`](https://github.com/openshift/release/blob/master/core-services/sync-rover-groups/_config.yaml):
@@ -43,9 +43,9 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
          - your-collection-name
    ```
 
-   {{< alert title="Note" color="info" >}}
+   {{% alert title="Note" color="info" %}}
    Secret collection names are globally unique in our system.
-   {{< /alert >}}
+   {{% /alert %}}
 
 3. After the PR is merged, a postsubmit job will provision the collection. This typically takes under a minute.
 
@@ -170,10 +170,10 @@ credentials:
 
 All fields from all groups in the bundle are mounted under the specified path.
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 Changes to bundles require a PR to `openshift/release`. After the PR is merged, it may take 1-2 hours
 for the changes to be propagated to CI jobs.
-{{< /alert >}}
+{{% /alert %}}
 
 ## Naming Conventions
 
