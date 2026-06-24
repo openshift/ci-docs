@@ -271,7 +271,7 @@ file), or before you set the image label `io.openshift.release.operator` to get 
 
     CVO manifests may also use [the `0.0.1-snapshot` placeholder][cluster-version-manifest-version-placeholder] to have the OCP release version injected at release-assembly time.
 1. Ensure you have successfully published your image to the CI integration stream
-1. Follow the [ART instructions](https://art-docs.engineering.redhat.com/sop/image_add/) to have them build your image
+1. Follow the [ART instructions](https://art-docs.engineering.redhat.com/sop/image_add/) (requires VPN) to have them build your image
 1. Ensure a single successful build is run (sync with ART to confirm).  You can also check for your new image name in both ART and CI ImageStreams by checking [CI registries](/how-tos/use-registries-in-build-farm/#how-do-i-gain-access-to-qci):
 
     ```console
