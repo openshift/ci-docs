@@ -13,14 +13,14 @@ The Secret Manager CLI is the primary way to manage secrets used in CI workflows
 - List, delete and update existing secrets
 - Retrieve authentication information for the service account tied to a secret collection
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 In the future, we may provide a GUI (e.g., a web interface),
 but currently, the CLI is the only interface available.
-{{< / alert >}}
+{{% /alert %}}
 
-{{< alert title="Security model" color="warning" >}}
+{{% alert title="Security model" color="warning" %}}
 Members of a Rover group can create, update, and delete secrets in their collections, but **cannot read secret values back**. Only the CI infrastructure reads secrets during job execution. This is by design to protect sensitive data.
-{{< /alert >}}
+{{% /alert %}}
 
 ## Prerequisites
 
@@ -157,10 +157,10 @@ Also see [commands cheat sheet](#commands-cheat-sheet) for quick reference.
 
 ## Creating a new secret
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 A secret must belong to both a [collection and a group](#understanding-secret-collections-and-groups).
 Before creating a new secret, make sure you have access to the target collection, or [create a new collection](#creating-a-new-secret-collection).
-{{< / alert >}}
+{{% /alert %}}
 
 To create a new secret, specify the collection and the secret path in `group/field` format:
 
@@ -188,9 +188,9 @@ After you enter the metadata, a secret at `my-collection/aws/access-key-id` will
 Once created, the secret is immediately available for use in CI jobs that reference it via `collection`/`group` in their credential stanzas. 
 For secrets that are part of a [bundle](/how-tos/adding-a-new-secret-to-ci-gsm/#composed-secrets-bundles) (e.g., cluster profile secrets), it may take 1-2 hours for the changes to be propagated.
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 We encourage users to automate secret rotation using the dedicated write-only service account provided for each collection. [Learn more](#getting-the-service-account-associated-with-a-collection).
-{{< /alert >}}
+{{% /alert %}}
 
 ### Creating a secret from a literal string
 
@@ -241,9 +241,9 @@ sm list --rover-group=my-rover-group
 
 This lists all collections configured for the `my-rover-group` Rover group, as defined in [the configuration file](https://github.com/openshift/release/tree/master/core-services/sync-rover-groups/_config.yaml).
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 `--rover-group` refers to your **Rover group** (for access control), which is different from **secret groups** (the organizational hierarchy within collections like `aws`, `gcp`, etc.).
-{{< / alert >}}
+{{% /alert %}}
 
 ### Listing all secret collections
 
@@ -263,9 +263,9 @@ The update takes effect immediately, and the new secret value will be used the n
 
 Previous versions of the secret are retained automatically by the underlying storage. However, the CLI always uses the latest version, and there is currently no way to roll back to a previous version through the CLI.
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 You can only update secrets in collections you have access to. To check which secret collections you have access to, use `sm list --rover-group=<my-rover-group>` or see [the configuration file](https://github.com/openshift/release/tree/master/core-services/sync-rover-groups/_config.yaml).
-{{< / alert >}}
+{{% /alert %}}
 
 ### Updating a secret from file
 
@@ -293,9 +293,9 @@ sm update --help
 
 To remove a secret from a collection, use the `delete` command.
 
-{{< alert title="Note" color="info" >}}
+{{% alert title="Note" color="info" %}}
 You can only delete secrets in collections you have access to. To check which secret collections you have access to, use `sm list --rover-group=<my-rover-group>` or see [the configuration file](https://github.com/openshift/release/tree/master/core-services/sync-rover-groups/_config.yaml).
-{{< / alert >}}
+{{% /alert %}}
 
 ### Example
 
