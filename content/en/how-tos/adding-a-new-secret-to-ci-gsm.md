@@ -1,5 +1,5 @@
 ---
-title: "Adding a New Secret to CI"
+title: "Adding a New Secret to CI (Coming Soon)"
 description: How to add and manage secrets used by CI jobs.
 ---
 
