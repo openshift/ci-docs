@@ -315,9 +315,11 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 
 If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile secret.
 
-**Important:** The secret must contain a key named `.awscred` (note the leading dot). The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+There are two supported authentication methods:
 
-**Format:**
+**Option A: Static IAM credentials (legacy)**
+
+The secret must contain a key named `.awscred` (note the leading dot). The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 
 ```ini
 [default]
@@ -326,6 +328,22 @@ aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
 ```
 
 Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual AWS credentials.
+
+**Option B: AWS STS role chaining (recommended)**
+
+Instead of storing long-lived static IAM keys, you can configure your cluster profile to use short-lived STS credentials with automatic role chaining. This approach eliminates static keys in favor of a three-hop STS exchange using OIDC-projected ServiceAccount tokens.
+
+To enable STS, add the following keys to your cluster profile secret (in addition to the standard keys like `baseDomain` and SSH keys):
+
+| Secret key | Description |
+|---|---|
+| `home_role_arn` | ARN of the `ci-step-runner` role in the build cluster's AWS account |
+| `hub_role_arn` | ARN of the `ci-step-runner-hub` role in the central hub AWS account |
+| `target_role_arn` | ARN of the `ci-step-runner-target` role in the target AWS account |
+
+When all three ARNs are present, `ci-operator` automatically injects an AWS config file and a projected ServiceAccount token into each step pod. The AWS SDK performs a three-hop STS exchange transparently, and no `.awscred` key is needed.
+
+For full details on the architecture, IAM role setup, and CloudFormation templates, see [AWS STS Role Chaining for CI](/architecture/aws-sts-role-chaining).
 
 #### Storing SSH Key Pairs
 
