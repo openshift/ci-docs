@@ -177,10 +177,7 @@ job under `artifacts/job-name/step-name/`. The logs of each container in a step 
 #### Injecting Custom Credentials
 
 Steps can inject custom credentials by adding configuration that identifies which secrets hold the credentials and where the data should be mounted
-in the step. For instance, to mount the my-data secret into the step's filesystem at `/var/run/my-data`, a step could be configured in a literal
-`ci-operator` configuration, or in the step's configuration in the registry in the following manner:
-
-Registry step configuration:
+in the step. Credentials are referenced by `collection`/`group` (from [Google Secret Manager](/how-tos/adding-a-new-secret-to-ci-gsm/)):
 
 {{< highlight yaml >}}
 ref:
@@ -192,18 +189,32 @@ ref:
       cpu: 1000m
       memory: 100Mi
   credentials:
-  - namespace: test-credentials # this entry injects the custom credential
-    name: my-data
+  - collection: my-collection
+    group: my-data
     mount_path: /var/run/my-data
   documentation: |-
     The step runs with custom credentials injected.
 {{< / highlight >}}
 
-{{< alert title="Warning" color="warning" >}}
-Access to read these secrets from the namespace configured must be granted separately from the configuration being added to a step.
-By default, only secrets in the `test-credentials` namespace will be available for mounting into test steps. Please follow the secret-management
-[documentation](/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) to set up a custom secret in that namespace.
-{{< /alert >}}
+All fields in `my-collection/my-data/` are mounted as files under `/var/run/my-data/`.
+
+To mount a single field, or to reference a pre-defined bundle:
+
+{{< highlight yaml >}}
+  credentials:
+  # Single field with rename
+  - collection: my-collection
+    group: gcp
+    field: credentials
+    as: sa-key
+    mount_path: /var/run/gcp-creds
+  # Bundle reference
+  - bundle: my-app-secrets
+    mount_path: /var/run/app-secrets
+{{< / highlight >}}
+
+See [Adding a New Secret to CI](/how-tos/adding-a-new-secret-to-ci-gsm/) for full details on creating
+secrets, bundles, and all available credential reference options.
 
 #### Injecting the `oc` CLI
 

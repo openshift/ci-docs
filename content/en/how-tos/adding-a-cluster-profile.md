@@ -82,7 +82,7 @@ When adding a new `cluster_profile`, you need to complete three main steps:
 
 1. **Add the new leases** in `Boskos`.
 2. **Provide the credentials** for the profile.
-3. **Register the profile** in [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/ae94b7380a8a713f2fd43fe6b76169ef8a49af7b/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
+3. **Register the profile** in [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/main/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
 
 Steps (1) and (2) can be accomplished simultaneously with just a single PR. Merge it and wait for your credentials to be synchronized by the [periodic-ci-secret-bootstrap](https://prow.ci.openshift.org/?job=periodic-ci-secret-bootstrap) job.  
 Open a separate PR to complete step (3).
@@ -109,11 +109,11 @@ You need to register the actual lease resources with the leasing server (Boskos)
 
 ### Providing Credentials
 
-Your tests need credentials (like cloud account keys, image registry passwords, etc.) to run. These credentials are stored in a Kubernetes Secret and automatically mounted into your test containers.
+Your tests need credentials (like cloud account keys, image registry passwords, etc.) to run. These credentials are stored in Google Secret Manager (GSM) and automatically mounted into your test containers via a **bundle**.
 
 **How it works:**
 
-1. **Secret naming:** The secret is usually named `cluster-secrets-<profile-name>`. For example:
+1. **Bundle naming:** Each cluster profile has a corresponding bundle named `cluster-secrets-<profile-name>`. For example:
    - `aws` profile → `cluster-secrets-aws`
    - `gcp-oadp-qe` profile → `cluster-secrets-gcp-oadp-qe`
 
@@ -123,28 +123,53 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 
 3. **Setting it up:**
 
-   **Step 1:** Create a pull request to `openshift/release` that adds your secret to the `ci-secret-bootstrap` configuration. This "seeds" the secret with platform-provided content.
+   **Step 1:** Create your secrets using the [Secret Manager CLI](/architecture/cli-secret-manager/).
+   Make sure you have a [secret collection](/how-tos/adding-a-new-secret-to-ci-gsm/#step-1-create-a-secret-collection)
+   set up.
 
-   **File:** [`core-services/ci-secret-bootstrap/_config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/_config.yaml)
-
-   See [this example](https://github.com/openshift/release/commit/1f775399dfd636a1feca304fb9b6944ca2dd8fb9#diff-6f809450f5216bc90d0c08b723c9fe080da1358283bbf47c42f05bfc589c49fd) for reference.
-
-   **Step 2:** Add your custom credentials (cloud keys, SSH keys, etc.) using the [self-service portal](/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret). When adding secrets in Vault, make sure to set these metadata keys:
+   **Step 2:** Define a bundle in [`core-services/ci-secret-bootstrap/gsm-config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/gsm-config.yaml)
+   that groups your secrets under `cluster-secrets-<your-profile-name>`. Example bundle:
 
    ```yaml
-   secretsync/target-namespace: "ci"
-   secretsync/target-name: "cluster-secrets-<your-profile-name>"
+   bundles:
+   - name: cluster-secrets-my-profile
+     gsm_secrets:
+     - collection: my-collection
+       group: aws
+     - collection: my-collection
+       group: ssh
+     sync_to_cluster: true
+     targets:
+     - cluster_groups: [non_app_ci]
+       namespace: ci
    ```
 
-   These metadata keys tell the system to automatically sync your Vault secrets into the Kubernetes Secret that your tests will use.
+   **Important**:`sync_to_cluster: true` is required. The `targets` section specifies which clusters and namespaces receive the secret,
+   usually the `non_app_ci` cluster_group and the `ci` namespace are the preferred options.
+
+   Submit this as a PR to [`openshift/release`](https://github.com/openshift/release). After it merges, it may take
+   1-2 hours for the secrets to be propagated.
+
+   See [Composed Secrets (Bundles)](/how-tos/adding-a-new-secret-to-ci-gsm/#composed-secrets-bundles) for more details on the bundle format.
 
 #### Storing AWS Credentials
 
-If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile secret.
+If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile.
 
-**Important:** The secret must contain a key named `.awscred` (note the leading dot). The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+**Important:** The field must be named `.awscred` (note the leading dot). Due to GSM naming restrictions, dots are stored as `--dot--`, so the field name in GSM will be `--dot--awscred`. Use `as` in your bundle definition to restore the original name:
 
-**Format:**
+```yaml
+bundles:
+- name: cluster-secrets-my-profile
+  gsm_secrets:
+  - collection: my-collection
+    group: aws
+    fields:
+    - name: --dot--awscred
+      as: .awscred
+```
+
+The value should be the contents of a standard [AWS credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html):
 
 ```ini
 [default]
@@ -152,7 +177,11 @@ aws_access_key_id=YOUR_ACCESS_KEY_ID
 aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
 ```
 
-Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual AWS credentials.
+To store it:
+
+```sh
+sm create -c my-collection aws/--dot--awscred --from-file=./aws-credentials
+```
 
 #### Storing SSH Key Pairs
 
@@ -160,24 +189,18 @@ Some workflows (like `ipi-aws`) require SSH keys so you can access and debug CI 
 
 **Best practice:** Generate a new SSH key pair specifically for CI usage. Don't reuse your personal SSH keys.
 
-**How to store them:**
+Store SSH keys as separate fields in your collection:
 
-SSH keys are stored in the same Vault secret as your other credentials, but as separate key-value pairs:
+```sh
+sm create -c my-collection ssh/ssh-publickey --from-file=./ci-key.pub
+sm create -c my-collection ssh/ssh-privatekey --from-file=./ci-key
+```
 
-- **Key name:** `ssh-publickey`  
-  **Value:** The contents of your SSH public key file (usually `~/.ssh/id_rsa.pub`)
-
-- **Key name:** `ssh-privatekey`  
-  **Value:** The contents of your SSH private key file (usually `~/.ssh/id_rsa`)
-
-**Example:** If you generate a key pair with `ssh-keygen -t rsa -f ci-key`, you would:
-
-1. Store the contents of `ci-key.pub` as the `ssh-publickey` value
-2. Store the contents of `ci-key` as the `ssh-privatekey` value
+Then include the `ssh` group in your cluster profile bundle (see [Providing Credentials](#providing-credentials) above).
 
 ### Registering a New Profile
 
-To register a new cluster profile, you need to define a new entry in [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/ae94b7380a8a713f2fd43fe6b76169ef8a49af7b/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
+To register a new cluster profile, you need to define a new entry in [`ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml`](https://github.com/openshift/release/blob/main/ci-operator/step-registry/cluster-profiles/cluster-profiles-config.yaml).
 
 Think of this as "telling the system about your new profile" - you're adding it to the list of profiles that the CI system recognizes:
 
@@ -201,7 +224,7 @@ cluster_profiles:
 
 The meaning of each stanza is described below:
 - `name`: name of this cluster profile.
-- `owners`: restricts the usage of the cluster profile to a given `organization`, `organization/repository`s or Konflux tenant. For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/master/ci-operator/step-registry/cluster-profiles/README.md).
+- `owners`: restricts the usage of the cluster profile to a given `organization`, `organization/repository`s or Konflux tenant. For detailed instructions please refer to the [README file](https://github.com/openshift/release/tree/main/ci-operator/step-registry/cluster-profiles/README.md).
 - `lease_type`: The lease type determines which cloud resources your tests can use.  
 This tells the system which "lease" (reserved cloud resources) to use for your profile.  
 **IMPORTANT**: The name of the lease **MUST** be the same of what you have chosen in the previous step [Adding New Leases](#adding-new-leases).
@@ -291,7 +314,7 @@ cluster.  Builds are configured in [`openshift/release`][openshift_release] in
 the [supplemental images][supplemental_images] directory (see for example the
 [OpenVPN image build][openvpn_build]).
 
-Once the `BuildConfig` is merged into `master` and the image is built and
+Once the `BuildConfig` is merged into `main` and the image is built and
 tagged, the cluster profile can reference the public _pull spec_.  For the
 OpenVPN image stream from the example above, that would be:
 
