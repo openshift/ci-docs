@@ -1,7 +1,11 @@
 ---
-title: "Adding a New Secret to CI"
+title: "Adding a New Secret to CI (Deprecated)"
 description: How to self-service manage secret data provided to jobs during execution.
 ---
+
+{{%  alert title="Deprecated" color="info" %}}
+This documentation is deprecated. Please refer to [the new workflow](/how-tos/adding-a-new-secret-to-ci-gsm/).
+{{% /alert %}}
 
 Jobs execute as `Pod`s; those jobs that need access to sensitive information can have access through mounted Kubernetes
 [`Secrets`](https://kubernetes.io/docs/concepts/configuration/secret/). Secret data is managed self-service by the owners

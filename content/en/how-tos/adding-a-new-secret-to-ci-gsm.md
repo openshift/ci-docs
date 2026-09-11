@@ -1,12 +1,7 @@
 ---
-title: "Adding a New Secret to CI (Coming Soon)"
+title: "Adding a New Secret to CI"
 description: How to add and manage secrets used by CI jobs.
 ---
-
-{{%  alert title="Coming soon" color="info" %}}
-This page describes the new Google Secret Manager-based secrets workflow, which is not yet in production.
-Until the migration is complete, please continue using the [current Vault-based workflow](/how-tos/adding-a-new-secret-to-ci/).
-{{% /alert %}}
 
 Jobs execute as `Pod`s; those jobs that need access to sensitive information can have it mounted from
 [Google Secret Manager](https://cloud.google.com/security/products/secret-manager) (GSM). Secret data is managed
