@@ -22,10 +22,14 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
 
 1. Go to [Rover groups](https://rover.redhat.com/groups/) and find an existing group for your team, or create a new one.
 
-   {{% alert title="Important" color="warning" %}}
-   The Rover group must have **email/calendar capabilities enabled**. This is required for the access control integration
-   to work. When creating a new group, check "Enable mail/calendar capabilities." For existing groups, this setting can be
-   enabled in the group settings.
+   {{% alert title="Read this before opening a PR" color="danger" %}}
+   The Rover group **must have email/calendar capabilities enabled**, otherwise no Google group is created for it and
+   access control cannot work. When creating a new group, check "Enable mail/calendar capabilities." For existing
+   groups, enable it in the group settings.
+
+   **Verify it worked:** go to [groups.google.com](https://groups.google.com) and confirm that **your group is listed
+   there with an email address attached**. If it is not listed, or has no email, the setup is *not* complete -- fix the
+   Rover group first, otherwise your collection cannot be provisioned.
    {{% /alert %}}
 
 2. Submit a PR to [`openshift/release`](https://github.com/openshift/release) adding your Rover group and collection
@@ -42,7 +46,12 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
    Secret collection names are globally unique in our system.
    {{% /alert %}}
 
-3. After the PR is merged, a postsubmit job will provision the collection. This typically takes under a minute.
+3. After the PR is merged, the
+   [`branch-ci-openshift-release-main-gsm-secrets-reconciler`](https://prow.ci.openshift.org/job-history/gs/test-platform-results/logs/branch-ci-openshift-release-main-gsm-secrets-reconciler)
+   postsubmit job provisions the collection. This typically takes under a minute. If your collection does not show up,
+   check that job's history -- its logs will tell you what went wrong, a missing Google group being the most common
+   cause. If the job is failing and you cannot tell why, reach out to the Test Platform team on the
+   `#forum-ocp-testplatform` Slack channel.
 
 Everyone in the Rover group can now create, update and delete secrets in the collection, and list
 what it contains, using the [Secret Manager CLI](/architecture/cli-secret-manager/).
