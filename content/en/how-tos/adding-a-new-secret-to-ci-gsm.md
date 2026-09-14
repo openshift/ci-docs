@@ -46,7 +46,12 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
    Secret collection names are globally unique in our system.
    {{% /alert %}}
 
-3. After the PR is merged, a postsubmit job will provision the collection. This typically takes under a minute.
+3. After the PR is merged, the
+   [`branch-ci-openshift-release-main-gsm-secrets-reconciler`](https://prow.ci.openshift.org/job-history/gs/test-platform-results/logs/branch-ci-openshift-release-main-gsm-secrets-reconciler)
+   postsubmit job provisions the collection. This typically takes under a minute. If your collection does not show up,
+   check that job's history -- its logs will tell you what went wrong, a missing Google group being the most common
+   cause. If the job is failing and you cannot tell why, reach out to the Test Platform team on the
+   `#forum-ocp-testplatform` Slack channel.
 
 Everyone in the Rover group can now create, update and delete secrets in the collection, and list
 what it contains, using the [Secret Manager CLI](/architecture/cli-secret-manager/).
