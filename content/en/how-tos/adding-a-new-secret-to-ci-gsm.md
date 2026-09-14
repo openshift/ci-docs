@@ -22,10 +22,14 @@ If your team already has a collection, skip to [Step 2](#step-2-create-the-secre
 
 1. Go to [Rover groups](https://rover.redhat.com/groups/) and find an existing group for your team, or create a new one.
 
-   {{% alert title="Important" color="warning" %}}
-   The Rover group must have **email/calendar capabilities enabled**. This is required for the access control integration
-   to work. When creating a new group, check "Enable mail/calendar capabilities." For existing groups, this setting can be
-   enabled in the group settings.
+   {{% alert title="Read this before opening a PR" color="danger" %}}
+   The Rover group **must have email/calendar capabilities enabled**, otherwise no Google group is created for it and
+   access control cannot work. When creating a new group, check "Enable mail/calendar capabilities." For existing
+   groups, enable it in the group settings.
+
+   **Verify it worked:** go to [groups.google.com](https://groups.google.com) and confirm that **your group is listed
+   there with an email address attached**. If it is not listed, or has no email, the setup is *not* complete -- fix the
+   Rover group first, otherwise your collection cannot be provisioned.
    {{% /alert %}}
 
 2. Submit a PR to [`openshift/release`](https://github.com/openshift/release) adding your Rover group and collection
