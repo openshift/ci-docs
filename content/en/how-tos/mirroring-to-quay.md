@@ -64,16 +64,34 @@ Additionally, you will need to add a new Periodic job
 any of the jobs as sample and simply replace all occurences of the value found in the `ci.openshift.io/area` label
 (e.g. `knative`) with the name of your repository (which should be the same as the name of the directory you created).
 
-In oder to push images to an external  repository, credentials are needed. Use `docker` or `podman` to create a docker config
-file as described [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#log-in-to-docker)
-and then use our [self-service portal](/how-tos/adding-a-new-secret-to-ci/#add-a-new-secret) to add it to the clusters,
-using the following keys in Vault:
+In order to push images to an external repository, credentials are needed. Use `docker` or `podman` to create a docker config
+file as described [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#log-in-to-docker),
+then follow these steps to make the credentials available to CI:
+
+1. Follow [Adding a New Secret to CI](/how-tos/adding-a-new-secret-to-ci-gsm/) (Steps 1 and 2) to create a collection and store the docker config in GSM.
+2. Open a PR to the `openshift/release` repo to add a bundle to [`core-services/ci-secret-bootstrap/gsm-config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/gsm-config.yaml) with `sync_to_cluster: true`. See [Infrastructure bundles](/how-tos/adding-a-new-secret-to-ci-gsm/#infrastructure-bundles-sync_to_cluster) for details.
+
+Example bundle:
 
 {{< highlight yaml >}}
-secretsync/target-namespace: "ci"
-secretsync/target-name: "registry-push-credentials-quay-io-NEW_ORGANIZATION"
-secretsync/target-clusters: "core-ci,app.ci"
+  - name: registry-push-credentials-quay-io-NEW_ORGANIZATION
+    gsm_secrets:
+      - collection: <your-collection>
+        group: <your-group>
+        fields:
+          - name: docker-config # this must match what is in the collection/group
+            as: config.json
+    sync_to_cluster: true
+    targets:
+      - cluster: app.ci
+        namespace: ci
+        type: kubernetes.io/dockerconfigjson
+      - cluster: core-ci
+        namespace: ci
+        type: kubernetes.io/dockerconfigjson
 {{< / highlight >}}
+
+Once the PR is merged, `ci-secret-bootstrap` will sync the secret to the clusters.
 
 Then, the mirroring jobs can mount the secret as a volume:
 
@@ -119,7 +137,7 @@ periodics:
     volumes:
     - name: push
       secret:
-        secretName: registry-push-credentials-quay-io-NEW_ORGANIZATION # this matches the secretsync/target-name
+        secretName: registry-push-credentials-quay-io-NEW_ORGANIZATION # this matches the bundle name in gsm-config.yaml
     - configMap:
         name: image-mirror-mappings
       name: config
