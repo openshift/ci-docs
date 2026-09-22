@@ -205,9 +205,10 @@ All fields from all groups in the bundle are mounted under the specified path.
 
 ### Infrastructure bundles (`sync_to_cluster`)
 
-Some bundles managed by the Test Platform team -- such as infrastructure secrets and
-[cluster profile secrets](/how-tos/adding-a-cluster-profile/) -- use `sync_to_cluster: true`, which
-syncs them to CI clusters as Kubernetes Secrets. This is not intended for regular user bundles.
+Some bundles -- such as infrastructure secrets managed by the Test Platform team,
+[cluster profile secrets](/how-tos/adding-a-cluster-profile/), and
+[cluster pool credential secrets](/how-tos/cluster-claim/#prepare-your-cloud-platform-credentials) -- use
+`sync_to_cluster: true`, which syncs them to CI clusters as Kubernetes Secrets.
 
 In the rare case when you must reference such a bundle in your multi-stage test, 
 you **must** provide `namespace` matching one of the bundle's `targets` in `gsm-config.yaml` 
