@@ -28,36 +28,41 @@ repository.
 
 ### Prepare Your Cloud Platform Credentials
 
-First, you need to make sure the cloud platform credentials that will be used to install cluster for the pool are
-available on the `hosted-mgmt` cluster. If you are not familiar with OpenShift CI custom secret management, please consult the
-[Adding a New Secret to CI](/how-tos/adding-a-new-secret-to-ci/) document first.
+The cloud platform credentials used to install clusters for the pool need to be available on the `hosted-mgmt` cluster
+as a Kubernetes Secret. This is done by creating a secret in Google Secret Manager (GSM) and configuring a bundle in
+`gsm-config.yaml` that syncs it to the cluster.
 
-1. Select a suitable collection in [Vault](https://vault.ci.openshift.org/ui/) to hold your cluster pool secret.
-   Alternatively, create a new suitable collection
-   in [collection self-service](https://selfservice.vault.ci.openshift.org/).
-2. In the selected collection, create a secret with the necessary keys and values. The specific needed keys depend on
+1. Set up a collection and create the secret in GSM with the necessary credential fields. The specific fields depend on
    the cloud platform; consult the
    Hive [Cloud Credentials](https://github.com/openshift/hive/blob/master/docs/using-hive.md#cloud-credentials)
-   document.
-3. Set `secretsync/target-clusters` key to `hosted-mgmt` to make sure your credentials are synced to the necessary cluster.
-4. Set `secretsync/target-namespace` key to a name of the namespace that will hold your pools (`${team}-cluster-pool` is a
-   good baseline name).
-5. Set `secretsync/target-name` to a name under which the secret will be accessible in the
-   cluster (`$platform-credentials` is a good baseline name).
+   document. See [Adding a New Secret to CI](/how-tos/adding-a-new-secret-to-ci-gsm/) (Steps 1 and 2) for how to
+   create a collection and add secrets to it.
 
-At the end, you should have a secret similar to the following in Vault:
+2. Open a PR to the [`openshift/release`](https://github.com/openshift/release) repo adding a bundle entry to
+   [`core-services/ci-secret-bootstrap/gsm-config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/gsm-config.yaml)
+   with `sync_to_cluster: true` targeting the `hosted-mgmt` cluster and your pool's
+   namespace. See [Infrastructure bundles](/how-tos/adding-a-new-secret-to-ci-gsm/#infrastructure-bundles-sync_to_cluster)
+   for more details on `sync_to_cluster` bundles.
 
-#### selfservice/dptp-demo-collection/dptp-demo-pool-credentials:
+   ```yaml
+     - name: <your-pool-name>-aws-credentials
+       gsm_secrets:
+         - collection: <your-collection>
+           group: <your-group>
+           fields:
+             - aws_access_key_id
+             - aws_secret_access_key
+       sync_to_cluster: true
+       targets:
+         - cluster: hosted-mgmt
+           namespace: <your-pool-name>-cluster-pool
+   ```
 
-```json
-{
-  "aws_access_key_id": "AWS KEY ID",
-  "aws_secret_access_key": "AWS ACCESS KEY",
-  "secretsync/target-clusters": "hosted-mgmt",
-  "secretsync/target-name": "demo-aws-credentials",
-  "secretsync/target-namespace": "dptp-demo-cluster-pool"
-}
-```
+   The `namespace` in `targets` must match the `metadata.namespace` of your `ClusterPool` resource.
+   `${team}-cluster-pool` is a good baseline name for your pool namespace.
+
+3. Once the PR is merged, the `ci-secret-bootstrap` job will sync the secret to the cluster.
+   This may take 1–2 hours.
 
 ### Create a Directory for Your Manifests
 
@@ -68,8 +73,8 @@ At the end, you should have a secret similar to the following in Vault:
    example).
 
 2. Create `OWNERS` file in the directory to allow your teammates make and approve changes.
-3. Create a manifest for the namespace that will hold your Hive resources (the namespace name must match the one where
-   you instructed [Vault to sync your secret](#prepare-your-cloud-platform-credentials)) and [set up RBACs](/how-tos/rbac/) for the pool
+3. Create a manifest for the namespace that will hold your Hive resources (the namespace name must match the one in your
+   [gsm-config.yaml bundle targets](#prepare-your-cloud-platform-credentials)) and [set up RBACs](/how-tos/rbac/) for the pool
    owners to debug on the `hosted-mgmt` cluster:
 
 ```console
@@ -127,7 +132,7 @@ apiVersion: hive.openshift.io/v1
 kind: ClusterPool
 metadata:
   name: dptp-demo-cluster-pool # name is not relevant but of course must be unique
-  namespace: dptp-demo-cluster-pool # the namespace name must match the one where you instructed Vault to sync your secret
+  namespace: dptp-demo-cluster-pool # the namespace name must match the one in your gsm-config.yaml bundle targets
   labels: # architecture, cloud, owner, product, version are used to filter out a pool when a job claims a cluster
     architecture: amd64
     cloud: aws
