@@ -335,7 +335,24 @@ tests:
     mount_path: /var/run/app-secrets
 ```
 
-{{% alert title="Note" color="info" %}}
-The `secrets` stanza does not support the `namespace` field. Bundle references in container tests
-always use the CSI path (direct GSM fetch), regardless of the bundle's `sync_to_cluster` setting.
-{{% /alert %}}
+The singular `secret` stanza is also accepted and behaves identically to a `secrets` list with a
+single entry. The two cannot both be set on the same test.
+
+Bundle references follow the same rules as in [multi-stage steps](#infrastructure-bundles-sync_to_cluster):
+a regular bundle is fetched directly from GSM, while a bundle with `sync_to_cluster: true` **must**
+specify a `namespace` matching one of the bundle's `targets` in `gsm-config.yaml`:
+
+```yaml
+tests:
+- as: my-test
+  commands: make test
+  container:
+    from: src
+  secret:
+    bundle: my-synced-bundle
+    namespace: test-credentials
+    mount_path: /var/run/my-synced-bundle
+```
+
+Without `namespace`, the job fails during setup with
+`bundle "my-synced-bundle" has sync_to_cluster: true but credential has no namespace specified`.
