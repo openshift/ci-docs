@@ -80,8 +80,8 @@ messages of level `info` and above from its output, described [below]({{< ref
 text, but served as a regular text file, and is also available as
 `build-log.txt` in the artifacts directory.
 
-In the case of the example job, the `build-log.txt` was as follows (parts of it
-will be used in examples in this and the next sections).
+The following excerpt from the example job's `build-log.txt` shows relevant
+entries (parts of it will be used in examples in this and the next sections).
 
 {{< highlight bash >}}
 INFO[2022-06-21T16:12:42Z] ci-operator version v20220617-3280eb53d
@@ -89,7 +89,6 @@ INFO[2022-06-21T16:12:42Z] Loading configuration from https://config.ci.openshif
 INFO[2022-06-21T16:12:42Z] Resolved source https://github.com/openshift/ci-tools to master@3280eb53, merging: #2877 92d493ad @hongkailiu
 INFO[2022-06-21T16:12:42Z] Using namespace https://console-openshift-console.apps.build04.34d2.p2.openshiftapps.com/k8s/cluster/projects/ci-op-qmyrhiml
 INFO[2022-06-21T16:12:42Z] Running [input:root], src, unit
-INFO[2022-06-21T16:12:42Z] Tagging build-cache/openshift-ci-tools:master into pipeline:root.
 INFO[2022-06-21T16:12:42Z] Building src
 INFO[2022-06-21T16:16:42Z] Build src succeeded after 4m4s
 INFO[2022-06-21T16:16:42Z] Executing test unit

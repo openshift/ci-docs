@@ -80,19 +80,13 @@ INFO[2022-07-11T17:03:23Z] Using namespace https://console-openshift-console.app
 ```
 
 Most log messages during input resolution have debug priority, so the log file
-is more informative in this case:
+is more informative in this case. The following excerpt shows relevant entries:
 
 ```
 {"level":"info","msg":"ci-operator version v20220708-ca6de370c","time":"2022-07-11T17:03:22Z"}
 {"level":"info","msg":"Loading configuration from https://config.ci.openshift.org for openshift/ci-tools@master","time":"2022-07-11T17:03:22Z"}
 {"level":"debug","msg":"performing request method GET url https://config.ci.openshift.org/config?branch=master&org=openshift&repo=ci-tools","time":"2022-07-11T17:03:22Z"}
 {"level":"info","msg":"Resolved source https://github.com/openshift/ci-tools to master@ca6de370, merging: #2883 3530bc01 @smg247","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Determining if build cache build-cache/openshift-ci-tools:master can be used in place of root ci/ci-tools-build-root:1.18","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Resolved build cache build-cache/openshift-ci-tools:master to sha256:de666c2027b84ff2b1ca1a4cafb08959aadcd5e8ba9e6a40c2767bbda87d1599","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Build cache build-cache/openshift-ci-tools:master is based on root image at sha256:f8c36a557d17e88976fea1349279a656e546b299d034e985b4ae43309003153d","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Resolved root image ci/ci-tools-build-root:1.18 to sha256:f8c36a557d17e88976fea1349279a656e546b299d034e985b4ae43309003153d","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Using build cache build-cache/openshift-ci-tools:master as root image.","time":"2022-07-11T17:03:22Z"}
-{"level":"debug","msg":"Resolved build-cache/openshift-ci-tools:master (root) to sha256:de666c2027b84ff2b1ca1a4cafb08959aadcd5e8ba9e6a40c2767bbda87d1599.","time":"2022-07-11T17:03:22Z"}
 {"level":"debug","msg":"Resolved origin/centos:stream8 (base_image: os) to sha256:ad7d81f622a590e73c34ec20b4ae6a0ff162b1e7306d121d3d634949bfae6b45.","time":"2022-07-11T17:03:22Z"}
 {"level":"debug","msg":"Resolved ocp/4.10:cli (base_image: cli) to sha256:954f2ea4c53cfdc6b439ba691180b6a3fcba64cc7d71d49bf81f269066fe4af6.","time":"2022-07-11T17:03:22Z"}
 {"level":"debug","msg":"Resolved ci/golangci-lint:v1.45.2 (base_image: golangci-lint) to sha256:50d12acf8ef7c41545ae8e1fe14cfc22e690baca7d2bb41d40da8feb8a78cabe.","time":"2022-07-11T17:03:23Z"}
