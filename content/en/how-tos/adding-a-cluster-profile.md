@@ -47,7 +47,7 @@ When you add a `cluster_profile` to a job or workflow, the CI system automatical
 
 ## Prepare the cloud account
 
-In order for most workflows to operate with the cluster profile, the cloud account must be prepared, including creating a new IAM user as described in the OCP document ([AWS](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-account.html), [GCP](https://docs.openshift.com/container-platform/4.14/installing/installing_gcp/installing-gcp-account.html)).
+In order for most workflows to operate with the cluster profile, the cloud account must be prepared, including creating a new IAM user as described in the OCP document ([AWS](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/installing_on_aws/installing-aws-account), [GCP](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/installing_on_google_cloud/installing-gcp-account)).
 
 In addition to the permissions specified by the OCP documentation, include the following which are required for running tests in the environment:
 
@@ -62,7 +62,7 @@ In addition to the permissions specified by the OCP documentation, include the f
 - `Compute Image User`
 - `Role Administrator`
 
-The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.openshift.com/container-platform/4.17/installing/installing_aws/installing-aws-account.html#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations to be requested on us-east-1, us-east-2, us-west-1, us-west-2 regions separately:
+The default AWS [quotas](https://us-east-1.console.aws.amazon.com/servicequotas) need to be increased to ensure the AWS account is capable of creating and running multiple clusters at the same time. The [Configuring an AWS account](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/installing_on_aws/installing-aws-account#installation-aws-limits_installing-aws-account) section of the OpenShift document include general instructions on configuring the quotas. We make the following recommendations to be requested on us-east-1, us-east-2, us-west-1, us-west-2 regions separately:
 
 - Simple Storage Service (S3): Bucket Limit: 1000
 - Amazon Elastic Compute Cloud (Amazon EC2): EC2-VPC Elastic IPs: 500

@@ -228,7 +228,7 @@ subjects:
 ```
 
 After the pull request is merged, the manifests will be automatically applied to `app.ci`.
-Members of group `my-project-admins` can then [create a bound token](https://docs.openshift.com/container-platform/4.13/authentication/bound-service-account-tokens.html#bound-sa-tokens-configuring-externally_bound-service-account-tokens) for the ServiceAccount and log in to quay-proxy.
+Members of group `my-project-admins` can then [create a bound token](https://docs.redhat.com/en/documentation/openshift_container_platform/4.13/html/authentication_and_authorization/bound-service-account-tokens#bound-sa-tokens-configuring-externally_bound-service-account-tokens) for the ServiceAccount and log in to quay-proxy.
 
 Prefer short-lived tokens. Avoid long-lived ServiceAccount secrets when possible ([Kubernetes guidance](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#create-token)). Admins own token rotation if a token leaks.
 

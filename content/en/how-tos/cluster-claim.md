@@ -16,7 +16,7 @@ accounts.
 
 * Verify that the cloud platform you want to use is supported
   by [Hive](https://github.com/openshift/hive#supported-cloud-providers)
-* [Configure the cloud account](https://docs.openshift.com/container-platform/4.7/installing/installing-preparing.html):
+* [Configure the cloud account](https://docs.redhat.com/en/documentation/openshift_container_platform/4.7/html/installing/installing-preparing):
   Hive does not require more configuration of the cloud account than installing an OpenShift cluster. Make sure that the
   account has quotas for the pools to contain the desired number of clusters.
 

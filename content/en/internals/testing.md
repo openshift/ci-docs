@@ -424,7 +424,7 @@ following pages:
 [life_of_a_prow_job]: https://docs.prow.k8s.io/docs/life-of-a-prow-job/
 [namespaces]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [presentations]: {{< ref "/getting-started/useful-links#presentations" >}}
-[project]: https://docs.openshift.com/container-platform/4.9/rest_api/project_apis/projectrequest-project-openshift-io-v1.html
+[project]: https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/project_apis/projectrequest-project-openshift-io-v1
 [prow]: https://github.com/kubernetes/test-infra/tree/master/prow
 [prowjobs]: https://docs.prow.k8s.io/docs/jobs/
 [registry_authentication_errors]: {{< ref "/how-tos/use-registries-in-build-farm#why-i-am-getting-an-authentication-error" >}}
