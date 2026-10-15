@@ -350,7 +350,7 @@ Before attempting to run `openshift-tests`, ensure these requirements are met:
 
   OpenShift versions (and valid upgrade versions) can be found from the [Release Status](https://amd64.ocp.releases.ci.openshift.org/) page.
 
-* Install the [`oc` command line tool](https://docs.openshift.com/container-platform/4.10/cli_reference/openshift_cli/getting-started-cli.html).
+* Install the [`oc` command line tool](https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/cli_tools/openshift-cli-oc#installing-openshift-cli).
 
 * Download the kubeconfig that cluster-bot generated and set the `KUBECONFIG` environment variable:
 

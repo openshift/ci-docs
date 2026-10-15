@@ -4,7 +4,7 @@ description: How to set up RBACs on CI clusters.
 ---
 
 [All the clusters](/getting-started/useful-links/#clusters) for Openshift CI have enabled authentication via Red Hat SSO.
-The [RBAC](https://docs.openshift.com/container-platform/4.6/authentication/using-rbac.html) manifests defined in [the clusters folder of the release
+The [RBAC](https://docs.redhat.com/en/documentation/openshift_container_platform/4.6/html/authentication_and_authorization/using-rbac) manifests defined in [the clusters folder of the release
 repo](https://github.com/openshift/release/tree/main/clusters) are applied automatically to the clusters. 
 
 ## Rover Groups

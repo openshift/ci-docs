@@ -227,7 +227,7 @@ reduce build times dramatically.
 ## Build inputs
 [Building Container Images](#building-container-images  ) paragraph has shown how it is possible to leverage build inputs `.inputs[]` to speed the building process up. We are going to analyze this feature in a greater detail now.
 ### `as:` substitutions
-It is a list of image names that directly maps to [`.spec.source.images[].as`](https://docs.openshift.com/container-platform/4.12/rest_api/workloads_apis/build-build-openshift-io-v1.html#spec-source-images-2) of an [Openshift Build](https://docs.openshift.com/container-platform/4.12/rest_api/workloads_apis/build-build-openshift-io-v1.html#specification), therefore it preserves the semantic.  
+It is a list of image names that directly maps to [`.spec.source.images[].as`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/workloads_apis/build-build-openshift-io-v1#spec-source-images-4) of an [Openshift Build](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/workloads_apis/build-build-openshift-io-v1#specification-2), therefore it preserves the semantic.\
 When the aforementioned stanza exists, a build searches for every source images that matches one of the `.as` names and it performs a substitution with the image specified in `.inputs[]`.  
 
 Images substitution can happen in one of the following ways:  
@@ -297,7 +297,7 @@ The Dockerfile's `FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.24-
 Manual `base_images` and `inputs` entries take precedence over auto-detection. Test container base images (used in `tests[].container.from`) must still be configured manually as they are not in project Dockerfiles.
 
 ## Build Arguments
-The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.openshift.com/container-platform/4.7/cicd/builds/build-strategies.html#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument is taken from the field `value` in the configuration.
+The `build_args` option in `ci-operator` configuration specifies a list of [build arguments](https://docs.redhat.com/en/documentation/openshift_container_platform/4.7/html/cicd/builds#builds-strategy-docker-build-arguments_build-strategies). The values of those arguments are passed to the build at the build time to override their default values from Dockerfile. The value of a build argument is taken from the field `value` in the configuration.
 
 ```yaml
 images:
@@ -314,7 +314,7 @@ images:
 
 ## How Builds Work In CI
 Every container image built in CI is implemented by
-[a native OpenShift build](https://docs.openshift.com/container-platform/4.12/cicd/builds/understanding-image-builds.html), i.e.,
+[a native OpenShift build](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/builds/understanding-image-builds), i.e.,
 `ci-operator` uses the parameters in the `images` stanza from the configuration file to define `builds` options on CI clusters.
 
 
@@ -671,7 +671,7 @@ The workflow exports following files for the testing steps to access the hosted 
 
 {{% alert title="NOTE" color="info" %}}
 If another cluster profile is chosen, `BASE_DOMAIN` or `HYPERSHIFT_BASE_DOMAIN` has to be changed accordingly.
-See [how to configuring Route 53](https://docs.openshift.com/container-platform/4.12/installing/installing_aws/installing-aws-account.html#installation-aws-route53_installing-aws-account) for details.
+See [how to configuring Route 53](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/installing_on_aws/installing-aws-account#installation-aws-route53_installing-aws-account) for details.
 A full list of environment variables consumed by this workflow can be found in the
 [step-registry](https://steps.ci.openshift.org/workflow/hypershift-hostedcluster-workflow).
 An example of this workflow is the Prow job [release-openshift-origin-installer-launch-hypershift-hosted](https://github.com/openshift/release/blob/main/ci-operator/jobs/openshift/release/openshift-release-infra-periodics.yaml) which is used as the implementation of the Cluster Bot.
@@ -684,8 +684,8 @@ The hosted clusters provisioned by HyperShift have the following advantages over
 
 The known limitations of hosted clusters are
 * It cannot be used in the e2e tests for the OpenShift core components, except
-[web console](https://docs.openshift.com/container-platform/4.12/web_console/web-console-overview.html) and
-[monitoring](https://docs.openshift.com/container-platform/4.12/welcome/index.html).
+[web console](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/web_console/web-console-overview) and
+[monitoring](https://docs.redhat.com/en/documentation/openshift_container_platform/4.12/html/monitoring/index).
 * HyperShift supports only AWS and the supported versions of the hosted clusters are {{<rawhtml>}}<span id="hypershift_supported_versions">[]</span>{{</rawhtml>}}. Note that the supported versions are determined by HyperShift which is kept being updated to the latest in the CI production.
 
 Test owners are encouraged to migrate from the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow to

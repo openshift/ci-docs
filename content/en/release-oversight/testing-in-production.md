@@ -13,7 +13,7 @@ It's important to understand we believe breaking ourselves first is a form of su
 There are couple ways we judge the success or a failure of a sprint:
 
 * Did we have a build on time?
-* Were any changes required by the administrator missing an [admin ack](https://docs.openshift.com/container-platform/4.9/updating/updating-cluster-prepare.html#update-preparing-migrate_updating-cluster-prepare)?
+* Were any changes required by the administrator missing an [admin ack](https://docs.redhat.com/en/documentation/openshift_container_platform/4.9/html/updating_clusters/updating-cluster-prepare#update-preparing-migrate_updating-cluster-prepare)?
 * Did we find a significant problem that forced us to remove the production cluster from rotation?
 
 ### Selecting the build
@@ -21,7 +21,7 @@ The selection process is quite simple.  On the last Wednesday of each sprint the
 
 From there Quality Engineering will run additional tests.  Barring any new surprises Test Platform will be notified that a release is ready.
 
-It's worth noting that we may create a dedicated channel for managing these releases through the [Update Service](https://docs.openshift.com/container-platform/4.7/updating/understanding-the-update-service.html) in the upcoming months.  At the present we classify the sprint payload as an *fc* build which notifies Quality Engineering that additional testing is needed.
+It's worth noting that we may create a dedicated channel for managing these releases through the [Update Service](https://docs.redhat.com/en/documentation/openshift_container_platform/4.7/html/updating_clusters/understanding-the-update-service) in the upcoming months.  At the present we classify the sprint payload as an *fc* build which notifies Quality Engineering that additional testing is needed.
 
 ### The environment
 We've selected one of our build farm clusters to run the output of each sprint.  This is a critical piece of infrastructure that all development teams are motivated to keep working.  In this document we'll refer to this cluster as the *sacrificial cluster*.
