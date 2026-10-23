@@ -55,7 +55,8 @@ To start using the Secret Manager CLI:
    ```
 
 3. The first command you need to run is `login`. This will open a browser window and authenticate you through Red Hat SSO.
-   You only need to log in once -- credentials are cached locally and persist across sessions.
+   Temporarily, `login` signs you in twice, one after the other: first to Google Cloud, then to Red Hat SSO. Complete both in your browser.
+   Credentials are cached locally. The Red Hat SSO sign-in expires after about an hour; when needed, `sm list -c` opens your browser again to renew it.
 
    To clear cached credentials and log out, run:
 
@@ -371,6 +372,14 @@ to configure a script or automation tool that rotates secrets on a regular basis
 ### "You don't have permission to access secrets in collection '...'"
 
 Your Rover group doesn't have access to this collection. Check which collections you have access to with `sm list --rover-group=<your-rover-group>`. If the collection is missing, add it to the [configuration file](https://github.com/openshift/release/tree/master/core-services/sync-rover-groups/_config.yaml) and wait for the postsubmit job to complete.
+
+### "Your hack/secret-manager.sh is outdated"
+
+Run `git pull` in your local `openshift/release` checkout, then retry.
+
+### "Could not listen on local port 8085 for the SSO login"
+
+The Red Hat SSO sign-in needs local port 8085. Stop the program using it (for example, another running `sm` command), then retry.
 
 ### "Collection '...' does not exist"
 
