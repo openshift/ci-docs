@@ -109,3 +109,5 @@ resources, so by the time a job author uses a `cluster_profile`, all the infrast
 
 For more complex lease configuration, see the multi-stage test
 [section](/architecture/step-registry/#leases).
+
+Several jobs that share one lease pool can be held in Prow until a queue slot is free. Set a [job queue](/how-tos/job-queues/) capacity equal to the number of leases in the pool, and set `job_queue_name` on each test that consumes that pool.

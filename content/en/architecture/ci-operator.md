@@ -788,6 +788,7 @@ There are few extra fields that can be configured to control if or when the test
 * `always_run` Set to `false` to disable automatic triggering on every PR. This defaults to `true` (run on every PR) unless `run_if_changed` or `skip_if_only_changed` is set.
 * `optional` Set to `true` to make the job not block merges.
 * `max_concurrency` Set the maximum number of concurrent runs of this job.
+* `job_queue_name` Assign the generated jobs for this test to a [Prow job queue](/how-tos/job-queues/). The queue and its capacity are defined with `plank.job_queue_capacities` in a supplemental Prow config. Every generated job that names the queue shares that capacity. The field applies to presubmits, postsubmits, and periodics.
 * `disable_rehearsal` Set to `true` to prevent this test from being picked up for rehearsals.
 * `reporter_config` Configure [Slack reporting](/how-tos/notification/) for this test with `channel`, `job_states_to_report`, `report_template`, and `report_presubmit`.
 
