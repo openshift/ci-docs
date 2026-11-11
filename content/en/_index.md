@@ -20,6 +20,7 @@ no_list: true
 * [Adding and Changing Step Registry Content](/how-tos/adding-changing-step-registry-content/)
 * [Migrating CI Jobs from Templates to Multi-stage Tests](/how-tos/migrating-template-jobs-to-multistage)
 * [Set Up Slack Alerts for Periodic Job Results](/how-tos/notification)
+* [Limit Concurrent Jobs with a Prow Job Queue](/how-tos/job-queues)
 * [Using External Images in CI](/how-tos/external-images)
 {{% /card %}}
 
