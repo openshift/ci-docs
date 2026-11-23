@@ -156,7 +156,9 @@ Your tests need credentials (like cloud account keys, image registry passwords, 
 
 If your workflows need to create AWS resources before installing the cluster (like the [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow), you'll need to store AWS credentials in your cluster profile.
 
-**Important:** The field must be named `.awscred` (note the leading dot). Due to GSM naming restrictions, dots are stored as `--dot--`, so the field name in GSM will be `--dot--awscred`. Use `as` in your bundle definition to restore the original name:
+**Default for new AWS profiles: STS.** Test Platform managed profiles (`aws`, `aws-2`, `aws-3`, `aws-4`, `aws-5`) already ship STS role ARNs in their cluster secrets. New self-supplied AWS profiles should enable STS during onboarding (see [Enabling AWS STS](#enabling-aws-sts-for-a-cluster-profile)). Keep static `.awscred` during the dual-stack period until static keys are fully retired.
+
+**Static credentials (still required for dual-stack / non-STS):** The field must be named `.awscred` (note the leading dot). Due to GSM naming restrictions, dots are stored as `--dot--`, so the field name in GSM will be `--dot--awscred`. Use `as` in your bundle definition to restore the original name:
 
 ```yaml
 bundles:
@@ -182,6 +184,125 @@ To store it:
 ```sh
 sm create -c my-collection aws/--dot--awscred --from-file=./aws-credentials
 ```
+
+#### Enabling AWS STS for a Cluster Profile
+
+OpenShift CI can use short-lived AWS credentials via STS (home → hub → target role chaining) instead of relying only on long-lived keys in `.awscred`.
+
+**How `ci-operator` activates STS:** there is no workflow/`ci-operator` `sts:` switch. STS turns on automatically when all three ARNs are present for a job:
+
+| ARN | Where it lives | Who owns it |
+|---|---|---|
+| `home_role_arn` | Secret `ci/aws-sts-cluster-config` on each **AWS** build farm | Test Platform (already deployed) |
+| `hub_role_arn` | Your cluster profile secret | Shared hub role (value below) |
+| `target_role_arn` | Your cluster profile secret | You (role in your AWS account) |
+
+When activated, `ci-operator` mounts a projected SA token and AWS config under `/var/run/secrets/aws/` and logs `Creating STS AWS config for test …`. Role templates live in [`openshift/ci-tools` `hack/aws-sts-roles/`](https://github.com/openshift/ci-tools/tree/master/hack/aws-sts-roles).
+
+Today only Test Platform managed profiles `aws` / `aws-2` / `aws-3` / `aws-4` / `aws-5` ship `hub_role_arn` + `target_role_arn` in their cluster secrets. Other AWS profiles still use static `.awscred` until they complete the steps below.
+
+{{< alert title="Note" color="info" >}}
+STS activates only on **AWS build farms** that publish `home_role_arn` (for example build01/03/05/…). GCP build farms (for example build02/04) do **not** have `ci/aws-sts-cluster-config`, so jobs that run only there will not get STS volumes even if your profile secret includes hub/target ARNs.
+{{< /alert >}}
+
+{{< alert title="Note" color="info" >}}
+STS activation mounts credentials for steps that honor `AWS_CONFIG_FILE=/var/run/secrets/aws/config/config`. Many steps still export `AWS_SHARED_CREDENTIALS_FILE=$CLUSTER_PROFILE_DIR/.awscred`, so keep `.awscred` populated (dual-stack) until static keys are retired.
+{{< /alert >}}
+
+##### 1. New AWS profile onboarding (STS by default)
+
+Complete the normal cluster-profile steps, and include STS while seeding credentials:
+
+1. **Prepare the cloud account** as usual ([Prepare the cloud account](#prepare-the-cloud-account)).
+2. **Deploy the target role** in your AWS account with [`target-role.cf`](https://github.com/openshift/ci-tools/blob/master/hack/aws-sts-roles/target-role.cf).
+   Download the template from that path, then:
+
+   ```bash
+   aws cloudformation deploy \
+     --stack-name ci-step-runner-target \
+     --template-file target-role.cf \
+     --capabilities CAPABILITY_NAMED_IAM \
+     --parameter-overrides \
+       TrustedRoleArn=arn:aws:iam::320297955214:role/ci-step-runner-hub
+   ```
+
+   The stack output `RoleArn` is your `target_role_arn` (role name is fixed as `ci-step-runner-target`, so the ARN looks like `arn:aws:iam::<your-account>:role/ci-step-runner-target`).
+   The hub role already allows assuming `arn:aws:iam::*:role/ci-step-runner-target`, so you do **not** need a hub stack update for a new account.
+
+3. **Store STS fields** in GSM next to `.awscred` (same collection/group your profile uses):
+
+   ```sh
+   # hub role is shared (same value used by managed aws / aws-2 … aws-5 profiles)
+   sm create -c my-collection aws/hub_role_arn \
+     --from-literal='arn:aws:iam::320297955214:role/ci-step-runner-hub'
+   sm create -c my-collection aws/target_role_arn \
+     --from-literal='arn:aws:iam::<your-account>:role/ci-step-runner-target'
+   ```
+
+4. **Declare the fields** on your bundle in [`core-services/ci-secret-bootstrap/gsm-config.yaml`](https://github.com/openshift/release/blob/main/core-services/ci-secret-bootstrap/gsm-config.yaml). Mirror a managed profile such as `cluster-secrets-aws` / `cluster-secrets-aws-2`:
+
+   ```yaml
+   fields:
+   - name: --dot--awscred
+     as: .awscred
+   - name: hub_role_arn
+   - name: target_role_arn
+   # …ssh keys, baseDomain, etc.
+   ```
+
+5. **Register the profile**, merge, and wait for [`periodic-ci-secret-bootstrap`](https://prow.ci.openshift.org/?job=periodic-ci-secret-bootstrap). Confirm the synced secret on an AWS build farm contains both ARNs:
+
+   ```bash
+   oc --context build01 -n ci get secret cluster-secrets-<profile> \
+     -o jsonpath='{.data.hub_role_arn}' | base64 -d; echo
+   oc --context build01 -n ci get secret cluster-secrets-<profile> \
+     -o jsonpath='{.data.target_role_arn}' | base64 -d; echo
+   ```
+
+6. **Job side:** The [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws) workflow defaults `AWS_INSTALL_USE_MINIMAL_PERMISSIONS` to `"yes"`, which creates per-run install-scoped IAM users. For other workflows, set:
+
+   ```yaml
+   env:
+     AWS_INSTALL_USE_MINIMAL_PERMISSIONS: "yes"
+   ```
+
+   Reference: [`ipi-conf-aws-user-min-permissions`](https://steps.ci.openshift.org/reference/ipi-conf-aws-user-min-permissions).
+
+##### 2. Existing (already onboarded) AWS profiles
+
+If your profile already runs with static `.awscred` only (no `hub_role_arn` / `target_role_arn` on `cluster-secrets-<profile>`):
+
+1. **Deploy `target-role.cf`** in the AWS account behind your profile (same command as onboarding step 2).
+2. **Add GSM fields** `hub_role_arn` and `target_role_arn` to the existing group for that profile (`sm create` for new fields, or `sm update` if they already exist).
+3. **Update `gsm-config.yaml`** so `cluster-secrets-<your-profile>` syncs those two fields (copy the field entries from `cluster-secrets-aws-2` or similar).
+4. Merge and wait for secret bootstrap. Re-check the ARNs on an AWS build farm with the `oc get secret` commands in onboarding step 5.
+5. **Turn on ephemeral install credentials** for your jobs if they do not already inherit [`ipi-aws`](https://steps.ci.openshift.org/workflow/ipi-aws):
+
+   ```yaml
+   env:
+     AWS_INSTALL_USE_MINIMAL_PERMISSIONS: "yes"
+   ```
+
+6. **Validate** with a rehearsal or representative job on an AWS build farm:
+   - ci-operator logs should include `Creating STS AWS config for test` when home/hub/target are all present.
+   - With min-permissions `"yes"`, the install path should create an ephemeral IAM user (`aws_minimal_permission` in `${SHARED_DIR}`).
+
+7. **Escape hatch** if something breaks:
+
+   ```yaml
+   env:
+     AWS_INSTALL_USE_MINIMAL_PERMISSIONS: "no"
+   ```
+
+   Ask in `#forum-ocp-testplatform` if you need help with role trust or bootstrap wiring.
+
+{{< alert title="Warning" color="warning" >}}
+Do not remove `.awscred` until Test Platform announces that static keys are fully retired for your profile. STS and static credentials currently run dual-stack.
+{{< /alert >}}
+
+{{< alert title="Note" color="info" >}}
+This procedure matches managed profiles `aws`–`aws-5` and current ci-operator STS activation. Deploying `target-role.cf` in a new account may still fail if your org SCPs block the role or attached policies.
+{{< /alert >}}
 
 #### Storing SSH Key Pairs
 
