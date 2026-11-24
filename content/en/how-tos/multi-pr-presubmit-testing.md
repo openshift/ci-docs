@@ -13,14 +13,17 @@ In order to utilize the plugin, you must ensure that it is added to your org or 
 ### /testwith Command
 The `/testwith` command can be utilized to trigger the presubmit tests. The basic structure is as follows:
 ```
-/testwith <org>/<repo>/<branch>/<?variant>/<test-name> [<org>/<repo>#<number>]+
+/testwith <org>/<repo>/<branch>/<?variant>/<test-name> [<org>/<repo>#<number> ...]
 ```
-As shown above this command expects two arguments: 
+The command accepts one required test selector and an optional list of additional PR references:
 1. The first argument contains the: `org`, `repo`, `branch`, optionally `variant`, and `test-name` (the `as` in the ci-operator config).
-2. The second argument can be included up to twenty times, and specifies an additional PR to include in the code under test in `<org>/<repo>#<number>` format.
+2. Zero to twenty additional PR references can follow, each in `<org>/<repo>#<number>` format, to include additional changes in the code under test.
 
-Given this command issued in a comment on a PR, the plugin will include the PR, as well as each additional PR in the built sources for which the specified test will run against.
-Note that the specified test must be defined in a repo to which one of these included PRs belongs. Otherwise, the test wouldn't be actually testing any of the included changes. If you think you need this, you probably want to try the `/payload` [command](/release-oversight/pull-request-testing/#payload) instead.
+When this command is issued in a comment on a PR, the plugin automatically includes that PR, along with any additional PRs specified in the command. You do not need to repeat the originating PR as an argument.
+
+The specified test does not require an included PR in its repository. If an included PR targets the test's repository and branch, the plugin uses that PR-backed source reference. Otherwise, it uses the requested branch at its resolved commit SHA, without PR changes in that repository, and retains the included PRs as additional source references. If you need to test changes through a release payload, use the `/payload` [command](/release-oversight/pull-request-testing/#payload) instead.
+
+Including a PR makes its sources available to the job. Whether a test exercises those changes depends on the build and dependency configuration; including sources alone does not establish that they are consumed by the test.
 
 The plugin will trigger the test, and then create a GitHub [check_run](https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28) to track its progress and provide a link to the `spyglass` logs within it. This check run is **never** required to succeed in order to merge the originating PR.
 
